@@ -1,0 +1,26 @@
+1. First of all upload the zip with the index.html on indiexpo, 
+so the game will be automatically playable online.
+
+2. Watch the Event at the end of every level.
+You will see an IF CONDITION with a script:
+
+window.IndiexpoAPI
+
+This is to check if the user is logged to the indiexpo.net
+
+3. add, in the IF CONDITION, a SCRIPT with this:
+
+IndiexpoAPI.sendScore($gameVariables.value(02)).done(function(result) {});
+
+where 02 is the variable used to count the points.
+
+End! Easy and fast! :)
+
+It's very good because a lot of players came back to check their scores and if they are still "the king" of the game.
+So you can gain new players and views. :D
+
+Bye and indiexpo forever!
+
+Freank
+
+p.s. not "to enable" the chart, you have to contact the indiexpo staff at info@indiexpo.net
