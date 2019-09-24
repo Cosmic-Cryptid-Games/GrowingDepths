@@ -2383,18 +2383,24 @@ function Game_Bullet() {
       if (this.isSwimming()) {
         this.resetJump();
         this._jumpCount--;
-      } else if (this._jumpCount > 0) {
-        this._jumpCount--;
       } else {
-        if (!this._wallJump) return;
+
+        //calculations for wall jumping
         if (this._direction == 4) {
           var x = Math.floor(this._realX - this._collideW - 0.16);
         } else {
           var x = Math.floor(this._realX + this._collideW + 0.16);
         }
         var y = Math.floor(this._realY);
-        if (!$gameMap.canWallJump(x, y, this._direction)) return;
-        this.wallJump();
+
+        //If you can wall jump, do it, otherwise regular jump (if you can), otherwise exit routine
+        if ($gameMap.canWallJump(x, y, this._direction)) {
+          this.wallJump();
+        } else if (this._jumpCount > 0) {
+          this._jumpCount--;
+        } else {
+          return;
+	}
       }
       if (this._ladder) {
         this.getOffLadder();
