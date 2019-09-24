@@ -2065,7 +2065,7 @@ function Game_Bullet() {
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
-    this.changeByInput();
+    // this.changeByInput();
     this.moveByInput();
     this.jumpByInput();
     this.dashByInput();
@@ -2274,7 +2274,7 @@ function Game_Bullet() {
   };
 
   // ボタン入力による操作アクター変更
-  Game_Player.prototype.changeByInput = function() {
+  /* Game_Player.prototype.changeByInput = function() {
     if (this._carryingObject) return;
     if (Input.isTriggered('pageup')) {
       this.changeMember(true);
@@ -2284,7 +2284,7 @@ function Game_Bullet() {
   };
 
   // 操作メンバーの切り替え
-  Game_Player.prototype.changeMember = function(reverse) {
+   Game_Player.prototype.changeMember = function(reverse) {
     var startActorId = this.actor().actorId();
     if (reverse) {
       $gameParty.backSlideActor();
@@ -2322,7 +2322,7 @@ function Game_Bullet() {
       if (!$gameMap.isPassable(rx, y, 6)) return false;
     }
     return true;
-  };
+  }; */
 
   // 方向ボタン入力による移動処理
   Game_Player.prototype.moveByInput = function() {
