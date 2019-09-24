@@ -436,7 +436,7 @@
  *   <friction:0>             # 摩擦
  *   <wall_jump>              # 壁ジャンプ
  *   <dash_speed_x:0.14>      # ダッシュ速度（横方向）
- *   <dash_speed_y:0.03>      # ダッシュ速度（縦方向）
+ *   <dash_speed_y:0.06>      # ダッシュ速度（縦方向）
  *   <dash_count:15>          # ダッシュ時間
  *   <dash_delay:30>          # ダッシュ後硬直時間
  *   <dash_mp_cost:0>         # ダッシュに必要なＭＰ
