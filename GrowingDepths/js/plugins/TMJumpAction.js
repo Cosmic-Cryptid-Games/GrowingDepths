@@ -2579,7 +2579,7 @@ function Game_Bullet() {
       this._carryPower = +(data.meta['carry_power'] || 0);
       this._gravity = +(data.meta['gravity'] || 0.0045);
       this._dashSpeedX = +(data.meta['dash_speed_x'] || 0.14);
-      this._dashSpeedY = +(data.meta['dash_speed_y'] || 0.03);
+      this._dashSpeedY = +(data.meta['dash_speed_y'] || 0.06);
       this._dashCountTime = +(data.meta['dash_count'] || 15);
       this._dashDelayTime = +(data.meta['dash_delay'] || 30);
       this._dashMpCost = +(data.meta['dash_mp_cost'] || 0);
