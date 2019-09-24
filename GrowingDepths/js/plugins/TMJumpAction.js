@@ -436,7 +436,7 @@
  *   <friction:0>             # 摩擦
  *   <wall_jump>              # 壁ジャンプ
  *   <dash_speed_x:0.14>      # ダッシュ速度（横方向）
- *   <dash_speed_y:0.03>      # ダッシュ速度（縦方向）
+ *   <dash_speed_y:0.06>      # ダッシュ速度（縦方向）
  *   <dash_count:15>          # ダッシュ時間
  *   <dash_delay:30>          # ダッシュ後硬直時間
  *   <dash_mp_cost:0>         # ダッシュに必要なＭＰ
@@ -1230,6 +1230,7 @@ function Game_Bullet() {
     this._moveCount = 0;
     this._jumpInput = 0;
     this._dashCount = 0;
+    this._canDash = true;
     this._friction = 0;
     this._moveSpeed = 0.05;
     this._jumpSpeed = 0.14;
@@ -1631,6 +1632,7 @@ function Game_Bullet() {
     this._realY = y;
     this._vy = 0;
     this.resetJump();
+    this.resetDash();
     if (this._ladder) this.getOffLadder();
     this.updateDamageFall();
   };
@@ -1639,6 +1641,10 @@ function Game_Bullet() {
   Game_CharacterBase.prototype.resetJump = function() {
     this._jumpCount = this._mulchJump;
     this._jumpInput = 0;
+  };
+
+  Game_CharacterBase.prototype.resetDash = function() {
+    this._canDash = true;
   };
 
   // 落下ダメージの処理
@@ -1721,12 +1727,14 @@ function Game_Bullet() {
 
   // ダッシュ（速度指定）
   Game_CharacterBase.prototype.dash = function(vx, vy) {
+    if (!this._canDash) return; //block dashing more than once
     this._vx = vx;
     this._vy = vy;
     this._dashCount = this._dashCountTime;
     this._moveCount = this._dashCount / 2;
     this.resetStopCount();
     this.straighten();
+    this._canDash = false;
   };
 
   // はじかれ
@@ -2571,7 +2579,7 @@ function Game_Bullet() {
       this._carryPower = +(data.meta['carry_power'] || 0);
       this._gravity = +(data.meta['gravity'] || 0.0045);
       this._dashSpeedX = +(data.meta['dash_speed_x'] || 0.14);
-      this._dashSpeedY = +(data.meta['dash_speed_y'] || 0.03);
+      this._dashSpeedY = +(data.meta['dash_speed_y'] || 0.06);
       this._dashCountTime = +(data.meta['dash_count'] || 15);
       this._dashDelayTime = +(data.meta['dash_delay'] || 30);
       this._dashMpCost = +(data.meta['dash_mp_cost'] || 0);
