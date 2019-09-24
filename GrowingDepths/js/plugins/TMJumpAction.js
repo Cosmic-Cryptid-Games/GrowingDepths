@@ -1938,7 +1938,7 @@ function Game_Bullet() {
     _Game_Player_initMembers.call(this);
     this._realSteps = 0;
     this._carryPower = 0;
-    this._wallJump = false;
+    this._wallJump = true;
     this._dashDelay = 0;
     this._dashDelayTime = 30;
     this._dashMpCost = 0;
@@ -2626,7 +2626,7 @@ function Game_Bullet() {
           if (obj.meta['shot_delay']) this._shotDelayTime += +obj.meta['shot_delay'];
         }
       }
-      this._wallJump = actor.loadTagBool('wall_jump');
+      //this._wallJump = actor.loadTagBool('wall_jump');
       this._shotType = +actor.loadTagString('shot_type', 1);
       this._shotIndex = +actor.loadTagString('shot_index', 0);
       this._shotSkillId = +actor.loadTagString('shot_skill', 0);
