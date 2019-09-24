@@ -436,7 +436,7 @@
  *   <friction:0>             # 摩擦
  *   <wall_jump>              # 壁ジャンプ
  *   <dash_speed_x:0.14>      # ダッシュ速度（横方向）
- *   <dash_speed_y:0.06>      # ダッシュ速度（縦方向）
+ *   <dash_speed_y:0.03>      # ダッシュ速度（縦方向）
  *   <dash_count:15>          # ダッシュ時間
  *   <dash_delay:30>          # ダッシュ後硬直時間
  *   <dash_mp_cost:0>         # ダッシュに必要なＭＰ
@@ -1938,7 +1938,7 @@ function Game_Bullet() {
     _Game_Player_initMembers.call(this);
     this._realSteps = 0;
     this._carryPower = 0;
-    this._wallJump = false;
+    this._wallJump = true;
     this._dashDelay = 0;
     this._dashDelayTime = 30;
     this._dashMpCost = 0;
@@ -2579,7 +2579,7 @@ function Game_Bullet() {
       this._carryPower = +(data.meta['carry_power'] || 0);
       this._gravity = +(data.meta['gravity'] || 0.0045);
       this._dashSpeedX = +(data.meta['dash_speed_x'] || 0.14);
-      this._dashSpeedY = +(data.meta['dash_speed_y'] || 0.06);
+      this._dashSpeedY = +(data.meta['dash_speed_y'] || 0.03);
       this._dashCountTime = +(data.meta['dash_count'] || 15);
       this._dashDelayTime = +(data.meta['dash_delay'] || 30);
       this._dashMpCost = +(data.meta['dash_mp_cost'] || 0);
@@ -2626,7 +2626,7 @@ function Game_Bullet() {
           if (obj.meta['shot_delay']) this._shotDelayTime += +obj.meta['shot_delay'];
         }
       }
-      this._wallJump = actor.loadTagBool('wall_jump');
+      //this._wallJump = actor.loadTagBool('wall_jump');
       this._shotType = +actor.loadTagString('shot_type', 1);
       this._shotIndex = +actor.loadTagString('shot_index', 0);
       this._shotSkillId = +actor.loadTagString('shot_skill', 0);
