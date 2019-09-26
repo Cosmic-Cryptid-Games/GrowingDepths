@@ -1744,6 +1744,7 @@ function Game_Bullet() {
     this._moveCount = this._dashCount / 2;
     this.resetStopCount();
     this.straighten();
+    AudioManager.playSe(actSeDash);
     this._canDash = false;
   };
 
@@ -2458,7 +2459,6 @@ function Game_Bullet() {
         }
         this.dashFromDirection(this._direction);
         this._dashDelay = this._dashDelayTime;
-        AudioManager.playSe(actSeDash);
         this.removeGuard();         // 防御状態の解除
         if (this._dashMpCost > 0) battler.gainMp(-this._dashMpCost);
       }
