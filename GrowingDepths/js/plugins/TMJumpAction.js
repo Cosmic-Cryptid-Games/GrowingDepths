@@ -572,16 +572,18 @@ function Game_Bullet() {
 
   var actGravity = +(parameters['gravity'] || 0.004);
   var actFriction = +(parameters['friction'] || 0.001);
-  var actTileMarginTop = +(parameters['tileMarginTop'] || 0.5);
+  // var actTileMarginTop = +(parameters['tileMarginTop'] || 0.5);
   var actStepsForTurn = +(parameters['stepsForTurn'] || 20);
   var actAllDeadEvent = +(parameters['allDeadEvent'] || 0);
   var actGuardStateId = +(parameters['guardState'] || 2);
   var actGuardMoveRate = +(parameters['guardMoveRate'] || 25);
   var actEventCollapse = JSON.parse(parameters['eventCollapse']);
   var actHpGauge = JSON.parse(parameters['hpGauge']);
+  /* floorDamage imp
   //var actFloorDamage = +(parameters['floorDamage'] || 10);
   //var actDamageFallRate = +(parameters['damageFallRate'] || 10);
   //var actDamageFallHeight = +(parameters['damageFallHeight'] || 5);
+  */
   var actFlickWeight = +(parameters['flickWeight'] || 1);
   var actFlickSkill = +(parameters['flickSkill'] || 1);
   var actStageRegion = +(parameters['stageRegion'] || 60);
@@ -1393,7 +1395,8 @@ function Game_Bullet() {
         }
       }
       this._y = Math.floor(this._realY);
-      this._lastY = Math.floor(this._realY + actTileMarginTop);
+      // this._lastY = Math.floor(this._realY + actTileMarginTop);
+      this._lastY = Math.floor(this._realY);
     }
   };
 
@@ -1471,7 +1474,8 @@ function Game_Bullet() {
 
   // マップとの衝突判定（下方向）
   Game_CharacterBase.prototype.collideMapDown = function() {
-    var y = Math.floor(this._realY + actTileMarginTop);
+    // var y = Math.floor(this._realY + actTileMarginTop);
+    var y = Math.floor(this._realY);
     if (y === this._lastY) return;
     var lx = Math.floor(this._realX - this._collideW);
     var rx = Math.floor(this._realX + this._collideW);
@@ -1480,7 +1484,8 @@ function Game_Bullet() {
         if (this._ladder && $gameMap.isLadder(x, y)) continue;
         this._landingObject = [x, y];
         this._landingRegion = $gameMap.regionId(x, y);
-        this.getLand(y - actTileMarginTop - 0.001);
+        this.getLand(y - 0.001);
+        // this.getLand(y - actTileMarginTop - 0.001);
         return;
       }
     }
@@ -1489,7 +1494,8 @@ function Game_Bullet() {
   // マップとの衝突判定（左方向）
   Game_CharacterBase.prototype.collideMapLeft = function() {
     var ty = Math.floor(this._realY - this._collideH);
-    var by = Math.floor(this._realY + actTileMarginTop);
+    // var by = Math.floor(this._realY + actTileMarginTop);
+    var by = Math.floor(this._realY);
     var x = Math.floor(this._realX - this._collideW);
     for (var y = ty; y <= by; y++) {
       if (!$gameMap.isPassable(x, y, 4)) {
@@ -1503,7 +1509,8 @@ function Game_Bullet() {
   // マップとの衝突判定（右方向）
   Game_CharacterBase.prototype.collideMapRight = function() {
     var ty = Math.floor(this._realY - this._collideH);
-    var by = Math.floor(this._realY + actTileMarginTop);
+    // var by = Math.floor(this._realY + actTileMarginTop);
+    var by = Math.floor(this._realY);
     var x = Math.floor(this._realX + this._collideW);
     for (var y = ty; y <= by; y++) {
       if (!$gameMap.isPassable(x, y, 6)) {
@@ -1634,9 +1641,10 @@ function Game_Bullet() {
     this.resetJump();
     this.resetDash();
     if (this._ladder) this.getOffLadder();
-    // next line used to create fall damage
-    // this.updateDamageFall();
-    this.resetPeak();
+    /* fallDamage imp
+    this.updateDamageFall();
+    */
+    this.resetPeak(); // if fallDamage is reimp, delete
   };
 
   // ジャンプカウントのリセット
@@ -1649,8 +1657,8 @@ function Game_Bullet() {
     this._canDash = true;
   };
 
-  // fall damage
-  /* Game_CharacterBase.prototype.updateDamageFall = function() {
+  /* fallDamage imp
+  Game_CharacterBase.prototype.updateDamageFall = function() {
     if (this.isBattler() && this._fallGuard < 100) {
       var n = this._realY - this._jumpPeak - actDamageFallHeight;
       if (n > 0 && !this.isSwimming()) {
@@ -2013,7 +2021,8 @@ function Game_Bullet() {
     var lastRealX = this._realX;
     this._realX = Math.floor(this._realX) + 0.5;
     if (downFlag) this._realY += 0.04;
-    this._lastY = Math.floor(this._realY + actTileMarginTop);
+    //this._lastY = Math.floor(this._realY + actTileMarginTop);
+    this._lastY = Math.floor(this._realY);
     if (lastRealX < this._realX) {
       this.collideCharacterLeft();
     } else if (lastRealX > this._realX) {
@@ -2274,7 +2283,8 @@ function Game_Bullet() {
   };
 
   // ボタン入力による操作アクター変更
-  /* Game_Player.prototype.changeByInput = function() {
+  /* characterSwitch imp
+  Game_Player.prototype.changeByInput = function() {
     if (this._carryingObject) return;
     if (Input.isTriggered('pageup')) {
       this.changeMember(true);
@@ -2541,11 +2551,13 @@ function Game_Bullet() {
     var x = Math.floor(this._realX);
     if (downFlag) {
       if (!this.isLanding()) return false;
-      var y = Math.floor(this._realY + actTileMarginTop + 0.1);
+      // var y = Math.floor(this._realY + actTileMarginTop + 0.1);
+      var y = Math.floor(this._realY + 0.1);
       return $gameMap.isLadder(x, y);
     } else {
       var ty = Math.floor(this._realY - this._collideH);
-      var by = Math.floor(this._realY + actTileMarginTop);
+      // var by = Math.floor(this._realY + actTileMarginTop);
+      var by = Math.floor(this._realY);
       for (var y = ty; y <= by; y++) {
         if ($gameMap.isLadder(x, y)) return true;
       }
@@ -2561,7 +2573,8 @@ function Game_Bullet() {
         $gameMap.setup(this._newMapId);
         this._needsMapReload = false;
       }
-      this.locate(this._newX + 0.5, this._newY + 0.99 - actTileMarginTop);
+      // this.locate(this._newX + 0.5, this._newY + 0.99 - actTileMarginTop);
+      this.locate(this._newX + 0.5, this._newY + 0.99);
       this.refresh();
       this.clearTransferInfo();
     }
