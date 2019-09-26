@@ -1,4 +1,4 @@
-﻿//=============================================================================
+//=============================================================================
 // TMPlugin - ジャンプアクション
 // バージョン: 1.0.1
 // 最終更新日: 2017/07/28
@@ -25,12 +25,6 @@
  * @desc 通常の地形とイベントの摩擦の強さ。
  * 初期値: 0.001
  * @default 0.001
- *
- * @param tileMarginTop
- * @type string
- * @desc 地形との接触判定に使う座標をどれだけ上へずらすか。
- * 初期値: 0.5
- * @default 0.5
  *
  * @param stepsForTurn
  * @type number
@@ -67,24 +61,6 @@
  * @desc 足元にHPゲージを表示する機能を利用する。
  * 初期値: ON ( false = OFF 無効 / true = ON 有効 )
  * @default true
- *
- * @param floorDamage
- * @type number
- * @desc ダメージ床から受けるダメージ。
- * 初期値: 10
- * @default 10
- *
- * @param damageFallRate
- * @type number
- * @desc 落下ダメージの倍率。
- * 初期値: 10
- * @default 10
- *
- * @param damageFallHeight
- * @type number
- * @desc 落下ダメージを受ける高さ。
- * 初期値: 5
- * @default 5
  *
  * @param flickWeight
  * @type number
@@ -282,12 +258,6 @@
  * @desc 防御効果音のパラメータ。
  * 初期値: {"volume":90, "pitch":150, "pan":0}
  * @default {"volume":90, "pitch":150, "pan":0}
- *
- * @param playerBulletsMax
- * @type number
- * @desc プレイヤーの弾の最大数。
- * 初期値: 32
- * @default 32
  *
  * @param enemyBulletsMax
  * @type number
@@ -572,18 +542,12 @@ function Game_Bullet() {
 
   var actGravity = +(parameters['gravity'] || 0.004);
   var actFriction = +(parameters['friction'] || 0.001);
-  // var actTileMarginTop = +(parameters['tileMarginTop'] || 0.5);
   var actStepsForTurn = +(parameters['stepsForTurn'] || 20);
   var actAllDeadEvent = +(parameters['allDeadEvent'] || 0);
   var actGuardStateId = +(parameters['guardState'] || 2);
   var actGuardMoveRate = +(parameters['guardMoveRate'] || 25);
   var actEventCollapse = JSON.parse(parameters['eventCollapse']);
   var actHpGauge = JSON.parse(parameters['hpGauge']);
-  /* floorDamage imp
-  //var actFloorDamage = +(parameters['floorDamage'] || 10);
-  //var actDamageFallRate = +(parameters['damageFallRate'] || 10);
-  //var actDamageFallHeight = +(parameters['damageFallHeight'] || 5);
-  */
   var actFlickWeight = +(parameters['flickWeight'] || 1);
   var actFlickSkill = +(parameters['flickSkill'] || 1);
   var actStageRegion = +(parameters['stageRegion'] || 60);
@@ -614,7 +578,6 @@ function Game_Bullet() {
   actSeHurl.name = parameters['hurlSe'] || '';
   var actSeGuard = JSON.parse(parameters['guardSeParam'] || '{}');
   actSeGuard.name = parameters['guardSe'] || '';
-  var actPlayerBulletsMax = +(parameters['playerBulletsMax'] || 32);
   var actEnemyBulletsMax = +(parameters['enemyBulletsMax'] || 256);
   var actWeaponSprite = JSON.parse(parameters['weaponSprite']);
   var actAutoDamageSe = JSON.parse(parameters['autoDamageSe']);
@@ -688,7 +651,7 @@ function Game_Bullet() {
   var _Game_System_initialize = Game_System.prototype.initialize;
   Game_System.prototype.initialize = function() {
     _Game_System_initialize.call(this);
-    this._actHpGaugeVisible = true;
+    this._actHpGaugeVisible = false; // add hp gauge
   };
 
   Game_System.prototype.isActHpGaugeVisible = function() {
@@ -895,13 +858,6 @@ function Game_Bullet() {
 
   // 弾のセットアップ
   Game_Map.prototype.setupBullets = function() {
-    this._playerBullets = [];
-    this._alivePlayerBullets = [];
-    this._blankPlayerBullets = [];
-    for (var i = 0; i < actPlayerBulletsMax; i++) {
-      this._playerBullets.push(new Game_Bullet());
-      this._blankPlayerBullets.push(i);
-    }
     this._enemyBullets = [];
     this._aliveEnemyBullets = [];
     this._blankEnemyBullets = [];
@@ -909,11 +865,6 @@ function Game_Bullet() {
       this._enemyBullets.push(new Game_Bullet());
       this._blankEnemyBullets.push(i);
     }
-  };
-
-  // 自機弾を返す
-  Game_Map.prototype.playerBullets = function() {
-    return this._playerBullets;
   };
 
   // 敵機弾を返す
@@ -975,13 +926,6 @@ function Game_Bullet() {
 
   // 弾の更新
   Game_Map.prototype.updateBullets = function() {
-    for (var i = this._alivePlayerBullets.length - 1; i >= 0; i--) {
-      var bi = this._alivePlayerBullets[i];
-      if (!this._playerBullets[bi].update()) {
-        this._alivePlayerBullets.splice(i, 1);
-        this._blankPlayerBullets.push(bi);
-      }
-    }
     for (var i = this._aliveEnemyBullets.length - 1; i >= 0; i--) {
       var bi = this._aliveEnemyBullets[i];
       if (!this._enemyBullets[bi].update()) {
@@ -999,22 +943,7 @@ function Game_Bullet() {
         this._enemyBullets[bi].setup(x, y, z, vx, vy, angle, count, type, index, true, skillId, owner);
         this._aliveEnemyBullets.push(bi);
       }
-    } else {
-      if (this._blankPlayerBullets.length > 0) {
-        var bi = this._blankPlayerBullets.shift();
-        this._playerBullets[bi].setup(x, y, z, vx, vy, angle, count, type, index, false, skillId, owner);
-        this._alivePlayerBullets.push(bi);
-      }
     }
-  };
-
-  // 自機弾の全削除
-  Game_Map.prototype.clearPlayerBullets = function() {
-    for (var i = 0; i < this._alivePlayerBullets.length; i++) {
-      this._playerBullets[this._alivePlayerBullets[i]].erase();
-    }
-    this._blankPlayerBullets.concat(this._alivePlayerBullets);
-    this._alivePlayerBullets = [];
   };
 
   // 敵機弾の全削除
@@ -1028,7 +957,6 @@ function Game_Bullet() {
 
   // すべての弾を削除
   Game_Map.prototype.clearAllBullets = function() {
-    this.clearPlayerBullets();
     this.clearEnemyBullets();
   };
 
@@ -1395,7 +1323,6 @@ function Game_Bullet() {
         }
       }
       this._y = Math.floor(this._realY);
-      // this._lastY = Math.floor(this._realY + actTileMarginTop);
       this._lastY = Math.floor(this._realY);
     }
   };
@@ -1474,7 +1401,6 @@ function Game_Bullet() {
 
   // マップとの衝突判定（下方向）
   Game_CharacterBase.prototype.collideMapDown = function() {
-    // var y = Math.floor(this._realY + actTileMarginTop);
     var y = Math.floor(this._realY);
     if (y === this._lastY) return;
     var lx = Math.floor(this._realX - this._collideW);
@@ -1485,7 +1411,6 @@ function Game_Bullet() {
         this._landingObject = [x, y];
         this._landingRegion = $gameMap.regionId(x, y);
         this.getLand(y - 0.001);
-        // this.getLand(y - actTileMarginTop - 0.001);
         return;
       }
     }
@@ -1494,7 +1419,6 @@ function Game_Bullet() {
   // マップとの衝突判定（左方向）
   Game_CharacterBase.prototype.collideMapLeft = function() {
     var ty = Math.floor(this._realY - this._collideH);
-    // var by = Math.floor(this._realY + actTileMarginTop);
     var by = Math.floor(this._realY);
     var x = Math.floor(this._realX - this._collideW);
     for (var y = ty; y <= by; y++) {
@@ -1509,7 +1433,6 @@ function Game_Bullet() {
   // マップとの衝突判定（右方向）
   Game_CharacterBase.prototype.collideMapRight = function() {
     var ty = Math.floor(this._realY - this._collideH);
-    // var by = Math.floor(this._realY + actTileMarginTop);
     var by = Math.floor(this._realY);
     var x = Math.floor(this._realX + this._collideW);
     for (var y = ty; y <= by; y++) {
@@ -2022,7 +1945,6 @@ function Game_Bullet() {
     var lastRealX = this._realX;
     this._realX = Math.floor(this._realX) + 0.5;
     if (downFlag) this._realY += 0.04;
-    //this._lastY = Math.floor(this._realY + actTileMarginTop);
     this._lastY = Math.floor(this._realY);
     if (lastRealX < this._realX) {
       this.collideCharacterLeft();
@@ -2283,58 +2205,6 @@ function Game_Bullet() {
     }
   };
 
-  // ボタン入力による操作アクター変更
-  /* characterSwitch imp
-  Game_Player.prototype.changeByInput = function() {
-    if (this._carryingObject) return;
-    if (Input.isTriggered('pageup')) {
-      this.changeMember(true);
-    } else if (Input.isTriggered('pagedown')) {
-      this.changeMember(false);
-    }
-  };
-
-  // 操作メンバーの切り替え
-   Game_Player.prototype.changeMember = function(reverse) {
-    var startActorId = this.actor().actorId();
-    if (reverse) {
-      $gameParty.backSlideActor();
-    } else {
-      $gameParty.frontSlideActor();
-    }
-    if (!this.isChangeMemberEnable()) $gameParty.sortActor(startActorId);
-    if (startActorId !== this.actor().actorId()) {
-      this.removeGuard();         // 防御状態の解除
-      this.battler().requestEffect('appear');
-      AudioManager.playSe(actSeChange);
-      $gameMap.requestRefresh();
-    }
-  };
-
-  // 指定したアクターに切り替えが可能かどうか
-  Game_Player.prototype.isChangeMemberEnable = function() {
-    var actor = this.actor();
-    if (actor.isDead()) return false;
-    var targets = this.collideTargets();
-    for (var i = 0; i < targets.length; i++) {
-      var character = targets[i];
-      if (character.isNormalPriority() && this.isCollide(character)) return false;
-    }
-    var lx = Math.floor(this._realX - this._collideW);
-    var rx = Math.floor(this._realX + this._collideW);
-    var ty = Math.floor(this._realY - this._collideH);
-    var by = Math.floor(this._realY + actTileMarginTop);
-    for (var x = lx; x <= rx; x++) {
-      if (!$gameMap.isPassable(x, ty, 8)) return false;
-      if (!$gameMap.isPassable(x, by, 2)) return false;
-    }
-    for (var y = ty; y <= by; y++) {
-      if (!$gameMap.isPassable(lx, y, 4)) return false;
-      if (!$gameMap.isPassable(rx, y, 6)) return false;
-    }
-    return true;
-  }; */
-
   // 方向ボタン入力による移動処理
   Game_Player.prototype.moveByInput = function() {
     if (this._ladder) {
@@ -2551,12 +2421,10 @@ function Game_Bullet() {
     var x = Math.floor(this._realX);
     if (downFlag) {
       if (!this.isLanding()) return false;
-      // var y = Math.floor(this._realY + actTileMarginTop + 0.1);
       var y = Math.floor(this._realY + 0.1);
       return $gameMap.isLadder(x, y);
     } else {
       var ty = Math.floor(this._realY - this._collideH);
-      // var by = Math.floor(this._realY + actTileMarginTop);
       var by = Math.floor(this._realY);
       for (var y = ty; y <= by; y++) {
         if ($gameMap.isLadder(x, y)) return true;
@@ -2573,7 +2441,6 @@ function Game_Bullet() {
         $gameMap.setup(this._newMapId);
         this._needsMapReload = false;
       }
-      // this.locate(this._newX + 0.5, this._newY + 0.99 - actTileMarginTop);
       this.locate(this._newX + 0.5, this._newY + 0.99);
       this.refresh();
       this.clearTransferInfo();
@@ -3553,10 +3420,6 @@ function Game_Bullet() {
   // 弾スプライトの作成
   Spriteset_Map.prototype.createBullets = function() {
     this._bulletSprites = [];
-    $gameMap.playerBullets().forEach(function(bullet) {
-      this._bulletSprites.push(new Sprite_Bullet(bullet));
-      this._baseSprite.addChild(this._bulletSprites[this._bulletSprites.length - 1]);
-    }, this);
     $gameMap.enemyBullets().forEach(function(bullet) {
       this._bulletSprites.push(new Sprite_Bullet(bullet));
       this._baseSprite.addChild(this._bulletSprites[this._bulletSprites.length - 1]);
