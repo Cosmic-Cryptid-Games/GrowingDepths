@@ -1667,6 +1667,7 @@ function Game_Bullet() {
     this._moveCount = this._dashCount / 2;
     this.resetStopCount();
     this.straighten();
+    AudioManager.playSe(actSeDash);
     this._canDash = false;
   };
 
@@ -2328,7 +2329,6 @@ function Game_Bullet() {
         }
         this.dashFromDirection(this._direction);
         this._dashDelay = this._dashDelayTime;
-        AudioManager.playSe(actSeDash);
         this.removeGuard();         // 防御状態の解除
         if (this._dashMpCost > 0) battler.gainMp(-this._dashMpCost);
       }
@@ -2454,7 +2454,7 @@ function Game_Bullet() {
       var characterName   = actor.characterName();
       var characterIndex  = actor.characterIndex();
       var data = actor.actor();
-      this._moveSpeed = +(data.meta['move_speed'] || 0.05);
+      this._moveSpeed = +(data.meta['move_speed'] || 0.10);
       this._jumpSpeed = +(data.meta['jump_speed'] || 0.14);
       this._swimSpeed = +(data.meta['swim_speed'] || 0.02);
       this._ladderSpeed = +(data.meta['ladder_speed'] || 0.04);
