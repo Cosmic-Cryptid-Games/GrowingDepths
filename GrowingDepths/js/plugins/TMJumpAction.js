@@ -658,7 +658,7 @@ function Game_Bullet() {
   var _Game_System_initialize = Game_System.prototype.initialize;
   Game_System.prototype.initialize = function() {
     _Game_System_initialize.call(this);
-    this._actHpGaugeVisible = true; // add hp gauge
+    this._actHpGaugeVisible = false; // add hp gauge
   };
 
   Game_System.prototype.isActHpGaugeVisible = function() {
