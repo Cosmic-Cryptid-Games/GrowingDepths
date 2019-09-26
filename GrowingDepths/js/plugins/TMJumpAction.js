@@ -579,9 +579,11 @@ function Game_Bullet() {
   var actGuardMoveRate = +(parameters['guardMoveRate'] || 25);
   var actEventCollapse = JSON.parse(parameters['eventCollapse']);
   var actHpGauge = JSON.parse(parameters['hpGauge']);
+  /* floorDamage imp
   //var actFloorDamage = +(parameters['floorDamage'] || 10);
   //var actDamageFallRate = +(parameters['damageFallRate'] || 10);
   //var actDamageFallHeight = +(parameters['damageFallHeight'] || 5);
+  */
   var actFlickWeight = +(parameters['flickWeight'] || 1);
   var actFlickSkill = +(parameters['flickSkill'] || 1);
   var actStageRegion = +(parameters['stageRegion'] || 60);
@@ -1634,9 +1636,10 @@ function Game_Bullet() {
     this.resetJump();
     this.resetDash();
     if (this._ladder) this.getOffLadder();
-    // next line used to create fall damage
-    // this.updateDamageFall();
-    this.resetPeak();
+    /* fallDamage imp
+    this.updateDamageFall();
+    */
+    this.resetPeak(); // if fallDamage is reimp, delete
   };
 
   // ジャンプカウントのリセット
@@ -1649,8 +1652,8 @@ function Game_Bullet() {
     this._canDash = true;
   };
 
-  // fall damage
-  /* Game_CharacterBase.prototype.updateDamageFall = function() {
+  /* fallDamage imp
+  Game_CharacterBase.prototype.updateDamageFall = function() {
     if (this.isBattler() && this._fallGuard < 100) {
       var n = this._realY - this._jumpPeak - actDamageFallHeight;
       if (n > 0 && !this.isSwimming()) {
@@ -2274,7 +2277,8 @@ function Game_Bullet() {
   };
 
   // ボタン入力による操作アクター変更
-  /* Game_Player.prototype.changeByInput = function() {
+  /* characterSwitch imp
+  Game_Player.prototype.changeByInput = function() {
     if (this._carryingObject) return;
     if (Input.isTriggered('pageup')) {
       this.changeMember(true);
