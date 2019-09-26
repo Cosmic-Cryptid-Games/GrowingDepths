@@ -2394,7 +2394,7 @@ function Game_Bullet() {
         var y = Math.floor(this._realY);
 
         //If you can wall jump, do it, otherwise regular jump (if you can), otherwise exit routine
-        if ($gameMap.canWallJump(x, y, this._direction)) {
+        if ($gameMap.canWallJump(x, y, this._direction) && this._jumpCount < this._mulchJump) {
           this.wallJump();
         } else if (this._jumpCount > 0) {
           this._jumpCount--;
