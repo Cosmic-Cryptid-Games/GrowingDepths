@@ -556,6 +556,7 @@ function Game_Bullet() {
   var actSlipFloorRegion = +(parameters['slipFloorRegion'] || 63);
   var actRoughFloorRegion = +(parameters['roughFloorRegion'] || 64);
   var actMarshFloorRegion = +(parameters['marshFloorRegion'] || 65);
+  var actInstantKillRegion = +(parameters['instantKillRegion'] || 66);
   var actWaterTerrainTag = +(parameters['waterTerrainTag'] || 1);
   var actLevelupPopup = parameters['levelupPopup'];
   var actLevelupAnimationId = +(parameters['levelupAnimationId'] || 0);
@@ -651,7 +652,7 @@ function Game_Bullet() {
   var _Game_System_initialize = Game_System.prototype.initialize;
   Game_System.prototype.initialize = function() {
     _Game_System_initialize.call(this);
-    this._actHpGaugeVisible = false; // add hp gauge
+    this._actHpGaugeVisible = true; // add hp gauge
   };
 
   Game_System.prototype.isActHpGaugeVisible = function() {
