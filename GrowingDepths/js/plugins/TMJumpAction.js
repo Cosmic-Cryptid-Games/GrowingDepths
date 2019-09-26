@@ -1,4 +1,4 @@
-﻿//=============================================================================
+//=============================================================================
 // TMPlugin - ジャンプアクション
 // バージョン: 1.0.1
 // 最終更新日: 2017/07/28
@@ -258,12 +258,6 @@
  * @desc 防御効果音のパラメータ。
  * 初期値: {"volume":90, "pitch":150, "pan":0}
  * @default {"volume":90, "pitch":150, "pan":0}
- *
- * @param playerBulletsMax
- * @type number
- * @desc プレイヤーの弾の最大数。
- * 初期値: 32
- * @default 32
  *
  * @param enemyBulletsMax
  * @type number
@@ -584,7 +578,6 @@ function Game_Bullet() {
   actSeHurl.name = parameters['hurlSe'] || '';
   var actSeGuard = JSON.parse(parameters['guardSeParam'] || '{}');
   actSeGuard.name = parameters['guardSe'] || '';
-  var actPlayerBulletsMax = +(parameters['playerBulletsMax'] || 32);
   var actEnemyBulletsMax = +(parameters['enemyBulletsMax'] || 256);
   var actWeaponSprite = JSON.parse(parameters['weaponSprite']);
   var actAutoDamageSe = JSON.parse(parameters['autoDamageSe']);
@@ -865,13 +858,6 @@ function Game_Bullet() {
 
   // 弾のセットアップ
   Game_Map.prototype.setupBullets = function() {
-    this._playerBullets = [];
-    this._alivePlayerBullets = [];
-    this._blankPlayerBullets = [];
-    for (var i = 0; i < actPlayerBulletsMax; i++) {
-      this._playerBullets.push(new Game_Bullet());
-      this._blankPlayerBullets.push(i);
-    }
     this._enemyBullets = [];
     this._aliveEnemyBullets = [];
     this._blankEnemyBullets = [];
@@ -879,11 +865,6 @@ function Game_Bullet() {
       this._enemyBullets.push(new Game_Bullet());
       this._blankEnemyBullets.push(i);
     }
-  };
-
-  // 自機弾を返す
-  Game_Map.prototype.playerBullets = function() {
-    return this._playerBullets;
   };
 
   // 敵機弾を返す
@@ -945,13 +926,6 @@ function Game_Bullet() {
 
   // 弾の更新
   Game_Map.prototype.updateBullets = function() {
-    for (var i = this._alivePlayerBullets.length - 1; i >= 0; i--) {
-      var bi = this._alivePlayerBullets[i];
-      if (!this._playerBullets[bi].update()) {
-        this._alivePlayerBullets.splice(i, 1);
-        this._blankPlayerBullets.push(bi);
-      }
-    }
     for (var i = this._aliveEnemyBullets.length - 1; i >= 0; i--) {
       var bi = this._aliveEnemyBullets[i];
       if (!this._enemyBullets[bi].update()) {
@@ -969,22 +943,7 @@ function Game_Bullet() {
         this._enemyBullets[bi].setup(x, y, z, vx, vy, angle, count, type, index, true, skillId, owner);
         this._aliveEnemyBullets.push(bi);
       }
-    } else {
-      if (this._blankPlayerBullets.length > 0) {
-        var bi = this._blankPlayerBullets.shift();
-        this._playerBullets[bi].setup(x, y, z, vx, vy, angle, count, type, index, false, skillId, owner);
-        this._alivePlayerBullets.push(bi);
-      }
     }
-  };
-
-  // 自機弾の全削除
-  Game_Map.prototype.clearPlayerBullets = function() {
-    for (var i = 0; i < this._alivePlayerBullets.length; i++) {
-      this._playerBullets[this._alivePlayerBullets[i]].erase();
-    }
-    this._blankPlayerBullets.concat(this._alivePlayerBullets);
-    this._alivePlayerBullets = [];
   };
 
   // 敵機弾の全削除
@@ -998,7 +957,6 @@ function Game_Bullet() {
 
   // すべての弾を削除
   Game_Map.prototype.clearAllBullets = function() {
-    this.clearPlayerBullets();
     this.clearEnemyBullets();
   };
 
@@ -3462,10 +3420,6 @@ function Game_Bullet() {
   // 弾スプライトの作成
   Spriteset_Map.prototype.createBullets = function() {
     this._bulletSprites = [];
-    $gameMap.playerBullets().forEach(function(bullet) {
-      this._bulletSprites.push(new Sprite_Bullet(bullet));
-      this._baseSprite.addChild(this._bulletSprites[this._bulletSprites.length - 1]);
-    }, this);
     $gameMap.enemyBullets().forEach(function(bullet) {
       this._bulletSprites.push(new Sprite_Bullet(bullet));
       this._baseSprite.addChild(this._bulletSprites[this._bulletSprites.length - 1]);
