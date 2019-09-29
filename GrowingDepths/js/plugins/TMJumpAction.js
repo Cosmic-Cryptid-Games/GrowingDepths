@@ -2050,6 +2050,10 @@ function Game_Bullet() {
         case actMarshFloorRegion:
           this._vx = 0;
           return;
+        case actInstantKillRegion:
+          var currentActor = $gameActors.actor($gamePlayer.actor().actorId());
+          currentActor.die()
+          break;
         default:
           if (this.isGuarding() && Math.abs(this._vx) > speed) {
             this._vx = this._vx > 0 ? speed : -speed;
