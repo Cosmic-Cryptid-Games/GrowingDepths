@@ -1696,7 +1696,6 @@ function Game_Bullet() {
       battler._actionResult.hpAffected = true;
       battler._actionResult.missed = false;
       battler._actionResult.evaded = false;
-      this.damaged();
       if (battler._actionResult.hpDamage > 0) {
         battler.playDamageSe();
       } else {
@@ -1709,18 +1708,6 @@ function Game_Bullet() {
     }
     if (battler._actionResult.isStatusAffected()) {
       this.requestRefresh();
-    }
-  };
-
-  // ダメージ後の処理
-  Game_CharacterBase.prototype.damaged = function() {
-    var battler = this.battler();
-  //  if (this.isLocking()) {
-  //    return;
-  //  }
-    battler.startDamagePopup();
-    if (battler._actionResult.isStateAdded(battler.deathStateId())) {
-      this.battlerDead();
     }
   };
 
