@@ -556,6 +556,7 @@ function Game_Bullet() {
   var actSlipFloorRegion = +(parameters['slipFloorRegion'] || 63);
   var actRoughFloorRegion = +(parameters['roughFloorRegion'] || 64);
   var actMarshFloorRegion = +(parameters['marshFloorRegion'] || 65);
+  var actInstantKillRegion = +(parameters['instantKillRegion'] || 66);
   var actWaterTerrainTag = +(parameters['waterTerrainTag'] || 1);
   var actLevelupPopup = parameters['levelupPopup'];
   var actLevelupAnimationId = +(parameters['levelupAnimationId'] || 0);
@@ -651,7 +652,7 @@ function Game_Bullet() {
   var _Game_System_initialize = Game_System.prototype.initialize;
   Game_System.prototype.initialize = function() {
     _Game_System_initialize.call(this);
-    this._actHpGaugeVisible = false; // add hp gauge
+    this._actHpGaugeVisible = true; // add hp gauge
   };
 
   Game_System.prototype.isActHpGaugeVisible = function() {
@@ -1564,9 +1565,6 @@ function Game_Bullet() {
     this.resetJump();
     this.resetDash();
     if (this._ladder) this.getOffLadder();
-    /* fallDamage imp
-    this.updateDamageFall();
-    */
     this.resetPeak(); // if fallDamage is reimp, delete
   };
 
@@ -1579,20 +1577,6 @@ function Game_Bullet() {
   Game_CharacterBase.prototype.resetDash = function() {
     this._canDash = true;
   };
-
-  /* fallDamage imp
-  Game_CharacterBase.prototype.updateDamageFall = function() {
-    if (this.isBattler() && this._fallGuard < 100) {
-      var n = this._realY - this._jumpPeak - actDamageFallHeight;
-      if (n > 0 && !this.isSwimming()) {
-        var rate = 100 - this._fallGuard;
-        var damage = Math.floor(Math.max(n * actDamageFallRate * rate / 100), 1);
-        this.battler().clearResult();
-        this.battler().gainHp(-damage);
-      }
-    }
-    this.resetPeak();
-  }; */
 
   // 最高到達点のリセット
   Game_CharacterBase.prototype.resetPeak = function() {
@@ -1712,7 +1696,6 @@ function Game_Bullet() {
       battler._actionResult.hpAffected = true;
       battler._actionResult.missed = false;
       battler._actionResult.evaded = false;
-      this.damaged();
       if (battler._actionResult.hpDamage > 0) {
         battler.playDamageSe();
       } else {
@@ -1725,18 +1708,6 @@ function Game_Bullet() {
     }
     if (battler._actionResult.isStatusAffected()) {
       this.requestRefresh();
-    }
-  };
-
-  // ダメージ後の処理
-  Game_CharacterBase.prototype.damaged = function() {
-    var battler = this.battler();
-  //  if (this.isLocking()) {
-  //    return;
-  //  }
-    battler.startDamagePopup();
-    if (battler._actionResult.isStateAdded(battler.deathStateId())) {
-      this.battlerDead();
     }
   };
 
@@ -1978,6 +1949,7 @@ function Game_Bullet() {
   Game_Player.prototype.update = function(sceneActive) {
     var lastScrolledX = this.scrolledX();
     var lastScrolledY = this.scrolledY();
+    var currentActor = this.actor();
     if (this.isLocking()) {
       this.updateLock();
     } else {
@@ -1997,7 +1969,6 @@ function Game_Bullet() {
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
-    // this.changeByInput();
     this.moveByInput();
     this.jumpByInput();
     this.dashByInput();
@@ -2049,6 +2020,10 @@ function Game_Bullet() {
         case actMarshFloorRegion:
           this._vx = 0;
           return;
+        case actInstantKillRegion:
+          var battler = this.actor()
+          battler.addState(0001)
+          break;
         default:
           if (this.isGuarding() && Math.abs(this._vx) > speed) {
             this._vx = this._vx > 0 ? speed : -speed;
