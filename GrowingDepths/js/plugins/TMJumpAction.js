@@ -1164,6 +1164,7 @@ function Game_Bullet() {
     this._canDash = true;
     this._friction = 0;
     this._moveSpeed = 0.05;
+    this._wallJumpSpeed = 3;
     this._jumpSpeed = 0.14;
     this._swimSpeed = 0.02;
     this._dashSpeedX = 0.1;
@@ -2276,7 +2277,8 @@ function Game_Bullet() {
 
   // 壁ジャンプの X 方向処理
   Game_Player.prototype.wallJump = function() {
-    this._vx = this._direction == 4 ? this._moveSpeed : -this._moveSpeed;
+    wallJumpSpeed = 0.12;
+    this._vx = this._direction == 4 ? wallJumpSpeed : -wallJumpSpeed;
     this.setDirection(this.reverseDir(this._direction));
     this.resetPeak();
   };
@@ -2429,7 +2431,8 @@ function Game_Bullet() {
       var characterName   = actor.characterName();
       var characterIndex  = actor.characterIndex();
       var data = actor.actor();
-      this._moveSpeed = +(data.meta['move_speed'] || 0.10);
+      this._moveSpeed = +(data.meta['move_speed'] || 0.065);
+      this._wallJumpSpeed = +(data.meta['wall_jump_speed'] || 0.10);
       this._jumpSpeed = +(data.meta['jump_speed'] || 0.14);
       this._swimSpeed = +(data.meta['swim_speed'] || 0.02);
       this._ladderSpeed = +(data.meta['ladder_speed'] || 0.04);
