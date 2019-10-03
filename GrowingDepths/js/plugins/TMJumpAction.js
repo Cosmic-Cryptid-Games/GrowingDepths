@@ -1691,7 +1691,7 @@ function Game_Bullet() {
     AudioManager.playSe(actSeDash);
     //$gamePlayer.requestAnimation(121); //XXX
     this._CurrentAnimation = MCAnimation.DASH;
-    $gameActors.actor(1).setCharacterImage('$DashMC%(5 0 1 2 3 4)', 1);
+    $gameActors.actor(1).setCharacterImage('$DashMC%(5 1 1 2 3 4)', 1);
 	$gamePlayer.refresh(); 	
   };
 
@@ -2312,9 +2312,19 @@ function Game_Bullet() {
       this.straighten();
       AudioManager.playSe(actSeJump);
       
-      
       this._CurrentAnimation = MCAnimation.JUMP;
-	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 0 1 2 3 4)', 1);
+      
+      //XXX What happens with wall jump?
+      /*
+      if (this._jumpCount == this._mulchJump - 1) {
+      	//First jump animation
+	  	$gameActors.actor(1).setCharacterImage('$JumpMC%(5 1 1 2 3 4)', 1);
+	  } else {
+	  	//double jump animation
+	  	$gameActors.actor(1).setCharacterImage('$JumpMC%(5 3 1 2 3 4)', 1);
+	  }
+	  */
+	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 1 1 2 3 4)', 1);
 	  //$gamePlayer.requestAnimation(122); //XXX 
 	  $gamePlayer.refresh();
     }
