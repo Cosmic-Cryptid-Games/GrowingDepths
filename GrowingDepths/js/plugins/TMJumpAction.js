@@ -1303,6 +1303,16 @@ function Game_Bullet() {
   Game_CharacterBase.prototype.updateMove = function() {
     this.updateGravity();
     this.updateFriction();
+    
+    //Track Y from last frame and current frame to be able to tell if traveling downwards
+    this._previousY = this._latestY
+    this._latestY = Math.floor(this._realY);
+    //"if travelling downwards, change character image"
+    if (this._previousY < this._latestY) {
+      	$gameActors.actor(1).setCharacterImage('Actor1', 1);
+	  	$gamePlayer.refresh();
+    }
+    
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
       if (this._through) {
@@ -1332,12 +1342,6 @@ function Game_Bullet() {
           this.collideCharacterUp();
         }
       }
-
-	//XXX
-      //if (this._lastY < this._y) {
-      //	$gameActors.actor(1).setCharacterImage('Actor1', 1);
-	  //	$gamePlayer.refresh();
-      //}
 
       this._y = Math.floor(this._realY);
       this._lastY = Math.floor(this._realY);
@@ -1994,8 +1998,7 @@ function Game_Bullet() {
   };
 
   // 入力の処理
-  Game_Player.prototype.updateInput = function() {
-    $gameActors.actor(1).setCharacterImage('Actor1', 1);
+  Game_Player.prototype.updateInput = function() {    
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
