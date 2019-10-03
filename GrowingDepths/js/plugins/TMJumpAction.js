@@ -1596,6 +1596,8 @@ function Game_Bullet() {
     if (this._CurrentAnimation !== MCAnimation.WALK) {
     	this._CurrentAnimation = MCAnimation.WALK
     	$gameActors.actor(1).setCharacterImage('$WalkMC%(5 0 1 2 3 4)', 1);
+    	//$gameActors.actor(1).setCharacterImage('$MCWalk%(5 0 1 2 3 4)', 1);
+    	
 		$gamePlayer.refresh(); 
 	}
 	
