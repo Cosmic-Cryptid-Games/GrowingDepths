@@ -1143,6 +1143,9 @@ function Game_Bullet() {
   var _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
+    //$gameActors.actor(1).setCharacterImage('$DashMC%(5 0 1 2 3 4)', 1);
+    //$gamePlayer.refresh();
+
     this._needsRefresh = false;
     this._mapPopups = [];
     this._vx = 0;
@@ -1565,6 +1568,11 @@ function Game_Bullet() {
     this._vy = 0;
     this.resetJump();
     this.resetDash();
+    $gameActors.actor(1).setCharacterImage('$WalkMC%(5 0 1 2 3 4)', 1); //XXX THIS IS A BUG, 
+    //protect character image changes by setting a variable like:
+    //(this.currentAnimation = 1 for walk 2 for dash 3 for jump), 
+    //check to see if the variable already has the value of 1 before changing the animation
+	$gamePlayer.refresh(); 
     if (this._ladder) this.getOffLadder();
     this.resetPeak(); // if fallDamage is reimp, delete
   };
@@ -1639,6 +1647,9 @@ function Game_Bullet() {
   // ダッシュ（方向指定）
   Game_CharacterBase.prototype.dashFromDirection = function(direction) {
     var vx = direction === 4 ? -this._dashSpeedX : this._dashSpeedX;
+    $gamePlayer.requestAnimation(121); //XXX
+    $gameActors.actor(1).setCharacterImage('$DashMC%(5 0 1 2 3 4)', 1);
+	$gamePlayer.refresh(); 
     var vy = -this._dashSpeedY;
     this.dash(vx, vy);
   };
@@ -2272,12 +2283,16 @@ function Game_Bullet() {
       this.resetStopCount();
       this.straighten();
       AudioManager.playSe(actSeJump);
+	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 0 1 2 3 4)', 1);
+	  $gamePlayer.refresh();
+
     }
   };
 
   // 壁ジャンプの X 方向処理
   Game_Player.prototype.wallJump = function() {
     this._vx = this._direction == 4 ? this._wallJumpSpeed : -this._wallJumpSpeed;
+    $gamePlayer.requestAnimation(actLevelupAnimationId); //XXX 
     this.setDirection(this.reverseDir(this._direction));
     this.resetPeak();
   };
