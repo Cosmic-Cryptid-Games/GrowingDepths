@@ -1332,8 +1332,16 @@ function Game_Bullet() {
           this.collideCharacterUp();
         }
       }
+
+	//XXX
+      //if (this._lastY < this._y) {
+      //	$gameActors.actor(1).setCharacterImage('Actor1', 1);
+	  //	$gamePlayer.refresh();
+      //}
+
       this._y = Math.floor(this._realY);
       this._lastY = Math.floor(this._realY);
+    
     }
   };
 
@@ -1987,6 +1995,7 @@ function Game_Bullet() {
 
   // 入力の処理
   Game_Player.prototype.updateInput = function() {
+    $gameActors.actor(1).setCharacterImage('Actor1', 1);
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
@@ -2295,16 +2304,16 @@ function Game_Bullet() {
       
       
       this._CurrentAnimation = MCAnimation.JUMP;
-	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 0 1 2 3 4)', 3);
+	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 0 1 2 3 4)', 1);
+	  //$gamePlayer.requestAnimation(122); //XXX 
 	  $gamePlayer.refresh();
-
     }
   };
 
   // 壁ジャンプの X 方向処理
   Game_Player.prototype.wallJump = function() {
     this._vx = this._direction == 4 ? this._wallJumpSpeed : -this._wallJumpSpeed;
-    $gamePlayer.requestAnimation(actLevelupAnimationId); //XXX 
+    //$gamePlayer.requestAnimation(122); //XXX 
     this.setDirection(this.reverseDir(this._direction));
     this.resetPeak();
   };
