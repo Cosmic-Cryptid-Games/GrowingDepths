@@ -491,6 +491,7 @@ var MCAnimation = {
   WALK: 1,
   JUMP: 2,
   DASH: 3,
+  FALLING: 4
 };
 
 var Imported = Imported || {};
@@ -1157,6 +1158,8 @@ function Game_Bullet() {
     this._vy = 0;
     this._vxPlus = 0;
     this._lastY = 0;
+    this._latestY = 0;
+    this._previousY = 0;
     this._lastSwim = false;
     this._collideW = 0.375;
     this._collideH = 0.75;
@@ -1307,10 +1310,14 @@ function Game_Bullet() {
     //Track Y from last frame and current frame to be able to tell if traveling downwards
     this._previousY = this._latestY
     this._latestY = Math.floor(this._realY);
+    
     //"if travelling downwards, change character image"
-    if (this._previousY < this._latestY) {
-      	$gameActors.actor(1).setCharacterImage('Actor1', 1);
-	  	$gamePlayer.refresh();
+    if (!this.isDashing() && this._previousY < this._latestY) {
+    	if (this._CurrentAnimation !== MCAnimation.FALLING) {
+    		this._CurrentAnimation = MCAnimation.FALLING
+    		$gameActors.actor(1).setCharacterImage('Actor1', 1);
+			$gamePlayer.refresh(); 
+		}
     }
     
     if (this._vx !== 0 || this._vxPlus !== 0) {
