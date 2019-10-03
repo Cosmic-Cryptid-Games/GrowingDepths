@@ -2324,7 +2324,7 @@ function Game_Bullet() {
 	  	$gameActors.actor(1).setCharacterImage('$JumpMC%(5 3 1 2 3 4)', 1);
 	  }
 	  */
-	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 1 1 2 3 4)', 1);
+	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 2 1 2 3 4)', 1);
 	  //$gamePlayer.requestAnimation(122); //XXX 
 	  $gamePlayer.refresh();
     }
