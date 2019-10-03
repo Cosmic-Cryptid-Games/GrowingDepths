@@ -487,6 +487,12 @@
  *     nall_shot の自機狙い版です。
  */
 
+var MCAnimation = {
+  WALK: 1,
+  JUMP: 2,
+  DASH: 3,
+};
+
 var Imported = Imported || {};
 Imported.TMJumpAction = true;
 
@@ -1143,9 +1149,8 @@ function Game_Bullet() {
   var _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
-    //$gameActors.actor(1).setCharacterImage('$DashMC%(5 0 1 2 3 4)', 1);
-    //$gamePlayer.refresh();
-
+    
+    this._CurrentAnimation = MCAnimation.WALK;
     this._needsRefresh = false;
     this._mapPopups = [];
     this._vx = 0;
@@ -1568,11 +1573,13 @@ function Game_Bullet() {
     this._vy = 0;
     this.resetJump();
     this.resetDash();
-    $gameActors.actor(1).setCharacterImage('$WalkMC%(5 0 1 2 3 4)', 1); //XXX THIS IS A BUG, 
-    //protect character image changes by setting a variable like:
-    //(this.currentAnimation = 1 for walk 2 for dash 3 for jump), 
-    //check to see if the variable already has the value of 1 before changing the animation
-	$gamePlayer.refresh(); 
+    
+    if (this._CurrentAnimation !== MCAnimation.WALK) {
+    	this._CurrentAnimation = MCAnimation.WALK
+    	$gameActors.actor(1).setCharacterImage('$WalkMC%(5 0 1 2 3 4)', 1);
+		$gamePlayer.refresh(); 
+	}
+	
     if (this._ladder) this.getOffLadder();
     this.resetPeak(); // if fallDamage is reimp, delete
   };
@@ -1646,10 +1653,7 @@ function Game_Bullet() {
 
   // ダッシュ（方向指定）
   Game_CharacterBase.prototype.dashFromDirection = function(direction) {
-    var vx = direction === 4 ? -this._dashSpeedX : this._dashSpeedX;
-    $gamePlayer.requestAnimation(121); //XXX
-    $gameActors.actor(1).setCharacterImage('$DashMC%(5 0 1 2 3 4)', 1);
-	$gamePlayer.refresh(); 
+    var vx = direction === 4 ? -this._dashSpeedX : this._dashSpeedX;	
     var vy = -this._dashSpeedY;
     this.dash(vx, vy);
   };
@@ -1657,14 +1661,19 @@ function Game_Bullet() {
   // ダッシュ（速度指定）
   Game_CharacterBase.prototype.dash = function(vx, vy) {
     if (!this._canDash) return; //block dashing more than once
+    this._canDash = false;
     this._vx = vx;
     this._vy = vy;
     this._dashCount = this._dashCountTime;
     this._moveCount = this._dashCount / 2;
     this.resetStopCount();
     this.straighten();
+    
     AudioManager.playSe(actSeDash);
-    this._canDash = false;
+    //$gamePlayer.requestAnimation(121); //XXX
+    this._CurrentAnimation = MCAnimation.DASH;
+    $gameActors.actor(1).setCharacterImage('$DashMC%(5 0 1 2 3 4)', 1);
+	$gamePlayer.refresh(); 	
   };
 
   // はじかれ
@@ -2283,7 +2292,10 @@ function Game_Bullet() {
       this.resetStopCount();
       this.straighten();
       AudioManager.playSe(actSeJump);
-	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 0 1 2 3 4)', 1);
+      
+      
+      this._CurrentAnimation = MCAnimation.JUMP;
+	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 0 1 2 3 4)', 3);
 	  $gamePlayer.refresh();
 
     }
