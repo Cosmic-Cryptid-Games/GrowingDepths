@@ -1315,7 +1315,7 @@ function Game_Bullet() {
     if (!this.isDashing() && this._previousY < this._latestY) {
     	if (this._CurrentAnimation !== MCAnimation.FALLING) {
     		this._CurrentAnimation = MCAnimation.FALLING
-    		$gameActors.actor(1).setCharacterImage('Actor1', 1);
+    		$gameActors.actor(1).setCharacterImage('$JumpMC%(5 4 1 2 3 4)', 1);
 			$gamePlayer.refresh(); 
 		}
     }
