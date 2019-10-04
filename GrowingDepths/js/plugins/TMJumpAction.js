@@ -491,7 +491,13 @@ var MCAnimation = {
   WALK: 1,
   JUMP: 2,
   DASH: 3,
-  FALLING: 4
+  FALLING: 4,
+  fileNames: {
+    1: "$WalkMC%(5 0 1 2 3 4)", //WALK
+    2: "$JumpMC%(5 2 1 2 3 4)", //JUMP
+    3: "$DashMC%(5 1 1 2 3 4)", //DASH
+    4: "$JumpMC%(5 4 1 2 3 4)", //FALL
+  }
 };
 
 var Imported = Imported || {};
@@ -1585,6 +1591,16 @@ function Game_Bullet() {
       this.checkEventTriggerCollide(id);
     }
   };
+  
+  //XXX
+  Game_CharacterBase.prototype.changeAnimation = function(RequestedAnimation) {
+  	if (this._CurrentAnimation !== RequestedAnimation) {
+    	this._CurrentAnimation = RequestedAnimation;
+    	var CharacterSheetToLoad = MCAnimation.fileNames[RequestedAnimation]
+    	$gameActors.actor(1).setCharacterImage(CharacterSheetToLoad, 1);    	
+		$gamePlayer.refresh(); 
+	}
+  }
 
   // 地面に降りる
   Game_CharacterBase.prototype.getLand = function(y) {
@@ -1595,9 +1611,7 @@ function Game_Bullet() {
     
     if (this._CurrentAnimation !== MCAnimation.WALK) {
     	this._CurrentAnimation = MCAnimation.WALK
-    	$gameActors.actor(1).setCharacterImage('$WalkMC%(5 0 1 2 3 4)', 1);
-    	//$gameActors.actor(1).setCharacterImage('$MCWalk%(5 0 1 2 3 4)', 1);
-    	
+    	$gameActors.actor(1).setCharacterImage('$WalkMC%(5 0 1 2 3 4)', 1);    	
 		$gamePlayer.refresh(); 
 	}
 	
