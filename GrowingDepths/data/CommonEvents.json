@@ -1,7 +1,7 @@
 [
 null,
-{"id":1,"list":[{"code":201,"indent":0,"parameters":[0,1,8,7,0,2]},{"code":311,"indent":0,"parameters":[0,0,0,0,1,false]},{"code":0,"indent":0,"parameters":[]}],"name":"After Game Over","switchId":1,"trigger":0},
-{"id":2,"list":[{"code":322,"indent":0,"parameters":[1,"$DashMC%(5 0 1 2 3 4)",0,"Actor1",0,"Actor1_1"]},{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":1},
+{"id":1,"list":[{"code":311,"indent":0,"parameters":[0,0,0,0,1,false]},{"code":201,"indent":0,"parameters":[0,2,2,2,0,2]},{"code":355,"indent":0,"parameters":["$gamePlayer.reserveTransfer($gameVariables.value(0001), $gameVariables.value(0002), $gameVariables.value(0003), 2, 2);"]},{"code":0,"indent":0,"parameters":[]}],"name":"After Game Over","switchId":1,"trigger":0},
+{"id":2,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
 {"id":3,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
 {"id":4,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0}
 ]
