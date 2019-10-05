@@ -1273,7 +1273,7 @@ function Game_Bullet() {
     } else {
       this.updateStop();
     }
-    if (this.isSwimming() !== this._lastSwim) this.updateSwiming();    
+    if (this.isSwimming() !== this._lastSwim) this.updateSwiming();        
     if (this._needsRefresh) this.refresh();
     if (this.isInvincible()) this._invincibleCount--;
   };
@@ -1294,6 +1294,8 @@ function Game_Bullet() {
   Game_CharacterBase.prototype.updateMove = function() {
     this.updateGravity();
     this.updateFriction();
+    if ($gameSwitches.value(1) == true) this.updateWind(); // if map has wind then update wind
+
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
       if (this._through) {
@@ -1351,6 +1353,11 @@ function Game_Bullet() {
     } else {
       this._vxPlus = 0;
     }
+  };
+
+  // update wind
+  Game_CharacterBase.prototype.updateWind = function() {
+	this._vx -= this._moveSpeed / 50;
   };
 
   // 移動カウントの処理
@@ -1995,14 +2002,24 @@ function Game_Bullet() {
         this._vy = this._vy > 0 ? Math.max(this._vy - n, 0) : Math.min(this._vy + n, 0);
       }
     } else {
-      // ダッシュ状態でなければ移動速度を超えないように調整する
+      // Adjust so as not to exceed movement speed unless in dash state
       if (!this.isDashing()) {
-        var n = this.isSwimming() ? this._swimSpeed : this._moveSpeed;
-        if (this._vx < -n) {
-          this._vx = Math.min(this._vx + 0.005, -n);
-        } else if (this._vx > n) {
-          this._vx = Math.max(this._vx - 0.005, n);
-        }
+	if(!$gameSwitches.value(1) == true) {// wind
+		var n = this.isSwimming() ? this._swimSpeed : this._moveSpeed;
+		if (this._vx < -n) {
+		  this._vx = Math.min(this._vx + 0.005, -n);
+		} else if (this._vx > n) {
+		  this._vx = Math.max(this._vx - 0.005, n);
+		}
+	} else {
+		var r = this._moveSpeed * .75;
+		var l = -this._moveSpeed * 2;
+		if(this._vx < l) {
+			this._vx = this._vx = Math.min(this._vx + 0.005, l);
+		} else if (this._vx > r) {
+			this._vx = Math.max(this._vx - 0.005, r);
+		}
+	}
       }
       if (this.isLanding()) {
         var n = actFriction;
@@ -2349,6 +2366,12 @@ function Game_Bullet() {
       this._realSteps = 0;
     }
   };
+
+  // Update wind
+  Game_Player.prototype.updateWind = function() {
+  	  Game_Character.prototype.updateWind.call(this);
+
+  }
 
   // 泳ぎ状態の更新
   Game_Player.prototype.updateSwiming = function() {
