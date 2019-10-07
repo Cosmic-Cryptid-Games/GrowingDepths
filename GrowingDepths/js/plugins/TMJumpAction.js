@@ -491,7 +491,13 @@ var MCAnimation = {
   WALK: 1,
   JUMP: 2,
   DASH: 3,
-  FALLING: 4
+  FALLING: 4,
+  fileNames: {
+    1: "$WalkMC%(5 0 1 2 3 4)", //WALK
+    2: "$JumpMC%(5 2 1 2 3 4)", //JUMP
+    3: "$DashMC%(5 1 1 2 3 4)", //DASH
+    4: "$JumpMC%(5 4 1 2 3 4)", //FALL
+  }
 };
 
 var Imported = Imported || {};
@@ -1301,6 +1307,13 @@ function Game_Bullet() {
     var th = $gameMap.tileHeight();
     return Math.round(this.scrolledY() * th);
   };
+  
+  //If the player is dashing, then I don't care if they are falling
+  //otherwise, check if the current Y position is less than the Y 
+  //position in the previous frame
+  Game_CharacterBase.prototype.isFalling = function() {
+  	return !this.isDashing() && this._previousY < this._latestY;
+  }
 
   // 移動の処理
   Game_CharacterBase.prototype.updateMove = function() {
@@ -1312,12 +1325,8 @@ function Game_Bullet() {
     this._latestY = Math.floor(this._realY);
     
     //"if travelling downwards, change character image"
-    if (!this.isDashing() && this._previousY < this._latestY) {
-    	if (this._CurrentAnimation !== MCAnimation.FALLING) {
-    		this._CurrentAnimation = MCAnimation.FALLING
-    		$gameActors.actor(1).setCharacterImage('$JumpMC%(5 4 1 2 3 4)', 1);
-			$gamePlayer.refresh(); 
-		}
+    if (this.isFalling()) {
+    	this.changeAnimation(MCAnimation.FALLING);
     }
     
     if (this._vx !== 0 || this._vxPlus !== 0) {
@@ -1585,6 +1594,16 @@ function Game_Bullet() {
       this.checkEventTriggerCollide(id);
     }
   };
+  
+  //XXX
+  Game_CharacterBase.prototype.changeAnimation = function(RequestedAnimation) {
+  	if (this._CurrentAnimation !== RequestedAnimation) {
+    	this._CurrentAnimation = RequestedAnimation;
+    	var CharacterSheetToLoad = MCAnimation.fileNames[RequestedAnimation]
+    	$gameActors.actor(1).setCharacterImage(CharacterSheetToLoad, 1);    	
+		$gamePlayer.refresh(); 
+	}
+  }
 
   // 地面に降りる
   Game_CharacterBase.prototype.getLand = function(y) {
@@ -1592,15 +1611,7 @@ function Game_Bullet() {
     this._vy = 0;
     this.resetJump();
     this.resetDash();
-    
-    if (this._CurrentAnimation !== MCAnimation.WALK) {
-    	this._CurrentAnimation = MCAnimation.WALK
-    	$gameActors.actor(1).setCharacterImage('$WalkMC%(5 0 1 2 3 4)', 1);
-    	//$gameActors.actor(1).setCharacterImage('$MCWalk%(5 0 1 2 3 4)', 1);
-    	
-		$gamePlayer.refresh(); 
-	}
-	
+    this.changeAnimation(MCAnimation.WALK);
     if (this._ladder) this.getOffLadder();
     this.resetPeak(); // if fallDamage is reimp, delete
   };
@@ -1692,9 +1703,7 @@ function Game_Bullet() {
     
     AudioManager.playSe(actSeDash);
     //$gamePlayer.requestAnimation(121); //XXX
-    this._CurrentAnimation = MCAnimation.DASH;
-    $gameActors.actor(1).setCharacterImage('$DashMC%(5 1 1 2 3 4)', 1);
-	$gamePlayer.refresh(); 	
+    this.changeAnimation(MCAnimation.DASH); 	
   };
 
   // はじかれ
@@ -2314,21 +2323,8 @@ function Game_Bullet() {
       this.straighten();
       AudioManager.playSe(actSeJump);
       
-      this._CurrentAnimation = MCAnimation.JUMP;
-      
-      //XXX What happens with wall jump?
-      /*
-      if (this._jumpCount == this._mulchJump - 1) {
-      	//First jump animation
-	  	$gameActors.actor(1).setCharacterImage('$JumpMC%(5 1 1 2 3 4)', 1);
-	  } else {
-	  	//double jump animation
-	  	$gameActors.actor(1).setCharacterImage('$JumpMC%(5 3 1 2 3 4)', 1);
-	  }
-	  */
-	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 2 1 2 3 4)', 1);
+      this.changeAnimation(MCAnimation.JUMP);
 	  //$gamePlayer.requestAnimation(122); //XXX 
-	  $gamePlayer.refresh();
     }
   };
 
