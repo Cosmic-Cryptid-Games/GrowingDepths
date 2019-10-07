@@ -341,21 +341,21 @@
  *
  * @param padButtonNames
  * @type string
- * @desc パッドボタンの名前
- * padButtonsと同じ並び順でボタンの名前を設定してください
- * @default 決定,キャンセル,メニュー,ダッシュ,アタック,ジャンプ,キャラ変更(前),キャラ変更(次)
-
+ * @desc Pad button name
+ * Set button names in the same order as padButtons
+ * @default decision, cancel, menu, dash, attack, jump, character change (previous), character change (next)
+ *
  * @param defaultPadButtons
  * @type string
- * @desc パッドボタンの初期配置
- * 初期値: ボタン 1 ～ 12 に対応するコードを設定してください
- * @default cancel,ok,shift,jump,pageup,pagedown,attack,menu,menu,menu,menu,menu
+ * @desc initial placement of pad buttons
+ * Default: Set the code corresponding to buttons 1-12
+ * @default cancel, ok, shift, jump, pageup, pagedown, attack, menu, menu, menu, menu, menu
  *
  * @param padConfigCommand
  * @type string
- * @desc パッドボタン配置のコマンド名 (空にすると機能を無効化)
- * 初期値: パッドボタン配置
- * @default パッドボタン配置
+ * @desc Pad button command name (empty to disable function)
+ * Default: Pad button layout
+ * @default pad button layout
  *
  * @param stepAnimeConstantA
  * @type string
@@ -378,114 +378,121 @@
  * @requiredAssets img/system/TMJumpActionShield
  *
  * @help
- * TMPlugin - ジャンプアクション ver1.0.1
- *
- * 使い方:
- *
- *   詳細は配布サイトを参照してください。
- *
- *   このプラグインは RPGツクールMV Version 1.5.0 で動作確認をしています。
- *
- *   このプラグインはMITライセンスのもとに配布しています、商用利用、
- *   改造、再配布など、自由にお使いいただけます。
- *
- *
- * メモ欄タグ（アクター、装備、ステート）:
- *
- *   <move_speed:0.05>        # 歩行速度
- *   <jump_speed:0.14>        # ジャンプ力
- *   <swim_speed:0.02>        # 泳ぐ速度
- *   <ladder_speed:0.04>      # はしご移動速度
- *   <accele:0.003>           # 歩行加速度
- *   <ladder_accele:0.003>    # はしご移動加速度
- *   <jump_input:0>           # ジャンプ追加入力時間
- *   <swim_jump:0.1>          # 水中ジャンプ力
- *   <mulch_jump:2>           # 連続ジャンプ回数
- *   <weight:2>               # 重さ
- *   <gravity:0.0045>         # 重力
- *   <friction:0>             # 摩擦
- *   <wall_jump>              # 壁ジャンプ
- *   <dash_speed_x:0.14>      # ダッシュ速度（横方向）
- *   <dash_speed_y:0.06>      # ダッシュ速度（縦方向）
- *   <dash_count:15>          # ダッシュ時間
- *   <dash_delay:30>          # ダッシュ後硬直時間
- *   <dash_mp_cost:0>         # ダッシュに必要なＭＰ
- *   <fall_guard:50>          # 落下ダメージ耐性
- *   <guard_speed:15>         # 防御状態への移行速度
- *   <invincible_time:30>     # 被ダメージ後の無敵時間
- *   <shot_way:1>             # 同時に発射する弾の数
- *   <shot_space:0.2>         # 弾同士の間隔（ラジアン）
- *   <shot_speed:0.07>        # 弾の移動速度
- *   <shot_count:30>          # 弾の寿命
- *   <shot_type:1>            # 弾のタイプ
- *   <shot_index:0>           # 弾画像のインデックス
- *   <shot_skill:1>           # 弾のスキル番号
- *   <shot_delay:10>          # 発射後の硬直時間
- *   <shot_se_name:Attack2>   # 弾発射効果音のファイル名
- *   <shot_se_volume:90>      # 弾発射効果音のボリューム
- *   <shot_se_pitch:150>      # 弾発射効果音のピッチ
- *
- *
- * メモ欄タグ（イベント）:
- *
- *   <w:0.375>                # 当たり判定（中心から左右の端までのサイズ）
- *   <h:0.75>                 # 当たり判定（足元から頭までのサイズ）
- *   <enemy:1>                # バトラー（敵番号）
- *   <dead:A>                 # バトラー戦闘不能時セルフスイッチ
- *   <repop:300>              # 再出現までの時間（フレーム）
- *   <lift>                   # リフト属性
- *   <weight:1>               # 重さ
- *   <gravity:0.004>          # 重力
- *
- *
- * メモ欄タグ（スキル）:
- *
- *   <bullet_anime:67>        # 着弾時に再生するアニメーション
- *   <map_through>            # 弾が地形を無視して貫通する
- *   <map_reflect>            # 弾が地形に当たると消えずに跳ね返る
- *
- *   <time_bomb:6 0 0.2 45 1 0 1>
- *     弾が時間切れで削除される際に新しく弾を発射する。
- *     パラメータはプラグインコマンド『nallShot』の n ～ skillId までを
- *     設定します。
- *
- *
- * プラグインコマンド:
- *
- *   actGainHp -1 -5          # プレイヤーに 5 ダメージを与える。
- *   actGainHp 1 -100         # イベント 1 番に 100 ダメージを与える。
- *   actHp 1 2                # イベント 1 番のHPをゲーム変数 2 番に代入。
- *   actForceX -1 0.1         # プレイヤーの X 速度を 0.1 に強制変更。
- *   actForceY 1 -0.15        # イベント 1 番の Y 速度を -0.15 に強制変更。
- *   actForceStop -1          # プレイヤーの速度を 0 に強制変更。
- *   actChangeActor 2         # 操作キャラクターをアクター 2 番に変更。
- *   actHideHpGauge           # 足元HPゲージを隠す
- *   actShowHpGauge           # 足元HPゲージを表示する
- *
- *   actPopup -1 テキスト #ff0000
- *     プレイヤーに赤色のテキストをポップアップ
- *
- *   nwayShot eventId n space angle speed count type index skillId
- *     eventId: 弾を発射するイベントの番号（ -1 でプレイヤー）
- *     n:       同時に発射する弾の数
- *     space:   弾同士の間隔（ラジアン）
- *     angle:   発射する方向（ラジアン）
- *     speed:   弾の移動速度
- *     count:   弾の寿命
- *     type:    弾のタイプ
- *     index:   弾画像のインデックス
- *     skillId: 弾のスキル（ダメージ計算用、省略可）
- *
- *   nwayAim eventId n space angle speed count type index skillId
- *     nway_shot と同様ですが、angleにプレイヤーがいる方向（ラジアン）を
- *     自動的に加算します。angleが 0 なら自機狙いになります。
- *
- *   nallShot eventId n angle speed count type index skillId
- *     全方位に向けて弾を発射します、弾同士の間隔は自動で設定されます。
- *
- *   nallAim eventId n space angle speed count type index skillId
- *     nall_shot の自機狙い版です。
+ * TMPlugin-Jump Action ver1.0.1
+ *
+ * Usage:
+ *
+ * Please refer to the distribution site for details.
+ *
+ * This plug-in has been tested with RPG Maker MV Version 1.5.0.
+ *
+ * This plug-in is distributed under the MIT license for commercial use,
+ * You can use it freely for remodeling and redistribution.
+ *
+ *
+ * Memo field tags (actors, equipment, states):
+ *
+ * <move_speed: 0.05> # walking speed
+ * <jump_speed: 0.14> # Jump power
+ * <swim_speed: 0.02> # swim speed
+ * <ladder_speed: 0.04> # Ladder speed
+ * <accele: 0.003> # walking acceleration
+ * <ladder_accele: 0.003> # Ladder acceleration
+ * <jump_input: 0> # Jump additional input time
+ * <swim_jump: 0.1> # Underwater jump power
+ * <mulch_jump: 2> # Number of consecutive jumps
+ * <weight: 2> # weight
+ * <gravity: 0.0045> # gravity
+ * <friction: 0> # friction
+ * <wall_jump> # Wall jump
+ * <dash_speed_x: 0.14> # Dash speed (horizontal direction)
+ * <dash_speed_y: 0.06> # Dash speed (vertical)
+ * <dash_count: 15> # Dash time
+ * <dash_delay: 30> # Rigid time after dash
+ * <dash_mp_cost: 0> # MP required for dash
+ * <fall_guard: 50> # Fall damage resistance
+ * <guard_speed: 15> # speed to enter defense state
+ * <invincible_time: 30> # Invincible time after taking damage
+ * <shot_way: 1> # Number of bullets fired simultaneously
+ * <shot_space: 0.2> # Spacing between bullets (radians)
+ * <shot_speed: 0.07> # bullet movement speed
+ * <shot_count: 30> # bullet life
+ * <shot_type: 1> # bullet type
+ * <shot_index: 0> # bullet image index
+ * <shot_skill: 1> # bullet skill number
+ * <shot_delay: 10> # Rigid time after launch
+ * <shot_se_name: Attack2> # File name of projectile sound effect
+ * <shot_se_volume: 90> # Volume of bullet firing sound effect
+ * <shot_se_pitch: 150> # Pitch of bullet firing sound effect
+ *
+ *
+ * Memo field tag (event):
+ *
+ * <w: 0.375> # Hit judgment (size from the center to the left and right edges)
+ * <h: 0.75> # Hit judgment (size from foot to head)
+ * <enemy: 1> # Butler (enemy number)
+ * <dead: A> # Butler self-switch when unable to fight
+ * <repop: 300> # Time to re-appear (frame)
+ * <lift> # lift attribute
+ * <weight: 1> # weight
+ * <gravity: 0.004> # gravity
+ *
+ *
+ * Memo field tag (skill):
+ *
+ * <bullet_anime: 67> # Animation to play when landing
+ * <map_through> # bullets penetrate ignoring terrain
+ * <map_reflect> # When a bullet hits the terrain, it bounces without disappearing
+ *
+ * <time_bomb: 6 0 0.2 45 1 0 1>
+ * Fire a new bullet when a bullet is deleted due to time out.
+ * Parameters are from n to skillId of the plug-in command “nallShot”
+ *     Set.
+ *
+ *
+ * Plugin command:
+ *
+ * actGainHp -1 -5 # Deal 5 damage to players.
+ * actGainHp 1 -100 # Deal 100 damage to event # 1.
+ * actHp 1 2 # Assign event 1 HP to game variable 2.
+ * actForceX -1 0.1 # Force the player's X speed to 0.1.
+ * actForceY 1 -0.15 # Forcibly change the Y speed of event 1 to -0.15.
+ * actForceStop -1 # Force the player speed to 0.
+ * actChangeActor 2 # Change the operation character to Actor 2.
+ * actHideHpGauge # Hide foot HP gauge
+ * actShowHpGauge # Display current HP gauge
+ *
+ * actPopup -1 text # ff0000
+ * Pop up red text to the player
+ *
+ * nwayShot eventId n space angle speed count type index skillId
+ * eventId: The number of the event that fires the bullet (-1 for the player)
+ * n: Number of bullets fired simultaneously
+ * space: Spacing between bullets (radians)
+ * angle: Fire direction (radian)
+ * speed: bullet movement speed
+ * count: bullet life
+ * type: bullet type
+ * index: Bullet image index
+ * skillId: Bullet skill (for damage calculation, optional)
+ *
+ * nwayAim eventId n space angle speed count type index skillId
+ * Same as nway_shot, but the direction the player is in the angle (radians)
+ * Add automatically. If angle is 0, it will be targeted.
+ *
+ * nallShot eventId n angle speed count type index skillId
+ * The bullets are fired in all directions, and the interval between bullets is set automatically.
+ *
+ * nallAim eventId n space angle speed count type index skillId
+ * This is the target version of nall_shot.
  */
+
+var MCAnimation = {
+  WALK: 1,
+  JUMP: 2,
+  DASH: 3,
+  FALLING: 4
+};
 
 var Imported = Imported || {};
 Imported.TMJumpAction = true;
@@ -1143,12 +1150,16 @@ function Game_Bullet() {
   var _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
+    
+    this._CurrentAnimation = MCAnimation.WALK;
     this._needsRefresh = false;
     this._mapPopups = [];
     this._vx = 0;
     this._vy = 0;
     this._vxPlus = 0;
     this._lastY = 0;
+    this._latestY = 0;
+    this._previousY = 0;
     this._lastSwim = false;
     this._collideW = 0.375;
     this._collideH = 0.75;
@@ -1164,6 +1175,7 @@ function Game_Bullet() {
     this._canDash = true;
     this._friction = 0;
     this._moveSpeed = 0.05;
+    this._wallJumpSpeed = 0.12;
     this._jumpSpeed = 0.14;
     this._swimSpeed = 0.02;
     this._dashSpeedX = 0.1;
@@ -1294,6 +1306,20 @@ function Game_Bullet() {
   Game_CharacterBase.prototype.updateMove = function() {
     this.updateGravity();
     this.updateFriction();
+    
+    //Track Y from last frame and current frame to be able to tell if traveling downwards
+    this._previousY = this._latestY
+    this._latestY = Math.floor(this._realY);
+    
+    //"if travelling downwards, change character image"
+    if (!this.isDashing() && this._previousY < this._latestY) {
+    	if (this._CurrentAnimation !== MCAnimation.FALLING) {
+    		this._CurrentAnimation = MCAnimation.FALLING
+    		$gameActors.actor(1).setCharacterImage('$JumpMC%(5 4 1 2 3 4)', 1);
+			$gamePlayer.refresh(); 
+		}
+    }
+    
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
       if (this._through) {
@@ -1323,8 +1349,10 @@ function Game_Bullet() {
           this.collideCharacterUp();
         }
       }
+
       this._y = Math.floor(this._realY);
       this._lastY = Math.floor(this._realY);
+    
     }
   };
 
@@ -1564,6 +1592,15 @@ function Game_Bullet() {
     this._vy = 0;
     this.resetJump();
     this.resetDash();
+    
+    if (this._CurrentAnimation !== MCAnimation.WALK) {
+    	this._CurrentAnimation = MCAnimation.WALK
+    	$gameActors.actor(1).setCharacterImage('$WalkMC%(5 0 1 2 3 4)', 1);
+    	//$gameActors.actor(1).setCharacterImage('$MCWalk%(5 0 1 2 3 4)', 1);
+    	
+		$gamePlayer.refresh(); 
+	}
+	
     if (this._ladder) this.getOffLadder();
     this.resetPeak(); // if fallDamage is reimp, delete
   };
@@ -1637,7 +1674,7 @@ function Game_Bullet() {
 
   // ダッシュ（方向指定）
   Game_CharacterBase.prototype.dashFromDirection = function(direction) {
-    var vx = direction === 4 ? -this._dashSpeedX : this._dashSpeedX;
+    var vx = direction === 4 ? -this._dashSpeedX : this._dashSpeedX;	
     var vy = -this._dashSpeedY;
     this.dash(vx, vy);
   };
@@ -1645,14 +1682,19 @@ function Game_Bullet() {
   // ダッシュ（速度指定）
   Game_CharacterBase.prototype.dash = function(vx, vy) {
     if (!this._canDash) return; //block dashing more than once
+    this._canDash = false;
     this._vx = vx;
     this._vy = vy;
     this._dashCount = this._dashCountTime;
     this._moveCount = this._dashCount / 2;
     this.resetStopCount();
     this.straighten();
+    
     AudioManager.playSe(actSeDash);
-    this._canDash = false;
+    //$gamePlayer.requestAnimation(121); //XXX
+    this._CurrentAnimation = MCAnimation.DASH;
+    $gameActors.actor(1).setCharacterImage('$DashMC%(5 1 1 2 3 4)', 1);
+	$gamePlayer.refresh(); 	
   };
 
   // はじかれ
@@ -1965,7 +2007,7 @@ function Game_Bullet() {
   };
 
   // 入力の処理
-  Game_Player.prototype.updateInput = function() {
+  Game_Player.prototype.updateInput = function() {    
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
@@ -2271,12 +2313,29 @@ function Game_Bullet() {
       this.resetStopCount();
       this.straighten();
       AudioManager.playSe(actSeJump);
+      
+      this._CurrentAnimation = MCAnimation.JUMP;
+      
+      //XXX What happens with wall jump?
+      /*
+      if (this._jumpCount == this._mulchJump - 1) {
+      	//First jump animation
+	  	$gameActors.actor(1).setCharacterImage('$JumpMC%(5 1 1 2 3 4)', 1);
+	  } else {
+	  	//double jump animation
+	  	$gameActors.actor(1).setCharacterImage('$JumpMC%(5 3 1 2 3 4)', 1);
+	  }
+	  */
+	  $gameActors.actor(1).setCharacterImage('$JumpMC%(5 2 1 2 3 4)', 1);
+	  //$gamePlayer.requestAnimation(122); //XXX 
+	  $gamePlayer.refresh();
     }
   };
 
   // 壁ジャンプの X 方向処理
   Game_Player.prototype.wallJump = function() {
-    this._vx = this._direction == 4 ? this._moveSpeed : -this._moveSpeed;
+    this._vx = this._direction == 4 ? this._wallJumpSpeed : -this._wallJumpSpeed;
+    //$gamePlayer.requestAnimation(122); //XXX 
     this.setDirection(this.reverseDir(this._direction));
     this.resetPeak();
   };
@@ -2429,7 +2488,8 @@ function Game_Bullet() {
       var characterName   = actor.characterName();
       var characterIndex  = actor.characterIndex();
       var data = actor.actor();
-      this._moveSpeed = +(data.meta['move_speed'] || 0.10);
+      this._moveSpeed = +(data.meta['move_speed'] || 0.065);
+      this._wallJumpSpeed = +(data.meta['wall_jump_speed'] || 0.12);
       this._jumpSpeed = +(data.meta['jump_speed'] || 0.14);
       this._swimSpeed = +(data.meta['swim_speed'] || 0.02);
       this._ladderSpeed = +(data.meta['ladder_speed'] || 0.04);
@@ -3504,7 +3564,7 @@ function Game_Bullet() {
 
   Window_PadOptions.prototype.makeCommandList = function() {
     for (var i = 1; i <= 12; i++) {
-      this.addCommand('パッドボタン' + i, 'padButton' + i);
+      this.addCommand('Button ' + i, 'padButton' + i);
     }
   };
 
