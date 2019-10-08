@@ -703,7 +703,7 @@ function Game_Bullet() {
   // Game_Battler
   //
 
-  // メンバ変数の初期化
+  // member variable initialization
   var _Game_Battler_initMembers = Game_Battler.prototype.initMembers;
   Game_Battler.prototype.initMembers = function() {
     _Game_Battler_initMembers.call(this);
@@ -1152,7 +1152,7 @@ function Game_Bullet() {
   // Game_CharacterBase
   //
 
-  // メンバ変数の初期化
+  // member variable initialization
   var _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
@@ -1263,7 +1263,7 @@ function Game_Bullet() {
     this._needsRefresh = true;
   };
 
-  // 移動速度のセット
+  // Set the movement speed
   Game_CharacterBase.prototype.setMoveSpeed = function(moveSpeed) {
     this._moveSpeed = moveSpeed / 100 + 0.02;
   };
@@ -1280,7 +1280,7 @@ function Game_Bullet() {
             (this.isDashing() ? 0.01 : 0)) * actStepAnimeConstantB;
   };
 
-  // フレーム更新
+  // frame update
   Game_CharacterBase.prototype.update = function() {
     this.updateMove();
     this.updateAnimation();
@@ -1291,18 +1291,18 @@ function Game_Bullet() {
     } else {
       this.updateStop();
     }
-    if (this.isSwimming() !== this._lastSwim) this.updateSwiming();
+    if (this.isSwimming() !== this._lastSwim) this.updateSwiming();        
     if (this._needsRefresh) this.refresh();
     if (this.isInvincible()) this._invincibleCount--;
   };
 
-  // 画面 X 座標の取得
+  // Get screen X coordinate
   Game_CharacterBase.prototype.screenX = function() {
     var tw = $gameMap.tileWidth();
     return Math.round(this.scrolledX() * tw);
   };
 
-  // 画面 Y 座標の取得
+  // Get screen Y coordinate
   Game_CharacterBase.prototype.screenY = function() {
     var th = $gameMap.tileHeight();
     return Math.round(this.scrolledY() * th);
@@ -1315,11 +1315,12 @@ function Game_Bullet() {
   	return !this.isDashing() && this._previousY < this._latestY;
   }
 
-  // 移動の処理
+  // move processing
   Game_CharacterBase.prototype.updateMove = function() {
     this.updateGravity();
     this.updateFriction();
-    
+    if ($gameSwitches.value(1) == true) this.updateWind(); // if map has wind then update wind
+
     //Track Y from last frame and current frame to be able to tell if traveling downwards
     this._previousY = this._latestY
     this._latestY = Math.floor(this._realY);
@@ -1388,6 +1389,11 @@ function Game_Bullet() {
     } else {
       this._vxPlus = 0;
     }
+  };
+
+  // update wind
+  Game_CharacterBase.prototype.updateWind = function() {
+	this._vx -= this._moveSpeed / 50;
   };
 
   // 移動カウントの処理
@@ -1985,7 +1991,7 @@ function Game_Bullet() {
     this.setDirection(Input.isPressed('left') ? 4 : 6);
   };
 
-  // 衝突したイベントの起動
+  // Triggering the collision event
   Game_Player.prototype.checkEventTriggerCollide = function(id) {
     if (!$gameMap.isEventRunning()) {
       var event = $gameMap.event(id);
@@ -1996,7 +2002,7 @@ function Game_Bullet() {
     }
   };
 
-  // フレーム更新
+  // frame update
   Game_Player.prototype.update = function(sceneActive) {
     var lastScrolledX = this.scrolledX();
     var lastScrolledY = this.scrolledY();
@@ -2015,8 +2021,8 @@ function Game_Bullet() {
   //  this._followers.update();
   };
 
-  // 入力の処理
-  Game_Player.prototype.updateInput = function() {    
+  // input processing
+  Game_Player.prototype.updateInput = function() {
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
@@ -2027,7 +2033,7 @@ function Game_Bullet() {
     this.triggerButtonAction();
   };
 
-  // 重力の処理
+  // Gravity handling
   Game_Player.prototype.updateGravity = function() {
     if (this._ladder || (this._jumpPeak > this._realY && this._gravity > 0)) {
       this.resetPeak();
@@ -2036,7 +2042,7 @@ function Game_Bullet() {
     Game_Character.prototype.updateGravity.call(this);
   };
 
-  // 摩擦の処理
+  // friction handling
   Game_Player.prototype.updateFriction = function() {
     Game_Character.prototype.updateFriction.call(this);
     this._friction = 0;
@@ -2046,14 +2052,24 @@ function Game_Bullet() {
         this._vy = this._vy > 0 ? Math.max(this._vy - n, 0) : Math.min(this._vy + n, 0);
       }
     } else {
-      // ダッシュ状態でなければ移動速度を超えないように調整する
+      // Adjust so as not to exceed movement speed unless in dash state
       if (!this.isDashing()) {
-        var n = this.isSwimming() ? this._swimSpeed : this._moveSpeed;
-        if (this._vx < -n) {
-          this._vx = Math.min(this._vx + 0.005, -n);
-        } else if (this._vx > n) {
-          this._vx = Math.max(this._vx - 0.005, n);
-        }
+	if(!$gameSwitches.value(1) == true) {// wind
+		var n = this.isSwimming() ? this._swimSpeed : this._moveSpeed;
+		if (this._vx < -n) {
+		  this._vx = Math.min(this._vx + 0.005, -n);
+		} else if (this._vx > n) {
+		  this._vx = Math.max(this._vx - 0.005, n);
+		}
+	} else {
+		var r = this._moveSpeed * .75;
+		var l = -this._moveSpeed * 2;
+		if(this._vx < l) {
+			this._vx = this._vx = Math.min(this._vx + 0.005, l);
+		} else if (this._vx > r) {
+			this._vx = Math.max(this._vx - 0.005, r);
+		}
+	}
       }
       if (this.isLanding()) {
         var n = actFriction;
@@ -2097,7 +2113,7 @@ function Game_Bullet() {
     this._moveCount--;
   };
 
-  // ロック状態の処理
+  // handle lock state
   Game_Player.prototype.updateLock = function() {
     this._lockCount--;
     if (this._lockCount === 0 && this.battler().isDead()) {
@@ -2105,7 +2121,7 @@ function Game_Bullet() {
     }
   };
 
-  // ボタン操作による持ち上げ（投げ）
+  // Lift by button operation (throw)
   Game_Player.prototype.carryByInput = function() {
     if (this.isCarrying()) {
       if (Input.isTriggered('attack')) {
@@ -2152,7 +2168,7 @@ function Game_Bullet() {
     }
   };
 
-  // 持ち上げる
+  // lift
   Game_Player.prototype.executeCarry = function() {
     this._carryingObject = $gameMap.event(this._landingObject.eventId());
     this._carryingObject.carry();
@@ -2160,7 +2176,7 @@ function Game_Bullet() {
     AudioManager.playSe(actSeCarry);
   };
 
-  // 投げる
+  // throw
   Game_Player.prototype.executeHurl = function() {
     this._carryingObject.hurl();
     if (Input.isPressed('up')) {            // 上を押しながら投げた
@@ -2187,7 +2203,7 @@ function Game_Bullet() {
     AudioManager.playSe(actSeHurl);
   };
 
-  // ボタン入力による攻撃
+  // Attack by button input
   Game_Player.prototype.attackByInput = function() {
     if (this._shotDelay > 0) {
       this._shotDelay--;
@@ -2231,7 +2247,7 @@ function Game_Bullet() {
     }
   };
 
-  // 方向ボタン入力による移動処理
+  // Move by direction button input
   Game_Player.prototype.moveByInput = function() {
     if (this._ladder) {
       if (Input.isPressed('up')) {
@@ -2276,7 +2292,7 @@ function Game_Bullet() {
     }
   };
 
-  // ボタン入力によるジャンプ処理
+  // Jump processing by button input
   Game_Player.prototype.jumpByInput = function() {
     if (this._jumpInput > 0) {
       this._jumpInput--;
@@ -2404,6 +2420,12 @@ function Game_Bullet() {
       this._realSteps = 0;
     }
   };
+
+  // Update wind
+  Game_Player.prototype.updateWind = function() {
+  	  Game_Character.prototype.updateWind.call(this);
+
+  }
 
   // 泳ぎ状態の更新
   Game_Player.prototype.updateSwiming = function() {
@@ -2582,7 +2604,7 @@ function Game_Bullet() {
   };
 
   //-----------------------------------------------------------------------------
-  // Game_Event
+  // Game_Event (Enemies)
   //
 
   // 初期化
