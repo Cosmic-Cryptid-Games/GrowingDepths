@@ -493,10 +493,10 @@ var MCAnimation = {
   DASH: 3,
   FALLING: 4,
   fileNames: {
-    1: "$WalkMC%(5 0 1 2 3 4)", //WALK
-    2: "$JumpMC%(5 2 1 2 3 4)", //JUMP
-    3: "$DashMC%(5 1 1 2 3 4)", //DASH
-    4: "$JumpMC%(5 4 1 2 3 4)", //FALL
+    1: "$MCWalk%(6 0 1 2 3 4 5)", //WALK
+    2: "$JumpMC%(6 0 1 2 3 4 5)", //JUMP
+    3: "$DashMC%(6 0 1 2 3 4 5)", //DASH
+    4: "$FallMC%(6 0 1 2 3 4 5)", //FALL
   }
 };
 
@@ -1702,7 +1702,7 @@ function Game_Bullet() {
     this.straighten();
     
     AudioManager.playSe(actSeDash);
-    //$gamePlayer.requestAnimation(121); //XXX
+    //$gamePlayer.requestAnimation(122); //XXX
     this.changeAnimation(MCAnimation.DASH); 	
   };
 
