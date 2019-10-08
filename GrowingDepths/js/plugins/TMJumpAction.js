@@ -487,6 +487,19 @@
  * This is the target version of nall_shot.
  */
 
+var MCAnimation = {
+  WALK: 1,
+  JUMP: 2,
+  DASH: 3,
+  FALLING: 4,
+  fileNames: {
+    1: "$WalkMC%(5 0 1 2 3 4)", //WALK
+    2: "$JumpMC%(5 2 1 2 3 4)", //JUMP
+    3: "$DashMC%(5 1 1 2 3 4)", //DASH
+    4: "$JumpMC%(5 4 1 2 3 4)", //FALL
+  }
+};
+
 var Imported = Imported || {};
 Imported.TMJumpAction = true;
 
@@ -1143,12 +1156,16 @@ function Game_Bullet() {
   var _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
+    
+    this._CurrentAnimation = MCAnimation.WALK;
     this._needsRefresh = false;
     this._mapPopups = [];
     this._vx = 0;
     this._vy = 0;
     this._vxPlus = 0;
     this._lastY = 0;
+    this._latestY = 0;
+    this._previousY = 0;
     this._lastSwim = false;
     this._collideW = 0.375;
     this._collideH = 0.75;
@@ -1164,6 +1181,7 @@ function Game_Bullet() {
     this._canDash = true;
     this._friction = 0;
     this._moveSpeed = 0.05;
+    this._wallJumpSpeed = 0.12;
     this._jumpSpeed = 0.14;
     this._swimSpeed = 0.02;
     this._dashSpeedX = 0.1;
@@ -1289,6 +1307,13 @@ function Game_Bullet() {
     var th = $gameMap.tileHeight();
     return Math.round(this.scrolledY() * th);
   };
+  
+  //If the player is dashing, then I don't care if they are falling
+  //otherwise, check if the current Y position is less than the Y 
+  //position in the previous frame
+  Game_CharacterBase.prototype.isFalling = function() {
+  	return !this.isDashing() && this._previousY < this._latestY;
+  }
 
   // move processing
   Game_CharacterBase.prototype.updateMove = function() {
@@ -1296,6 +1321,15 @@ function Game_Bullet() {
     this.updateFriction();
     if ($gameSwitches.value(1) == true) this.updateWind(); // if map has wind then update wind
 
+    //Track Y from last frame and current frame to be able to tell if traveling downwards
+    this._previousY = this._latestY
+    this._latestY = Math.floor(this._realY);
+    
+    //"if travelling downwards, change character image"
+    if (this.isFalling()) {
+    	this.changeAnimation(MCAnimation.FALLING);
+    }
+    
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
       if (this._through) {
@@ -1325,8 +1359,10 @@ function Game_Bullet() {
           this.collideCharacterUp();
         }
       }
+
       this._y = Math.floor(this._realY);
       this._lastY = Math.floor(this._realY);
+    
     }
   };
 
@@ -1564,6 +1600,16 @@ function Game_Bullet() {
       this.checkEventTriggerCollide(id);
     }
   };
+  
+  //XXX
+  Game_CharacterBase.prototype.changeAnimation = function(RequestedAnimation) {
+  	if (this._CurrentAnimation !== RequestedAnimation) {
+    	this._CurrentAnimation = RequestedAnimation;
+    	var CharacterSheetToLoad = MCAnimation.fileNames[RequestedAnimation]
+    	$gameActors.actor(1).setCharacterImage(CharacterSheetToLoad, 1);    	
+		$gamePlayer.refresh(); 
+	}
+  }
 
   // 地面に降りる
   Game_CharacterBase.prototype.getLand = function(y) {
@@ -1571,6 +1617,7 @@ function Game_Bullet() {
     this._vy = 0;
     this.resetJump();
     this.resetDash();
+    this.changeAnimation(MCAnimation.WALK);
     if (this._ladder) this.getOffLadder();
     this.resetPeak(); // if fallDamage is reimp, delete
   };
@@ -1644,7 +1691,7 @@ function Game_Bullet() {
 
   // ダッシュ（方向指定）
   Game_CharacterBase.prototype.dashFromDirection = function(direction) {
-    var vx = direction === 4 ? -this._dashSpeedX : this._dashSpeedX;
+    var vx = direction === 4 ? -this._dashSpeedX : this._dashSpeedX;	
     var vy = -this._dashSpeedY;
     this.dash(vx, vy);
   };
@@ -1652,14 +1699,17 @@ function Game_Bullet() {
   // ダッシュ（速度指定）
   Game_CharacterBase.prototype.dash = function(vx, vy) {
     if (!this._canDash) return; //block dashing more than once
+    this._canDash = false;
     this._vx = vx;
     this._vy = vy;
     this._dashCount = this._dashCountTime;
     this._moveCount = this._dashCount / 2;
     this.resetStopCount();
     this.straighten();
+    
     AudioManager.playSe(actSeDash);
-    this._canDash = false;
+    //$gamePlayer.requestAnimation(121); //XXX
+    this.changeAnimation(MCAnimation.DASH); 	
   };
 
   // はじかれ
@@ -2288,12 +2338,16 @@ function Game_Bullet() {
       this.resetStopCount();
       this.straighten();
       AudioManager.playSe(actSeJump);
+      
+      this.changeAnimation(MCAnimation.JUMP);
+	  //$gamePlayer.requestAnimation(122); //XXX 
     }
   };
 
   // 壁ジャンプの X 方向処理
   Game_Player.prototype.wallJump = function() {
-    this._vx = this._direction == 4 ? this._moveSpeed : -this._moveSpeed;
+    this._vx = this._direction == 4 ? this._wallJumpSpeed : -this._wallJumpSpeed;
+    //$gamePlayer.requestAnimation(122); //XXX 
     this.setDirection(this.reverseDir(this._direction));
     this.resetPeak();
   };
@@ -2452,7 +2506,8 @@ function Game_Bullet() {
       var characterName   = actor.characterName();
       var characterIndex  = actor.characterIndex();
       var data = actor.actor();
-      this._moveSpeed = +(data.meta['move_speed'] || 0.10);
+      this._moveSpeed = +(data.meta['move_speed'] || 0.065);
+      this._wallJumpSpeed = +(data.meta['wall_jump_speed'] || 0.12);
       this._jumpSpeed = +(data.meta['jump_speed'] || 0.14);
       this._swimSpeed = +(data.meta['swim_speed'] || 0.02);
       this._ladderSpeed = +(data.meta['ladder_speed'] || 0.04);
