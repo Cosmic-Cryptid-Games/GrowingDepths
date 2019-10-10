@@ -2069,8 +2069,8 @@ function Game_Bullet() {
             this._vx = Math.max(this._vx - 0.005, r);
           }
         } else if ($gameSwitches.value(4) == true) {// wind W to E
-          var l = this._moveSpeed * .75;
-          var r = -this._moveSpeed * 2;
+          var l = -this._moveSpeed * .75;
+          var r = this._moveSpeed * 2;
           if(this._vx < l) {
             this._vx =  Math.max(this._vx + 0.005, l);
           } else if (this._vx > r) {
