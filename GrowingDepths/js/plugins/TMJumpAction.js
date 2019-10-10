@@ -1319,7 +1319,7 @@ function Game_Bullet() {
   Game_CharacterBase.prototype.updateMove = function() {
     this.updateGravity();
     this.updateFriction();
-    if ($gameSwitches.value(1) == true) this.updateWind(); // if map has wind then update wind
+    if ($gameSwitches.value(3) == true || $gameSwitches.value(4) == true) this.updateWind(); // if map has wind then update wind
 
     //Track Y from last frame and current frame to be able to tell if traveling downwards
     this._previousY = this._latestY
@@ -1393,7 +1393,11 @@ function Game_Bullet() {
 
   // update wind
   Game_CharacterBase.prototype.updateWind = function() {
-	this._vx -= this._moveSpeed / 50;
+    if($gameSwitches.value(3) == true) {
+      this._vx -= this._moveSpeed / 50; 
+    } else if ($gameSwitches.value(4) == true) {
+      this._vx += this._moveSpeed / 50; 
+    }
   };
 
   // 移動カウントの処理
@@ -2054,22 +2058,31 @@ function Game_Bullet() {
     } else {
       // Adjust so as not to exceed movement speed unless in dash state
       if (!this.isDashing()) {
-	if(!$gameSwitches.value(1) == true) {// wind
-		var n = this.isSwimming() ? this._swimSpeed : this._moveSpeed;
-		if (this._vx < -n) {
-		  this._vx = Math.min(this._vx + 0.005, -n);
-		} else if (this._vx > n) {
-		  this._vx = Math.max(this._vx - 0.005, n);
-		}
-	} else {
-		var r = this._moveSpeed * .75;
-		var l = -this._moveSpeed * 2;
-		if(this._vx < l) {
-			this._vx = this._vx = Math.min(this._vx + 0.005, l);
-		} else if (this._vx > r) {
-			this._vx = Math.max(this._vx - 0.005, r);
-		}
-	}
+        var n = this.isSwimming() ? this._swimSpeed : this._moveSpeed;
+        
+        if($gameSwitches.value(3) == true) { // WIND E TO W
+          var r = this._moveSpeed * .75;
+          var l = -this._moveSpeed * 3;
+          if(this._vx < l) {
+            this._vx = Math.min(this._vx + 0.005, l);
+          } else if (this._vx > r) {
+            this._vx = Math.max(this._vx - 0.005, r);
+          }
+        } else if ($gameSwitches.value(4) == true) {// wind W to E
+          var l = this._moveSpeed * .75;
+          var r = -this._moveSpeed * 2;
+          if(this._vx < l) {
+            this._vx =  Math.max(this._vx + 0.005, l);
+          } else if (this._vx > r) {
+            this._vx = Math.min(this._vx - 0.005, r);
+          }
+        } else { // NO WIND
+          if (this._vx < -n) {
+            this._vx = Math.min(this._vx + 0.005, -n);
+          } else if (this._vx > n) {
+            this._vx = Math.max(this._vx - 0.005, n);
+          }
+        }
       }
       if (this.isLanding()) {
         var n = actFriction;
