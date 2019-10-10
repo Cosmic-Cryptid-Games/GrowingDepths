@@ -1764,7 +1764,6 @@ function Game_Bullet() {
       }
     } else if (battler._actionResult.missed ||
                battler._actionResult.evaded) {
-      this.damaged();
       battler.playMissSe();
     }
     if (battler._actionResult.isStatusAffected()) {
