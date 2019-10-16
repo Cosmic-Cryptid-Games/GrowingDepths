@@ -2100,8 +2100,11 @@ function Game_Bullet() {
           this._vx = 0;
           return;
         case actInstantKillRegion:
-          var battler = this.actor()
-          battler.addState(0001)
+          if ($gameVariables.value(12) == 0) {
+          	$gameVariables.setValue(12, 1);
+          	var battler = this.actor()
+          	battler.addState(0001)
+          }
           break;
         default:
           if (this.isGuarding() && Math.abs(this._vx) > speed) {
