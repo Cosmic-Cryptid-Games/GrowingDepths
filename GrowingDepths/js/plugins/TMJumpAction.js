@@ -2530,7 +2530,7 @@ function Game_Bullet() {
       var characterName   = actor.characterName();
       var characterIndex  = actor.characterIndex();
       var data = actor.actor();
-      this._moveSpeed = +(data.meta['move_speed'] || 0.065);
+      this._moveSpeed = +(data.meta['move_speed'] || 0.085);
       this._wallJumpSpeed = +(data.meta['wall_jump_speed'] || 0.12);
       this._jumpSpeed = +(data.meta['jump_speed'] || 0.14);
       this._swimSpeed = +(data.meta['swim_speed'] || 0.02);
