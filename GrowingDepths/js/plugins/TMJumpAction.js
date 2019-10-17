@@ -3000,7 +3000,7 @@ function Game_Bullet() {
   Sprite_Bullet.prototype = Object.create(Sprite.prototype);
   Sprite_Bullet.prototype.constructor = Sprite_Bullet;
 
-  // 初期化
+  // Initialization
   Sprite_Bullet.prototype.initialize = function(bullet) {
     Sprite.prototype.initialize.call(this);
     this.anchor.x = 0.5;
@@ -3010,7 +3010,7 @@ function Game_Bullet() {
     this._characterIndex = 0;
   };
 
-  // フレーム更新
+  // frame update
   Sprite_Bullet.prototype.update = function() {
     Sprite.prototype.update.call(this);
     this.opacity = this._bullet._opacity;
@@ -3023,7 +3023,7 @@ function Game_Bullet() {
     }
   };
 
-  // 転送元ビットマップの更新
+  // Update source bitmap
   Sprite_Bullet.prototype.updateBitmap = function() {
     if (this.isImageChanged()) {
       this._characterName = this._bullet._characterName;
@@ -3032,7 +3032,7 @@ function Game_Bullet() {
     }
   };
 
-  // グラフィックの変更判定
+  // Graphic change judgment
   Sprite_Bullet.prototype.isImageChanged = function() {
     return this._characterName !== this._bullet.characterName ||
            this._characterIndex !== this._bullet.characterIndex;
@@ -3695,10 +3695,57 @@ function Game_Bullet() {
   // Scene_Map
   //
 
+  var jump_orb1 = new Sprite(new Bitmap(5, 5));
+  var jump_orb2 = new Sprite(new Bitmap(5, 5));
+  var dash_orb = new Sprite(new Bitmap(5, 5));
+
   var _Scene_Map_start = Scene_Map.prototype.start;
   Scene_Map.prototype.start = function() {
     _Scene_Map_start.call(this);
     $gamePlayer.refresh();
+    Scene_Map.prototype.initHud.call();
+
+    this.addChild(jump_orb1);
+    this.addChild(jump_orb2);
+    this.addChild(dash_orb);
+  };
+
+  var Scene_Map_Update = Scene_Map.prototype.update;
+  Scene_Map.prototype.update = function() {
+    Scene_Map_Update.call(this);
+
+    if($gamePlayer._jumpCount == 0) {
+      jump_orb1.visible = false;
+      jump_orb2.visible = false;
+      
+    } else if ($gamePlayer._jumpCount == 1) {
+      jump_orb1.visible = false;
+      jump_orb2.visible = true;
+    } else {
+      jump_orb1.visible = true;
+      jump_orb2.visible = true;
+    }
+
+    if($gamePlayer._dashDelay > 0) {
+      dash_orb.visible = false;
+    } else {
+      dash_orb.visible =true;
+    }
+
+    // if($gamePlayer._dashCount > 0) {
+    //   dash_orb.visible = false;
+    // } else {
+    //   dash_orb.visible =true;
+    // }
+
+    jump_orb1.x = $gamePlayer.screenX() - (jump_orb1.width / 2) - 10; 
+    jump_orb1.y = $gamePlayer.screenY() - (jump_orb1.height / 2) + 10;
+
+    jump_orb2.x = $gamePlayer.screenX() - (jump_orb2.width / 2); 
+    jump_orb2.y = $gamePlayer.screenY() - (jump_orb2.height / 2) + 10;
+
+    dash_orb.x = $gamePlayer.screenX() - (dash_orb.width / 2) + 10; 
+    dash_orb.y = $gamePlayer.screenY() - (dash_orb.height / 2) + 10;
   };
 
   Scene_Base.prototype.checkGameover = function() {
@@ -3707,6 +3754,14 @@ function Game_Bullet() {
   Scene_Map.prototype.processMapTouch = function() {
   };
 
+  Scene_Map.prototype.initHud = function() {
+    
+    jump_orb1.bitmap.fillAll('blue'); 
+    jump_orb2.bitmap.fillAll('blue'); 
+    dash_orb.bitmap.fillAll('red'); 
+
+  };
+  
   //-----------------------------------------------------------------------------
   // Scene_Options
   //
