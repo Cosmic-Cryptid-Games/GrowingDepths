@@ -1921,6 +1921,7 @@ function Game_Bullet() {
     this._shotSeVolume = 0;
     this._shotSePitch = 0;
     this._carryingObject = null;
+    this.jumpInputCountdown = 0;
   };
 
   // 画面中央の X 座標
@@ -2007,6 +2008,12 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
+  
+  	//prevent jumping for a certain while
+  	//remove 1 tick every update frame
+  	if (this.jumpInputCountdown > 0) {
+  		this.jumpInputCountdown = this.jumpInputCountdown - 1;
+  	}
     var lastScrolledX = this.scrolledX();
     var lastScrolledY = this.scrolledY();
     var currentActor = this.actor();
@@ -2334,11 +2341,12 @@ function Game_Bullet() {
         //If you can wall jump, do it, otherwise regular jump (if you can), otherwise exit routine
         if ($gameMap.canWallJump(x, y, this._direction)) {
           this.wallJump();
-        } else if (this._jumpCount > 0) {
+        } else if (this._jumpCount > 0 && this.jumpInputCountdown == 0) {
           this._jumpCount--;
+          this.jumpInputCountdown = 15;
         } else {
           return;
-	}
+	    }
       }
       if (this._ladder) {
         this.getOffLadder();
@@ -2349,12 +2357,13 @@ function Game_Bullet() {
         this._dashCount = this._dashCountTime;
         this._vx = this._direction == 4 ? -this._dashSpeedX : this._dashSpeedX
       }
+      
       this._vy = this.isSwimming() ? -this._swimJump : -this._jumpSpeed;
       this.resetStopCount();
       this.straighten();
       AudioManager.playSe(actSeJump);
-      
       this.changeAnimation(MCAnimation.JUMP);
+      
 	  //$gamePlayer.requestAnimation(122); //XXX 
     }
   };
