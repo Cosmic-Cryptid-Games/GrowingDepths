@@ -1292,7 +1292,7 @@ function Game_Bullet() {
       this.updateStop();
     }
     if (this.isSwimming() !== this._lastSwim) this.updateSwiming();        
-    if (this._needsRefresh) this.refresh();
+    //if (this._needsRefresh) this.refresh();
     if (this.isInvincible()) this._invincibleCount--;
   };
 
