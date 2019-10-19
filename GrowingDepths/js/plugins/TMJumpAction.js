@@ -1292,7 +1292,7 @@ function Game_Bullet() {
       this.updateStop();
     }
     if (this.isSwimming() !== this._lastSwim) this.updateSwiming();        
-    if (this._needsRefresh) this.refresh();
+    //if (this._needsRefresh) this.refresh();
     if (this.isInvincible()) this._invincibleCount--;
   };
 
@@ -2339,7 +2339,7 @@ function Game_Bullet() {
         var y = Math.floor(this._realY);
 
         //If you can wall jump, do it, otherwise regular jump (if you can), otherwise exit routine
-        if ($gameMap.canWallJump(x, y, this._direction)) {
+        if ($gameMap.canWallJump(x, y, this._direction) && this._jumpCount != this._mulchJump) {
           this.wallJump();
         } else if (this._jumpCount > 0 && this.jumpInputCountdown == 0) {
           this._jumpCount--;
@@ -2927,6 +2927,15 @@ function Game_Bullet() {
     } else if (command === 'actPopup') {
       var character = this.character(args[0]);
       if (character) character.setMapPopup(args[1], args[2]);
+      
+    } else if (command === 'nwayShotWithEventID') {
+      console.log("Got nwayShotWithEventID");
+      var character = $gameMap.event(args[9]);
+      if (character && character.isBattler()) {
+        if (!args[8]) args[8] = character.battler().attackSkillId();
+        character.nwayShot(+args[1], +args[2], +args[3], +args[4],
+                           +args[5], +args[6], +args[7], +args[8]);
+      }
     } else if (command === 'nwayShot') {
       var character = this.character(args[0]);
       if (character && character.isBattler()) {
