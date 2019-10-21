@@ -1292,7 +1292,7 @@ function Game_Bullet() {
       this.updateStop();
     }
     if (this.isSwimming() !== this._lastSwim) this.updateSwiming();        
-    if (this._needsRefresh) this.refresh();
+    //if (this._needsRefresh) this.refresh();
     if (this.isInvincible()) this._invincibleCount--;
   };
 
@@ -1921,6 +1921,7 @@ function Game_Bullet() {
     this._shotSeVolume = 0;
     this._shotSePitch = 0;
     this._carryingObject = null;
+    this.jumpInputCountdown = 0;
   };
 
   // 画面中央の X 座標
@@ -2007,6 +2008,12 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
+  
+  	//prevent jumping for a certain while
+  	//remove 1 tick every update frame
+  	if (this.jumpInputCountdown > 0) {
+  		this.jumpInputCountdown = this.jumpInputCountdown - 1;
+  	}
     var lastScrolledX = this.scrolledX();
     var lastScrolledY = this.scrolledY();
     var currentActor = this.actor();
@@ -2100,8 +2107,11 @@ function Game_Bullet() {
           this._vx = 0;
           return;
         case actInstantKillRegion:
-          var battler = this.actor()
-          battler.addState(0001)
+          if ($gameVariables.value(12) == 0) {
+          	$gameVariables.setValue(12, 1);
+          	var battler = this.actor()
+          	battler.addState(0001)
+          }
           break;
         default:
           if (this.isGuarding() && Math.abs(this._vx) > speed) {
@@ -2329,13 +2339,14 @@ function Game_Bullet() {
         var y = Math.floor(this._realY);
 
         //If you can wall jump, do it, otherwise regular jump (if you can), otherwise exit routine
-        if ($gameMap.canWallJump(x, y, this._direction)) {
+        if ($gameMap.canWallJump(x, y, this._direction) && this._jumpCount != this._mulchJump) {
           this.wallJump();
-        } else if (this._jumpCount > 0) {
+        } else if (this._jumpCount > 0 && this.jumpInputCountdown == 0) {
           this._jumpCount--;
+          this.jumpInputCountdown = 15;
         } else {
           return;
-	}
+	    }
       }
       if (this._ladder) {
         this.getOffLadder();
@@ -2346,12 +2357,13 @@ function Game_Bullet() {
         this._dashCount = this._dashCountTime;
         this._vx = this._direction == 4 ? -this._dashSpeedX : this._dashSpeedX
       }
+      
       this._vy = this.isSwimming() ? -this._swimJump : -this._jumpSpeed;
       this.resetStopCount();
       this.straighten();
       AudioManager.playSe(actSeJump);
-      
       this.changeAnimation(MCAnimation.JUMP);
+      
 	  //$gamePlayer.requestAnimation(122); //XXX 
     }
   };
@@ -2915,6 +2927,15 @@ function Game_Bullet() {
     } else if (command === 'actPopup') {
       var character = this.character(args[0]);
       if (character) character.setMapPopup(args[1], args[2]);
+      
+    } else if (command === 'nwayShotWithEventID') {
+      console.log("Got nwayShotWithEventID");
+      var character = $gameMap.event(args[9]);
+      if (character && character.isBattler()) {
+        if (!args[8]) args[8] = character.battler().attackSkillId();
+        character.nwayShot(+args[1], +args[2], +args[3], +args[4],
+                           +args[5], +args[6], +args[7], +args[8]);
+      }
     } else if (command === 'nwayShot') {
       var character = this.character(args[0]);
       if (character && character.isBattler()) {
