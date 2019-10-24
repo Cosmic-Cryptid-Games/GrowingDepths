@@ -553,7 +553,7 @@ function Game_Bullet() {
 
   var parameters = PluginManager.parameters('TMJumpAction');
 
-  var deathCaseControlVariable = +(parameters['caseControlVariable'] || 12);
+  var deathCaseControlVariable = +(parameters['caseControlVariable'] || 4);
   var actGravity = +(parameters['gravity'] || 0.004);
   var actFriction = +(parameters['friction'] || 0.001);
   var actStepsForTurn = +(parameters['stepsForTurn'] || 20);
@@ -1158,7 +1158,7 @@ function Game_Bullet() {
   var _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
-    
+
     this._CurrentAnimation = MCAnimation.WALK;
     this._needsRefresh = false;
     this._mapPopups = [];
@@ -1293,7 +1293,7 @@ function Game_Bullet() {
     } else {
       this.updateStop();
     }
-    if (this.isSwimming() !== this._lastSwim) this.updateSwiming();        
+    if (this.isSwimming() !== this._lastSwim) this.updateSwiming();
     //if (this._needsRefresh) this.refresh();
     if (this.isInvincible()) this._invincibleCount--;
   };
@@ -1309,9 +1309,9 @@ function Game_Bullet() {
     var th = $gameMap.tileHeight();
     return Math.round(this.scrolledY() * th);
   };
-  
+
   //If the player is dashing, then I don't care if they are falling
-  //otherwise, check if the current Y position is less than the Y 
+  //otherwise, check if the current Y position is less than the Y
   //position in the previous frame
   Game_CharacterBase.prototype.isFalling = function() {
   	return !this.isDashing() && this._previousY < this._latestY;
@@ -1326,12 +1326,12 @@ function Game_Bullet() {
     //Track Y from last frame and current frame to be able to tell if traveling downwards
     this._previousY = this._latestY
     this._latestY = Math.floor(this._realY);
-    
+
     //"if travelling downwards, change character image"
     if (this.isFalling()) {
     	this.changeAnimation(MCAnimation.FALLING);
     }
-    
+
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
       if (this._through) {
@@ -1364,7 +1364,7 @@ function Game_Bullet() {
 
       this._y = Math.floor(this._realY);
       this._lastY = Math.floor(this._realY);
-    
+
     }
   };
 
@@ -1396,9 +1396,9 @@ function Game_Bullet() {
   // update wind
   Game_CharacterBase.prototype.updateWind = function() {
     if($gameSwitches.value(3) == true) {
-      this._vx -= this._moveSpeed / 50; 
+      this._vx -= this._moveSpeed / 50;
     } else if ($gameSwitches.value(4) == true) {
-      this._vx += this._moveSpeed / 50; 
+      this._vx += this._moveSpeed / 50;
     }
   };
 
@@ -1606,14 +1606,14 @@ function Game_Bullet() {
       this.checkEventTriggerCollide(id);
     }
   };
-  
+
   //XXX
   Game_CharacterBase.prototype.changeAnimation = function(RequestedAnimation) {
   	if (this._CurrentAnimation !== RequestedAnimation) {
     	this._CurrentAnimation = RequestedAnimation;
     	var CharacterSheetToLoad = MCAnimation.fileNames[RequestedAnimation]
-    	$gameActors.actor(1).setCharacterImage(CharacterSheetToLoad, 1);    	
-		$gamePlayer.refresh(); 
+    	$gameActors.actor(1).setCharacterImage(CharacterSheetToLoad, 1);
+		$gamePlayer.refresh();
 	}
   }
 
@@ -1697,7 +1697,7 @@ function Game_Bullet() {
 
   // ダッシュ（方向指定）
   Game_CharacterBase.prototype.dashFromDirection = function(direction) {
-    var vx = direction === 4 ? -this._dashSpeedX : this._dashSpeedX;	
+    var vx = direction === 4 ? -this._dashSpeedX : this._dashSpeedX;
     var vy = -this._dashSpeedY;
     this.dash(vx, vy);
   };
@@ -1712,10 +1712,10 @@ function Game_Bullet() {
     this._moveCount = this._dashCount / 2;
     this.resetStopCount();
     this.straighten();
-    
+
     AudioManager.playSe(actSeDash);
     //$gamePlayer.requestAnimation(122); //XXX
-    this.changeAnimation(MCAnimation.DASH); 	
+    this.changeAnimation(MCAnimation.DASH);
   };
 
   // はじかれ
@@ -2010,20 +2010,20 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
-  
+
   	//prevent jumping for a certain while
   	//remove 1 tick every update frame
   	if (this.jumpInputCountdown > 0) {
   		this.jumpInputCountdown = this.jumpInputCountdown - 1;
   	}
-  	
+
   	//If the player is in the enemy aggression region, set a variable, otherwise unset it
   	if ($gameMap.regionId($gamePlayer.x, $gamePlayer.y) === actEnemyAngerRegion) {
     	$gameVariables.setValue(9, 1);
     } else {
     	$gameVariables.setValue(9, 0);
     }
-    
+
     var lastScrolledX = this.scrolledX();
     var lastScrolledY = this.scrolledY();
     var currentActor = this.actor();
@@ -2075,7 +2075,7 @@ function Game_Bullet() {
       // Adjust so as not to exceed movement speed unless in dash state
       if (!this.isDashing()) {
         var n = this.isSwimming() ? this._swimSpeed : this._moveSpeed;
-        
+
         if($gameSwitches.value(3) == true) { // WIND E TO W
           var r = this._moveSpeed * .75;
           var l = -this._moveSpeed * 3;
@@ -2367,21 +2367,21 @@ function Game_Bullet() {
         this._dashCount = this._dashCountTime;
         this._vx = this._direction == 4 ? -this._dashSpeedX : this._dashSpeedX
       }
-      
+
       this._vy = this.isSwimming() ? -this._swimJump : -this._jumpSpeed;
       this.resetStopCount();
       this.straighten();
       AudioManager.playSe(actSeJump);
       this.changeAnimation(MCAnimation.JUMP);
-      
-	  //$gamePlayer.requestAnimation(122); //XXX 
+
+	  //$gamePlayer.requestAnimation(122); //XXX
     }
   };
 
   // 壁ジャンプの X 方向処理
   Game_Player.prototype.wallJump = function() {
     this._vx = this._direction == 4 ? this._wallJumpSpeed : -this._wallJumpSpeed;
-    //$gamePlayer.requestAnimation(122); //XXX 
+    //$gamePlayer.requestAnimation(122); //XXX
     this.setDirection(this.reverseDir(this._direction));
     this.resetPeak();
   };
@@ -2937,7 +2937,7 @@ function Game_Bullet() {
     } else if (command === 'actPopup') {
       var character = this.character(args[0]);
       if (character) character.setMapPopup(args[1], args[2]);
-      
+
     } else if (command === 'nwayShotWithEventID') {
       console.log("Got nwayShotWithEventID");
       var character = $gameMap.event(args[9]);
