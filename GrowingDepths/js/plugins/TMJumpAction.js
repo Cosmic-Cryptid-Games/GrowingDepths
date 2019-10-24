@@ -2123,13 +2123,6 @@ function Game_Bullet() {
           	battler.addState(0001)
           }
           break;
-          
-        //XXX
-        case actEnemyAngerRegion:
-          if ($gameVariables.value(9) == 0) {
-          	$gameVariables.setValue(9, 1);
-          }
-          break;
         default:
           if (this.isGuarding() && Math.abs(this._vx) > speed) {
             this._vx = this._vx > 0 ? speed : -speed;
