@@ -553,6 +553,7 @@ function Game_Bullet() {
 
   var parameters = PluginManager.parameters('TMJumpAction');
 
+  var deathCaseControlVariable = +(parameters['caseControlVariable'] || 12);
   var actGravity = +(parameters['gravity'] || 0.004);
   var actFriction = +(parameters['friction'] || 0.001);
   var actStepsForTurn = +(parameters['stepsForTurn'] || 20);
@@ -570,6 +571,7 @@ function Game_Bullet() {
   var actRoughFloorRegion = +(parameters['roughFloorRegion'] || 64);
   var actMarshFloorRegion = +(parameters['marshFloorRegion'] || 65);
   var actInstantKillRegion = +(parameters['instantKillRegion'] || 66);
+  var actEnemyAngerRegion = +(parameters['enemyAngerRegion'] || 236);
   var actWaterTerrainTag = +(parameters['waterTerrainTag'] || 1);
   var actLevelupPopup = parameters['levelupPopup'];
   var actLevelupAnimationId = +(parameters['levelupAnimationId'] || 0);
@@ -2014,6 +2016,14 @@ function Game_Bullet() {
   	if (this.jumpInputCountdown > 0) {
   		this.jumpInputCountdown = this.jumpInputCountdown - 1;
   	}
+  	
+  	//If the player is in the enemy aggression region, set a variable, otherwise unset it
+  	if ($gameMap.regionId($gamePlayer.x, $gamePlayer.y) === actEnemyAngerRegion) {
+    	$gameVariables.setValue(9, 1);
+    } else {
+    	$gameVariables.setValue(9, 0);
+    }
+    
     var lastScrolledX = this.scrolledX();
     var lastScrolledY = this.scrolledY();
     var currentActor = this.actor();
@@ -2107,8 +2117,8 @@ function Game_Bullet() {
           this._vx = 0;
           return;
         case actInstantKillRegion:
-          if ($gameVariables.value(12) == 0) {
-          	$gameVariables.setValue(12, 1);
+          if ($gameVariables.value(deathCaseControlVariable) == 0) {
+          	$gameVariables.setValue(deathCaseControlVariable, 1);
           	var battler = this.actor()
           	battler.addState(0001)
           }
