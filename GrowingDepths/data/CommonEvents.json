@@ -1,7 +1,7 @@
 [
 null,
 {"id":1,"list":[{"code":221,"indent":0,"parameters":[]},{"code":311,"indent":0,"parameters":[0,0,0,0,1,false]},{"code":201,"indent":0,"parameters":[0,4,9,8,2,2]},{"code":355,"indent":0,"parameters":["$gamePlayer.reserveTransfer($gameVariables.value(0001), $gameVariables.value(0002), $gameVariables.value(0003), 2, 2);"]},{"code":222,"indent":0,"parameters":[]},{"code":108,"indent":0,"parameters":["Make the player available to be killed again"]},{"code":122,"indent":0,"parameters":[4,4,0,0,0]},{"code":0,"indent":0,"parameters":[]}],"name":"After Game Over","switchId":1,"trigger":0},
-{"id":2,"list":[{"code":122,"indent":0,"parameters":[14,14,0,3,5,-1,0]},{"code":122,"indent":0,"parameters":[15,15,0,3,5,-1,1]},{"code":285,"indent":0,"parameters":[16,6,1,14,15]},{"code":0,"indent":0,"parameters":[]}],"name":"Player Region","switchId":1,"trigger":0},
+{"id":2,"list":[{"code":122,"indent":0,"parameters":[5,5,0,3,5,-1,0]},{"code":122,"indent":0,"parameters":[6,6,0,3,5,-1,1]},{"code":285,"indent":0,"parameters":[7,6,1,5,6]},{"code":0,"indent":0,"parameters":[]}],"name":"Player Region","switchId":1,"trigger":0},
 {"id":3,"list":[{"code":355,"indent":0,"parameters":["var key = [$gameVariables.value(1), $gameVariables.value(17), 'A']"]},{"code":655,"indent":0,"parameters":["$gameSelfSwitches.setValue(key, true)"]},{"code":0,"indent":0,"parameters":[]}],"name":"Mushroom","switchId":1,"trigger":0},
 {"id":4,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0}
 ]
