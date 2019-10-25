@@ -553,7 +553,8 @@ function Game_Bullet() {
 
   var parameters = PluginManager.parameters('TMJumpAction');
 
-  var deathCaseControlVariable = +(parameters['caseControlVariable'] || 4);
+  var deathCaseControlVariable = +(parameters['deathCaseControlVariable'] || 4);
+  var enemyAggressionVariable = +(parameters['enemyAggressionVariable'] || 9);
   var actGravity = +(parameters['gravity'] || 0.004);
   var actFriction = +(parameters['friction'] || 0.001);
   var actStepsForTurn = +(parameters['stepsForTurn'] || 20);
@@ -2007,22 +2008,45 @@ function Game_Bullet() {
       }
     }
   };
-
+  
+  //if the player is in the enemy aggression region, let the enemies know
+  //if the player is in the instant death region, kill them
+  Game_Player.prototype.checkPlayerRegionOverlap = function(x, y) {
+    var playerRegionID = $gameMap.regionId(x, y);
+  
+  	//If the player is in the enemy aggression region, set enemyAggressionVariable to 1
+  	//otherwise set it to 0
+  	if (playerRegionID === actEnemyAngerRegion) {
+    	$gameVariables.setValue(enemyAggressionVariable, 1);
+    } else {
+    	$gameVariables.setValue(enemyAggressionVariable, 0);
+    }
+    
+    //If the player is in the death region, then kill them
+  	if (playerRegionID === actInstantKillRegion) {
+  	
+  		//prevent double death by setting deathCaseControlVariable to 1.  The common event
+  		//sets the deathCaseControlVariable back to 0 once it finishes respawning
+  		//the player, meaning that there's no way this "if" statement will be entered more
+  		//than once per death
+    	if ($gameVariables.value(deathCaseControlVariable) == 0) {
+          	$gameVariables.setValue(deathCaseControlVariable, 1);
+          	var battler = this.actor()
+          	battler.addState(0001)
+        }
+    }
+  }
+  
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
+  
+  	this.checkPlayerRegionOverlap($gamePlayer.x, $gamePlayer.y);
 
   	//prevent jumping for a certain while
   	//remove 1 tick every update frame
   	if (this.jumpInputCountdown > 0) {
   		this.jumpInputCountdown = this.jumpInputCountdown - 1;
   	}
-
-  	//If the player is in the enemy aggression region, set a variable, otherwise unset it
-  	if ($gameMap.regionId($gamePlayer.x, $gamePlayer.y) === actEnemyAngerRegion) {
-    	$gameVariables.setValue(9, 1);
-    } else {
-    	$gameVariables.setValue(9, 0);
-    }
 
     var lastScrolledX = this.scrolledX();
     var lastScrolledY = this.scrolledY();
