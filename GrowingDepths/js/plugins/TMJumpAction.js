@@ -1160,6 +1160,7 @@ function Game_Bullet() {
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
 
+	this.mushroomSet = {};
     this._CurrentAnimation = MCAnimation.WALK;
     this._needsRefresh = false;
     this._mapPopups = [];
@@ -1894,6 +1895,32 @@ function Game_Bullet() {
   Game_Character.prototype.nallAim = function(n, angle, speed, count, type, index, skillId) {
     var a = angle + this.angleToPlayer()
     this.nallShot(n, a, speed, count, type, index, skillId);
+  };
+  
+  /*
+  adds a mushroom to the set after checking that it hasn't already been collected and 
+  plays the collection sound.
+  It adds the mushroom by identifying it with a key built by the following:
+  	"locationName,x,y", 
+  	
+  	so by example: 
+  	trackMushroom("LightForest 1", 1, 2); 
+  	
+  	will use the key
+  	"LightForest 1,1,2"
+  
+  parameters:
+  	locationName: Name of Current Map
+  	x: x position of the mushroom
+  	y: y position of the mushroom
+  */
+  Game_Character.prototype.trackMushroom = function(locationName, x, y) {
+  	console.log("trackMushroom called");// with ", locationName, x, y);
+    const key = locationName.concat(",", x, ",", y);
+  	if (key in this.mushroomSet) return;
+  	console.log("adding a key");
+  	this.mushroomSet[key] = true;
+  	console.log(this.mushroomSet);
   };
 
   //-----------------------------------------------------------------------------
@@ -2893,6 +2920,11 @@ function Game_Bullet() {
   //-----------------------------------------------------------------------------
   // Game_Interpreter
   //
+  var _Game_Interpreter_initialize = Game_Interpreter.prototype.initialize;
+  Game_Interpreter.prototype.initialize = function(mapId, eventId) {
+    _Game_Interpreter_initialize.call(this);
+    this.mushroomSet = {};
+  };
 
   // イベントの位置変更
   Game_Interpreter.prototype.command203 = function() {
@@ -2920,12 +2952,47 @@ function Game_Bullet() {
     if (!$gameParty.inBattle()) $gamePlayer.requestRefresh();
     return true;
   };
-
+  
+  Game_Interpreter.prototype.testFunc = function() {
+  	console.log("testFunc called");
+  };
+  
+  /*
+  adds a mushroom to the set after checking that it hasn't already been collected and 
+  plays the collection sound.
+  It adds the mushroom by identifying it with a key built by the following:
+  	"locationName,x,y", 
+  	
+  	so by example: 
+  	trackMushroom("LightForest 1", 1, 2); 
+  	
+  	will use the key
+  	"LightForest 1,1,2"
+  
+  parameters:
+  	locationName: Name of Current Map
+  	x: x position of the mushroom
+  	y: y position of the mushroom
+  */
+  Game_Interpreter.prototype.trackMushroom = function(locationName, x, y) {
+  	console.log("trackMushroom called");// with ", locationName, x, y);
+  	console.log("trackMushroom called with ", locationName, x, y);
+    const key = locationName.concat(",", x, ",", y);
+  	if (key in this.mushroomSet) return;
+  	console.log("adding a key");
+  	this.mushroomSet[key] = true;
+  	console.log(this.mushroomSet);
+  };
+  
   // プラグインコマンド
   var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
-    if (command === 'actGainHp') {
+    if (command === "testFunc") {
+    	this.testFunc();
+    	console.log("TestFUNCCCC");
+    	
+    } else if (command === 'actGainHp') {
       var character = this.character(args[0]);
       if (character && character.isBattler()) {
         character.battler().clearResult();
