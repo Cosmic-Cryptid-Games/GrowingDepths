@@ -1714,7 +1714,6 @@ function Game_Bullet() {
     this.resetStopCount();
     this.straighten();
 
-	console.log(actSeDash);
     AudioManager.playSe(actSeDash);
     //$gamePlayer.requestAnimation(122); //XXX
     this.changeAnimation(MCAnimation.DASH);
@@ -2925,10 +2924,6 @@ function Game_Bullet() {
     _Game_Interpreter_command319.call(this);
     if (!$gameParty.inBattle()) $gamePlayer.requestRefresh();
     return true;
-  };
-  
-  Game_Interpreter.prototype.testFunc = function() {
-  	console.log("testFunc called");
   };
   
   /*
