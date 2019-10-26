@@ -1348,7 +1348,7 @@ function Game_Bullet() {
     this._latestY = Math.floor(this._realY);
     
     //"if travelling downwards and not able to wall jump, change character image"
-    if (this.isFalling() && !this.currentlyCanWallJump()) {//this._CurrentAnimation != MCAnimation.WALLSLIDE) {
+    if (this.isFalling() && !this.currentlyCanWallJump()) {
     	this.changeAnimation(MCAnimation.FALLING);
     }
 
