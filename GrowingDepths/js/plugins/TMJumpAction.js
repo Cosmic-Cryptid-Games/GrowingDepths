@@ -2948,7 +2948,7 @@ function Game_Bullet() {
   	y: y position of the mushroom
   */
   Game_Interpreter.prototype.trackMushroom = function(locationName, x, y) {
-  	console.log("trackMushroom called with loc=", locationName, " x=", x, " and y=" y);
+  	console.log("trackMushroom called with loc=", locationName, " x=", x, " and y=", y);
   	const loc = locationName.toString();
     const key = loc.concat(",", x, ",", y);
   	if (key in this.mushroomSet) return;
