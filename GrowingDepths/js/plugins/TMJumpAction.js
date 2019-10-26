@@ -1160,7 +1160,6 @@ function Game_Bullet() {
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
 
-	this.mushroomSet = {};
     this._CurrentAnimation = MCAnimation.WALK;
     this._needsRefresh = false;
     this._mapPopups = [];
@@ -1895,32 +1894,6 @@ function Game_Bullet() {
   Game_Character.prototype.nallAim = function(n, angle, speed, count, type, index, skillId) {
     var a = angle + this.angleToPlayer()
     this.nallShot(n, a, speed, count, type, index, skillId);
-  };
-  
-  /*
-  adds a mushroom to the set after checking that it hasn't already been collected and 
-  plays the collection sound.
-  It adds the mushroom by identifying it with a key built by the following:
-  	"locationName,x,y", 
-  	
-  	so by example: 
-  	trackMushroom("LightForest 1", 1, 2); 
-  	
-  	will use the key
-  	"LightForest 1,1,2"
-  
-  parameters:
-  	locationName: Name of Current Map
-  	x: x position of the mushroom
-  	y: y position of the mushroom
-  */
-  Game_Character.prototype.trackMushroom = function(locationName, x, y) {
-  	console.log("trackMushroom called");// with ", locationName, x, y);
-    const key = locationName.concat(",", x, ",", y);
-  	if (key in this.mushroomSet) return;
-  	console.log("adding a key");
-  	this.mushroomSet[key] = true;
-  	console.log(this.mushroomSet);
   };
 
   //-----------------------------------------------------------------------------
@@ -2975,12 +2948,11 @@ function Game_Bullet() {
   	y: y position of the mushroom
   */
   Game_Interpreter.prototype.trackMushroom = function(locationName, x, y) {
-  	console.log("trackMushroom called");// with ", locationName, x, y);
-  	console.log("trackMushroom called with ", locationName, x, y);
+  	console.log("trackMushroom called with loc=", locationName, " x=", x, " and y=" y);
   	const loc = locationName.toString();
     const key = loc.concat(",", x, ",", y);
   	if (key in this.mushroomSet) return;
-  	console.log("adding a key");
+  	console.log("adding key:", key);
   	this.mushroomSet[key] = true;
   	console.log(this.mushroomSet);
   };
@@ -2990,7 +2962,6 @@ function Game_Bullet() {
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
     if (command === "trackMushroom") {
-    	console.log("TrackMUSHHH");
     	this.trackMushroom(args[0], args[1], args[2]);
     	
     } else if (command === 'actGainHp') {
