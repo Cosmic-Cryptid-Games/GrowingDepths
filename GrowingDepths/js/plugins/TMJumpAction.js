@@ -2977,7 +2977,8 @@ function Game_Bullet() {
   Game_Interpreter.prototype.trackMushroom = function(locationName, x, y) {
   	console.log("trackMushroom called");// with ", locationName, x, y);
   	console.log("trackMushroom called with ", locationName, x, y);
-    const key = locationName.concat(",", x, ",", y);
+  	const loc = locationName.toString();
+    const key = loc.concat(",", x, ",", y);
   	if (key in this.mushroomSet) return;
   	console.log("adding a key");
   	this.mushroomSet[key] = true;
@@ -2988,9 +2989,9 @@ function Game_Bullet() {
   var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
-    if (command === "testFunc") {
-    	this.testFunc();
-    	console.log("TestFUNCCCC");
+    if (command === "trackMushroom") {
+    	console.log("TrackMUSHHH");
+    	this.trackMushroom(args[0], args[1], args[2]);
     	
     } else if (command === 'actGainHp') {
       var character = this.character(args[0]);
