@@ -1714,6 +1714,7 @@ function Game_Bullet() {
     this.resetStopCount();
     this.straighten();
 
+	console.log(actSeDash);
     AudioManager.playSe(actSeDash);
     //$gamePlayer.requestAnimation(122); //XXX
     this.changeAnimation(MCAnimation.DASH);
@@ -2934,27 +2935,38 @@ function Game_Bullet() {
   adds a mushroom to the set after checking that it hasn't already been collected and 
   plays the collection sound.
   It adds the mushroom by identifying it with a key built by the following:
-  	"locationName,x,y", 
+  	"locationID,x,y", 
   	
-  	so by example: 
-  	trackMushroom("LightForest 1", 1, 2); 
+  	so by example: Map012, x=1, y=2
+  	trackMushroom(12, 1, 2); 
   	
   	will use the key
-  	"LightForest 1,1,2"
+  	"12,1,2"
   
   parameters:
-  	locationName: Name of Current Map
+  	locationID: ID of Current Map
   	x: x position of the mushroom
   	y: y position of the mushroom
   */
-  Game_Interpreter.prototype.trackMushroom = function(locationName, x, y) {
-  	console.log("trackMushroom called with loc=", locationName, " x=", x, " and y=", y);
-  	const loc = locationName.toString();
+  Game_Interpreter.prototype.trackMushroom = function(locationID, x, y) {
+  	console.log("trackMushroom called with locationID=", locationID, " x=", x, " and y=", y);
+  	const loc = locationID.toString();
     const key = loc.concat(",", x, ",", y);
   	if (key in this.mushroomSet) return;
   	console.log("adding key:", key);
   	this.mushroomSet[key] = true;
   	console.log(this.mushroomSet);
+  	
+  	//play sound
+  	mushroomCollectionSound = {
+  		volume:50,
+  		pitch:100,
+  		pan:0,
+  		name:"MushroomCollect"
+  	}
+  	
+  	console.log("ding!");
+  	AudioManager.playSe(mushroomCollectionSound);
   };
   
   // プラグインコマンド
