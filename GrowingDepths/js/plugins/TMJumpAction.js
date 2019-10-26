@@ -1159,7 +1159,8 @@ function Game_Bullet() {
   var _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
-
+    
+	this._playerHasJumped = false;
     this._CurrentAnimation = MCAnimation.WALK;
     this._needsRefresh = false;
     this._mapPopups = [];
@@ -1312,10 +1313,16 @@ function Game_Bullet() {
   };
 
   //If the player is dashing, then I don't care if they are falling
-  //otherwise, check if the current Y position is less than the Y
-  //position in the previous frame
+  //otherwise, check if the player is idle or has jumped and also use 
+  //their downwards velocity 
   Game_CharacterBase.prototype.isFalling = function() {
-  	return !this.isDashing() && this._previousY < this._latestY;
+  	//if the player has jumped, then the threshold for traveling downwards is >0.025
+  	//if they are standing still or falling from a ledge, the threshold is >0.085
+  	return !this.isDashing() && 
+  		(
+  			(this._playerHasJumped && this._vy > 0.025) ||
+  			(this._vy > 0.085)
+  		);  	
   }
 
   // move processing
@@ -1323,15 +1330,6 @@ function Game_Bullet() {
     this.updateGravity();
     this.updateFriction();
     if ($gameSwitches.value(3) == true || $gameSwitches.value(4) == true) this.updateWind(); // if map has wind then update wind
-
-    //Track Y from last frame and current frame to be able to tell if traveling downwards
-    this._previousY = this._latestY
-    this._latestY = Math.floor(this._realY);
-
-    //"if travelling downwards, change character image"
-    if (this.isFalling()) {
-    	this.changeAnimation(MCAnimation.FALLING);
-    }
 
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
@@ -1357,6 +1355,10 @@ function Game_Bullet() {
         if (this._vy > 0) {
           this.collideMapDown();
           this.collideCharacterDown();
+          //"if travelling downwards, change character image"
+          if (this.isFalling()) {
+    	    this.changeAnimation(MCAnimation.FALLING);
+          }
         } else {
           this.collideMapUp();
           this.collideCharacterUp();
@@ -1625,6 +1627,7 @@ function Game_Bullet() {
     this.resetJump();
     this.resetDash();
     this.changeAnimation(MCAnimation.WALK);
+    this._playerHasJumped = false;
     if (this._ladder) this.getOffLadder();
     this.resetPeak(); // if fallDamage is reimp, delete
   };
@@ -2378,6 +2381,7 @@ function Game_Bullet() {
         } else if (this._jumpCount > 0 && this.jumpInputCountdown == 0) {
           this._jumpCount--;
           this.jumpInputCountdown = 15;
+          this._playerHasJumped = true;
         } else {
           return;
 	    }
@@ -2893,6 +2897,11 @@ function Game_Bullet() {
   //-----------------------------------------------------------------------------
   // Game_Interpreter
   //
+  var _Game_Interpreter_initialize = Game_Interpreter.prototype.initialize;
+  Game_Interpreter.prototype.initialize = function(mapId, eventId) {
+    _Game_Interpreter_initialize.call(this);
+    this.mushroomSet = {};
+  };
 
   // イベントの位置変更
   Game_Interpreter.prototype.command203 = function() {
@@ -2920,12 +2929,53 @@ function Game_Bullet() {
     if (!$gameParty.inBattle()) $gamePlayer.requestRefresh();
     return true;
   };
-
+  
+  /*
+  adds a mushroom to the set after checking that it hasn't already been collected and 
+  plays the collection sound.
+  It adds the mushroom by identifying it with a key built by the following:
+  	"locationID,x,y", 
+  	
+  	so by example: Map012, x=1, y=2
+  	trackMushroom(12, 1, 2); 
+  	
+  	will use the key
+  	"12,1,2"
+  
+  parameters:
+  	locationID: ID of Current Map
+  	x: x position of the mushroom
+  	y: y position of the mushroom
+  */
+  Game_Interpreter.prototype.trackMushroom = function(locationID, x, y) {
+  	console.log("trackMushroom called with locationID=", locationID, " x=", x, " and y=", y);
+  	const loc = locationID.toString();
+    const key = loc.concat(",", x, ",", y);
+  	if (key in this.mushroomSet) return;
+  	console.log("adding key:", key);
+  	this.mushroomSet[key] = true;
+  	console.log(this.mushroomSet);
+  	
+  	//play sound
+  	mushroomCollectionSound = {
+  		volume:50,
+  		pitch:100,
+  		pan:0,
+  		name:"MushroomCollect"
+  	}
+  	
+  	console.log("ding!");
+  	AudioManager.playSe(mushroomCollectionSound);
+  };
+  
   // プラグインコマンド
   var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
-    if (command === 'actGainHp') {
+    if (command === "trackMushroom") {
+    	this.trackMushroom(args[0], args[1], args[2]);
+    	
+    } else if (command === 'actGainHp') {
       var character = this.character(args[0]);
       if (character && character.isBattler()) {
         character.battler().clearResult();
