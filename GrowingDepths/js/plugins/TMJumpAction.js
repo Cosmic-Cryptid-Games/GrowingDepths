@@ -492,11 +492,13 @@ var MCAnimation = {
   JUMP: 2,
   DASH: 3,
   FALLING: 4,
+  WALLSLIDE: 5,
   fileNames: {
     1: "$MCWalk%(6 0 1 2 3 4 5)", //WALK
     2: "$JumpMC%(6 0 1 2 3 4 5)", //JUMP
     3: "$DashMC%(6 0 1 2 3 4 5)", //DASH
     4: "$FallMC%(6 0 1 2 3 4 5)", //FALL
+    5: "$OwlDive%(6 0 1 2 3 4 5)", //WALLSLIDE
   }
 };
 
@@ -1324,12 +1326,38 @@ function Game_Bullet() {
   			(this._vy > 0.085)
   		);  	
   }
+  
+  //gets the player's x and y coordinates
+  Game_CharacterBase.prototype.getWallJumpCalculations = function(x,y) {
+    if (this._direction == 4) {
+      var x = Math.floor(this._realX - this._collideW - 0.16);
+	} else {
+      var x = Math.floor(this._realX + this._collideW + 0.16);
+    }
+    var y = Math.floor(this._realY);
+    return { x: x, y: y };
+  }
+  
+  //checks if the player is against a wall and has 1 less than their max jumps
+  Game_CharacterBase.prototype.currentlyCanWallJump = function() {
+  	let {x, y} = this.getWallJumpCalculations();
+    return $gameMap.canWallJump(x, y, this._direction) && this._jumpCount != this._mulchJump;
+  }
 
   // move processing
   Game_CharacterBase.prototype.updateMove = function() {
     this.updateGravity();
     this.updateFriction();
     if ($gameSwitches.value(3) == true || $gameSwitches.value(4) == true) this.updateWind(); // if map has wind then update wind
+
+    //Track Y from last frame and current frame to be able to tell if traveling downwards
+    this._previousY = this._latestY
+    this._latestY = Math.floor(this._realY);
+    
+    //"if travelling downwards and not able to wall jump, change character image"
+    if (this.isFalling() && !this.currentlyCanWallJump()) {
+    	this.changeAnimation(MCAnimation.FALLING);
+    }
 
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
@@ -2049,6 +2077,10 @@ function Game_Bullet() {
   	if (this.jumpInputCountdown > 0) {
   		this.jumpInputCountdown = this.jumpInputCountdown - 1;
   	}
+  	
+  	if (this.currentlyCanWallJump()) {
+  		this.changeAnimation(MCAnimation.WALLSLIDE);
+  	}
 
     var lastScrolledX = this.scrolledX();
     var lastScrolledY = this.scrolledY();
@@ -2388,16 +2420,10 @@ function Game_Bullet() {
         this._jumpCount--;
       } else {
 
-        //calculations for wall jumping
-        if (this._direction == 4) {
-          var x = Math.floor(this._realX - this._collideW - 0.16);
-        } else {
-          var x = Math.floor(this._realX + this._collideW + 0.16);
-        }
-        var y = Math.floor(this._realY);
-
-        //If you can wall jump, do it, otherwise regular jump (if you can), otherwise exit routine
-        if ($gameMap.canWallJump(x, y, this._direction) && this._jumpCount != this._mulchJump) {
+		//If you can wall jump, do it, (means you have used 1 jump and you're against a wall)
+		//otherwise regular jump (if you can), 
+		//otherwise exit routine
+        if (this.currentlyCanWallJump()) {
           this.wallJump();
         } else if (this._jumpCount > 0 && this.jumpInputCountdown == 0) {
           this._jumpCount--;
