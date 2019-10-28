@@ -1610,7 +1610,6 @@ function Game_Bullet() {
     }
   };
 
-  //XXX
   Game_CharacterBase.prototype.changeAnimation = function(RequestedAnimation) {
   	if (this._CurrentAnimation !== RequestedAnimation) {
     	this._CurrentAnimation = RequestedAnimation;
@@ -2071,15 +2070,7 @@ function Game_Bullet() {
 
   // input processing
   Game_Player.prototype.updateInput = function() {
-  	//XXX
-  	if (this.y == this.previous_y && this._vx == 0) {
-  		this.idleTimer++;
-  		console.log(this.idleTimer);
-  	} else {
-  		this.idleTimer = 0;
-  	}
-  	this.previous_y = this.y;
-  	
+  	this.updateIdleCount();
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
@@ -2089,6 +2080,20 @@ function Game_Bullet() {
     this.guardByInput();
     this.triggerButtonAction();
   };
+  
+  Game_Player.prototype.updateIdleCount = function() {
+  	//if the player hasn't changed y position and has no horizontal velocity on this
+  	//frame, then increment the idle counter. Otherwise set the idle timer to 0.
+  	if (this._vx == 0 && this._vy >= 0) {
+  		this.idleTimer++;
+  		if (this.idleTimer > 400) {
+  			//this.changeAnimation(MCAnimation.IDLE);
+  			console.log("IDLE");
+  		}
+  	} else {
+  		this.idleTimer = 0;
+  	}
+  }
 
   // Gravity handling
   Game_Player.prototype.updateGravity = function() {
