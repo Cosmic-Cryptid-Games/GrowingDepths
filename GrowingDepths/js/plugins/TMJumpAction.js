@@ -1161,7 +1161,8 @@ function Game_Bullet() {
   var _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
-
+    
+	this._playerHasJumped = false;
     this._CurrentAnimation = MCAnimation.WALK;
     this._needsRefresh = false;
     this._mapPopups = [];
@@ -1314,10 +1315,16 @@ function Game_Bullet() {
   };
 
   //If the player is dashing, then I don't care if they are falling
-  //otherwise, check if the current Y position is less than the Y
-  //position in the previous frame
+  //otherwise, check if the player is idle or has jumped and also use 
+  //their downwards velocity 
   Game_CharacterBase.prototype.isFalling = function() {
-  	return !this.isDashing() && this._previousY < this._latestY;
+  	//if the player has jumped, then the threshold for traveling downwards is >0.01
+  	//if they are standing still or falling from a ledge, the threshold is >0.085
+  	return !this.isDashing() && 
+  		(
+  			(this._playerHasJumped && this._vy > 0.01) ||
+  			(this._vy > 0.085)
+  		);  	
   }
   
   //gets the player's x and y coordinates
@@ -1376,6 +1383,10 @@ function Game_Bullet() {
         if (this._vy > 0) {
           this.collideMapDown();
           this.collideCharacterDown();
+          //"if travelling downwards, change character image"
+          if (this.isFalling()) {
+    	    this.changeAnimation(MCAnimation.FALLING);
+          }
         } else {
           this.collideMapUp();
           this.collideCharacterUp();
@@ -1627,7 +1638,6 @@ function Game_Bullet() {
     }
   };
 
-  //XXX
   Game_CharacterBase.prototype.changeAnimation = function(RequestedAnimation) {
   	if (this._CurrentAnimation !== RequestedAnimation) {
     	this._CurrentAnimation = RequestedAnimation;
@@ -1944,6 +1954,7 @@ function Game_Bullet() {
     this._shotSePitch = 0;
     this._carryingObject = null;
     this.jumpInputCountdown = 0;
+    this.idleTimer = 0;
   };
 
   // 画面中央の X 座標
@@ -2090,6 +2101,7 @@ function Game_Bullet() {
 
   // input processing
   Game_Player.prototype.updateInput = function() {
+  	this.updateIdleCount();
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
@@ -2099,6 +2111,20 @@ function Game_Bullet() {
     this.guardByInput();
     this.triggerButtonAction();
   };
+  
+  Game_Player.prototype.updateIdleCount = function() {
+  	//if the player hasn't changed y position and has no horizontal velocity on this
+  	//frame, then increment the idle counter. Otherwise set the idle timer to 0.
+  	if (this._vx == 0 && this._vy >= 0) {
+  		this.idleTimer++;
+  		if (this.idleTimer > 400) {
+  			//this.changeAnimation(MCAnimation.IDLE);
+  			console.log("IDLE");
+  		}
+  	} else {
+  		this.idleTimer = 0;
+  	}
+  }
 
   // Gravity handling
   Game_Player.prototype.updateGravity = function() {
@@ -2370,6 +2396,13 @@ function Game_Bullet() {
       }
     }
   };
+  
+      // ジャンプカウントのリセット
+  var _Game_Player_resetJump = Game_Player.prototype.resetJump;
+  Game_Player.prototype.resetJump = function() {
+  	_Game_Player_resetJump.call(this);
+    this._playerHasJumped = false;
+  };
 
   // Jump processing by button input
   Game_Player.prototype.jumpByInput = function() {
@@ -2395,6 +2428,7 @@ function Game_Bullet() {
         } else if (this._jumpCount > 0 && this.jumpInputCountdown == 0) {
           this._jumpCount--;
           this.jumpInputCountdown = 15;
+          this._playerHasJumped = true;
         } else {
           return;
 	    }
@@ -3026,7 +3060,6 @@ function Game_Bullet() {
       if (character) character.setMapPopup(args[1], args[2]);
 
     } else if (command === 'nwayShotWithEventID') {
-      console.log("Got nwayShotWithEventID");
       var character = $gameMap.event(args[9]);
       if (character && character.isBattler()) {
         if (!args[8]) args[8] = character.battler().attackSkillId();
