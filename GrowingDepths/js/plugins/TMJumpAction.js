@@ -493,12 +493,14 @@ var MCAnimation = {
   DASH: 3,
   FALLING: 4,
   WALLSLIDE: 5,
+  IDLE: 6,
   fileNames: {
     1: "$MCWalk%(6 0 1 2 3 4 5)", //WALK
     2: "$JumpMC%(6 0 1 2 3 4 5)", //JUMP
     3: "$DashMC%(6 0 1 2 3 4 5)", //DASH
     4: "$FallMC%(6 0 1 2 3 4 5)", //FALL
     5: "$OwlDive%(6 0 1 2 3 4 5)", //WALLSLIDE
+    6: "$SnakeAttack%(6 0 1 2 3 4 5)", //IDLE
   }
 };
 
@@ -1350,15 +1352,6 @@ function Game_Bullet() {
     this.updateFriction();
     if ($gameSwitches.value(3) == true || $gameSwitches.value(4) == true) this.updateWind(); // if map has wind then update wind
 
-    //Track Y from last frame and current frame to be able to tell if traveling downwards
-    this._previousY = this._latestY
-    this._latestY = Math.floor(this._realY);
-    
-    //"if travelling downwards and not able to wall jump, change character image"
-    if (this.isFalling() && !this.currentlyCanWallJump()) {
-    	this.changeAnimation(MCAnimation.FALLING);
-    }
-
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
       if (this._through) {
@@ -1383,7 +1376,8 @@ function Game_Bullet() {
         if (this._vy > 0) {
           this.collideMapDown();
           this.collideCharacterDown();
-          //"if travelling downwards, change character image"
+          
+          //"if travelling downwards and not able to wall jump, change character image"
           if (this.isFalling() && !this.currentlyCanWallJump()) {
     	    this.changeAnimation(MCAnimation.FALLING);
           }
@@ -1652,8 +1646,7 @@ function Game_Bullet() {
     this._realY = y;
     this._vy = 0;
     this.resetJump();
-    this.resetDash();
-    this.changeAnimation(MCAnimation.WALK);
+    this.resetDash();    
     if (this._ladder) this.getOffLadder();
     this.resetPeak(); // if fallDamage is reimp, delete
   };
@@ -1955,6 +1948,7 @@ function Game_Bullet() {
     this._carryingObject = null;
     this.jumpInputCountdown = 0;
     this.idleTimer = 0;
+    this.idleFramesStartAnimation = 400;
   };
 
   // 画面中央の X 座標
@@ -2117,9 +2111,8 @@ function Game_Bullet() {
   	//frame, then increment the idle counter. Otherwise set the idle timer to 0.
   	if (this._vx == 0 && this._vy >= 0) {
   		this.idleTimer++;
-  		if (this.idleTimer > 400) {
-  			//this.changeAnimation(MCAnimation.IDLE);
-  			console.log("IDLE");
+  		if (this.idleTimer >= this.idleFramesStartAnimation) {
+  			this.changeAnimation(MCAnimation.IDLE);
   		}
   	} else {
   		this.idleTimer = 0;
@@ -2402,6 +2395,9 @@ function Game_Bullet() {
   Game_Player.prototype.resetJump = function() {
   	_Game_Player_resetJump.call(this);
     this._playerHasJumped = false;
+    if (this.idleTimer < this.idleFramesStartAnimation) {
+    	this.changeAnimation(MCAnimation.WALK);
+    }
   };
 
   // Jump processing by button input
