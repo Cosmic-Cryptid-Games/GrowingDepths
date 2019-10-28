@@ -1384,7 +1384,7 @@ function Game_Bullet() {
           this.collideMapDown();
           this.collideCharacterDown();
           //"if travelling downwards, change character image"
-          if (this.isFalling()) {
+          if (this.isFalling() && !this.currentlyCanWallJump()) {
     	    this.changeAnimation(MCAnimation.FALLING);
           }
         } else {
