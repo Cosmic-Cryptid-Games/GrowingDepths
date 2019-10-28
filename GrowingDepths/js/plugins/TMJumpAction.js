@@ -1316,11 +1316,11 @@ function Game_Bullet() {
   //otherwise, check if the player is idle or has jumped and also use 
   //their downwards velocity 
   Game_CharacterBase.prototype.isFalling = function() {
-  	//if the player has jumped, then the threshold for traveling downwards is >0.025
+  	//if the player has jumped, then the threshold for traveling downwards is >0.01
   	//if they are standing still or falling from a ledge, the threshold is >0.085
   	return !this.isDashing() && 
   		(
-  			(this._playerHasJumped && this._vy > 0.025) ||
+  			(this._playerHasJumped && this._vy > 0.01) ||
   			(this._vy > 0.085)
   		);  	
   }
@@ -1627,7 +1627,6 @@ function Game_Bullet() {
     this.resetJump();
     this.resetDash();
     this.changeAnimation(MCAnimation.WALK);
-    this._playerHasJumped = false;
     if (this._ladder) this.getOffLadder();
     this.resetPeak(); // if fallDamage is reimp, delete
   };
@@ -2350,6 +2349,13 @@ function Game_Bullet() {
       }
     }
   };
+  
+      // ジャンプカウントのリセット
+  Game_Player.prototype.resetJump = function() {
+    this._jumpCount = this._mulchJump;
+    this._jumpInput = 0;
+    this._playerHasJumped = false;
+  };
 
   // Jump processing by button input
   Game_Player.prototype.jumpByInput = function() {
@@ -3013,7 +3019,6 @@ function Game_Bullet() {
       if (character) character.setMapPopup(args[1], args[2]);
 
     } else if (command === 'nwayShotWithEventID') {
-      console.log("Got nwayShotWithEventID");
       var character = $gameMap.event(args[9]);
       if (character && character.isBattler()) {
         if (!args[8]) args[8] = character.battler().attackSkillId();
