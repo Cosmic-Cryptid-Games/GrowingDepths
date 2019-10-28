@@ -1927,6 +1927,8 @@ function Game_Bullet() {
     this._shotSePitch = 0;
     this._carryingObject = null;
     this.jumpInputCountdown = 0;
+    this.idleTimer = 0;
+  	this.previous_y = 0;
   };
 
   // 画面中央の X 座標
@@ -2069,6 +2071,15 @@ function Game_Bullet() {
 
   // input processing
   Game_Player.prototype.updateInput = function() {
+  	//XXX
+  	if (this.y == this.previous_y && this._vx == 0) {
+  		this.idleTimer++;
+  		console.log(this.idleTimer);
+  	} else {
+  		this.idleTimer = 0;
+  	}
+  	this.previous_y = this.y;
+  	
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
