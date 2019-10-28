@@ -1927,7 +1927,6 @@ function Game_Bullet() {
     this._carryingObject = null;
     this.jumpInputCountdown = 0;
     this.idleTimer = 0;
-  	this.previous_y = 0;
   };
 
   // 画面中央の X 座標
