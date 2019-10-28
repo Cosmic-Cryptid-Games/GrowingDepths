@@ -2910,6 +2910,11 @@ function Game_Bullet() {
   //-----------------------------------------------------------------------------
   // Game_Interpreter
   //
+  var _Game_Interpreter_initialize = Game_Interpreter.prototype.initialize;
+  Game_Interpreter.prototype.initialize = function(mapId, eventId) {
+    _Game_Interpreter_initialize.call(this);
+    this.mushroomSet = {};
+  };
 
   // イベントの位置変更
   Game_Interpreter.prototype.command203 = function() {
@@ -2937,12 +2942,53 @@ function Game_Bullet() {
     if (!$gameParty.inBattle()) $gamePlayer.requestRefresh();
     return true;
   };
-
+  
+  /*
+  adds a mushroom to the set after checking that it hasn't already been collected and 
+  plays the collection sound.
+  It adds the mushroom by identifying it with a key built by the following:
+  	"locationID,x,y", 
+  	
+  	so by example: Map012, x=1, y=2
+  	trackMushroom(12, 1, 2); 
+  	
+  	will use the key
+  	"12,1,2"
+  
+  parameters:
+  	locationID: ID of Current Map
+  	x: x position of the mushroom
+  	y: y position of the mushroom
+  */
+  Game_Interpreter.prototype.trackMushroom = function(locationID, x, y) {
+  	console.log("trackMushroom called with locationID=", locationID, " x=", x, " and y=", y);
+  	const loc = locationID.toString();
+    const key = loc.concat(",", x, ",", y);
+  	if (key in this.mushroomSet) return;
+  	console.log("adding key:", key);
+  	this.mushroomSet[key] = true;
+  	console.log(this.mushroomSet);
+  	
+  	//play sound
+  	mushroomCollectionSound = {
+  		volume:50,
+  		pitch:100,
+  		pan:0,
+  		name:"MushroomCollect"
+  	}
+  	
+  	console.log("ding!");
+  	AudioManager.playSe(mushroomCollectionSound);
+  };
+  
   // プラグインコマンド
   var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
-    if (command === 'actGainHp') {
+    if (command === "trackMushroom") {
+    	this.trackMushroom(args[0], args[1], args[2]);
+    	
+    } else if (command === 'actGainHp') {
       var character = this.character(args[0]);
       if (character && character.isBattler()) {
         character.battler().clearResult();
