@@ -2367,9 +2367,9 @@ function Game_Bullet() {
   };
   
       // ジャンプカウントのリセット
+  var _Game_Player_resetJump = Game_Player.prototype.resetJump;
   Game_Player.prototype.resetJump = function() {
-    this._jumpCount = this._mulchJump;
-    this._jumpInput = 0;
+  	_Game_Player_resetJump.call(this);
     this._playerHasJumped = false;
   };
 
