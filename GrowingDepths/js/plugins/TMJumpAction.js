@@ -1634,6 +1634,11 @@ function Game_Bullet() {
 
   Game_CharacterBase.prototype.changeAnimation = function(RequestedAnimation) {
   	if (this._CurrentAnimation !== RequestedAnimation) {
+  		if (RequestedAnimation == MCAnimation.IDLE) {
+  			this.setStepAnime(true);
+  		} else {
+  			this.setStepAnime(false);
+  		}
     	this._CurrentAnimation = RequestedAnimation;
     	var CharacterSheetToLoad = MCAnimation.fileNames[RequestedAnimation]
     	$gameActors.actor(1).setCharacterImage(CharacterSheetToLoad, 1);
