@@ -2949,6 +2949,42 @@ function Game_Bullet() {
     _Game_Interpreter_initialize.call(this);
     this.mushroomSet = {};
   };
+  
+  Game_Interpreter.prototype.RegisterBossBaddie = function(eventId) {
+  	if (this.BossEventID != eventId) {
+  		this.BossEventID = eventId;
+  	}	
+  };
+  
+  //modified to set up a bounding box around the boss enemy, so if the player collides
+  //with any part of the enemy they get killed
+  _Game_Interpreter_update = Game_Interpreter.prototype.update;
+  Game_Interpreter.prototype.update = function() {
+    _Game_Interpreter_update.call(this);
+    
+    //if the boss event ID has been set, and the player isn't currently dying, then 
+    //check if the player is within a certain area around the boss event
+    if (this.BossEventID > 0 && $gameVariables.value(deathCaseControlVariable) == 0) {
+    	
+      //grab boss event
+      var eve = $gameMap.event(this.BossEventID);
+      //check in a bounding box around the event (currently set to the big owl)
+      for (var x = eve.x - 2; x <= eve.x + 2; x++) {
+        for (var y = eve.y - 10; y <= eve.y + 1; y++) {
+        	
+          //check if it is colliding, if so, set deathCaseControlVariable to 1
+          if (eve.isCollidedWithPlayerCharacters(x, y)) {
+            //this kills the player
+            var PLAYER = $gameActors.actor(1)
+            var HP = -1;
+            var KO = true;
+            Game_Interpreter.prototype.changeHp(PLAYER, HP, KO);
+            $gameVariables.setValue(deathCaseControlVariable, 1);
+          }
+  		}
+  	  }	
+  	}
+  }
 
   // イベントの位置変更
   Game_Interpreter.prototype.command203 = function() {
