@@ -1164,7 +1164,6 @@ function Game_Bullet() {
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
     
-	this._playerHasJumped = false;
     this._CurrentAnimation = MCAnimation.WALK;
     this._needsRefresh = false;
     this._mapPopups = [];
@@ -1315,19 +1314,6 @@ function Game_Bullet() {
     var th = $gameMap.tileHeight();
     return Math.round(this.scrolledY() * th);
   };
-
-  //If the player is dashing, then I don't care if they are falling
-  //otherwise, check if the player is idle or has jumped and also use 
-  //their downwards velocity 
-  Game_CharacterBase.prototype.isFalling = function() {
-  	//if the player has jumped, then the threshold for traveling downwards is >0.01
-  	//if they are standing still or falling from a ledge, the threshold is >0.085
-  	return !this.isDashing() && 
-  		(
-  			(this._playerHasJumped && this._vy > 0.01) ||
-  			(this._vy > 0.085)
-  		);  	
-  }
   
   //gets the player's x and y coordinates
   Game_CharacterBase.prototype.getWallJumpCalculations = function(x,y) {
@@ -2063,7 +2049,6 @@ function Game_Bullet() {
   
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
-  
   	this.checkPlayerRegionOverlap($gamePlayer.x, $gamePlayer.y);
 
   	//prevent jumping for a certain while
@@ -2109,6 +2094,15 @@ function Game_Bullet() {
       this.changeAnimation(MCAnimation.FALLING);
     }
   };
+  
+  //If the player is dashing, then I don't care if they are falling
+  //otherwise, check if the player is idle or has jumped and also use 
+  //their downwards velocity 
+  Game_Player.prototype.isFalling = function() {
+  	//if the player has jumped, then the threshold for traveling downwards is >0.01
+  	//if they are standing still or falling from a ledge, the threshold is >0.085
+  	return !this.isDashing() && this._vy > 0;
+  }
   
   Game_Player.prototype.updateIdleCount = function() {
   	//if the player hasn't changed y position and has no horizontal velocity on this
@@ -2398,7 +2392,6 @@ function Game_Bullet() {
   var _Game_Player_resetJump = Game_Player.prototype.resetJump;
   Game_Player.prototype.resetJump = function() {
   	_Game_Player_resetJump.call(this);
-    this._playerHasJumped = false;
     if (this.idleTimer < this.idleFramesStartAnimation) {
     	this.changeAnimation(MCAnimation.WALK);
     }
@@ -2428,7 +2421,6 @@ function Game_Bullet() {
         } else if (this._jumpCount > 0 && this.jumpInputCountdown == 0) {
           this._jumpCount--;
           this.jumpInputCountdown = 15;
-          this._playerHasJumped = true;
         } else {
           return;
 	    }
