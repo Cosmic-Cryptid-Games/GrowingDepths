@@ -2037,6 +2037,7 @@ function Game_Bullet() {
   //if the player is in the instant death region, kill them
   Game_Player.prototype.checkPlayerRegionOverlap = function(x, y) {
     var playerRegionID = $gameMap.regionId(x, y);
+    var regionIDAbove = $gameMap.regionId(x, y - 1);
   
   	//If the player is in the enemy aggression region, set enemyAggressionVariable to 1
   	//otherwise set it to 0
@@ -2046,8 +2047,8 @@ function Game_Bullet() {
     	$gameVariables.setValue(enemyAggressionVariable, 0);
     }
     
-    //If the player is in the death region, then kill them
-  	if (playerRegionID === actInstantKillRegion) {
+    //If the player is in the death region or just below spikes, then kill them
+  	if (playerRegionID === actInstantKillRegion || regionIDAbove === actInstantKillRegion) {
   	
   		//prevent double death by setting deathCaseControlVariable to 1.  The common event
   		//sets the deathCaseControlVariable back to 0 once it finishes respawning
