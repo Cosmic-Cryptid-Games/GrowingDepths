@@ -2095,19 +2095,16 @@ function Game_Bullet() {
     }
   };
   
-  //If the player is dashing, then I don't care if they are falling
-  //otherwise, check if the player is idle or has jumped and also use 
-  //their downwards velocity 
+  //If the player is dashing, then I don't care if they are falling,
+  //otherwise check if the player has downards velocity
   Game_Player.prototype.isFalling = function() {
-  	//if the player has jumped, then the threshold for traveling downwards is >0.01
-  	//if they are standing still or falling from a ledge, the threshold is >0.085
   	return !this.isDashing() && this._vy > 0;
   }
   
   Game_Player.prototype.updateIdleCount = function() {
-  	//if the player hasn't changed y position and has no horizontal velocity on this
+  	//if the player has no vertical and horizontal velocity on this
   	//frame, then increment the idle counter. Otherwise set the idle timer to 0.
-  	if (this._vx == 0 && this._vy >= 0) {
+  	if (this._vx === 0 && this._vy === 0) {
   		this.idleTimer++;
   		if (this.idleTimer >= this.idleFramesStartAnimation) {
   			this.changeAnimation(MCAnimation.IDLE);
