@@ -791,7 +791,7 @@ function Game_Bullet() {
       $gamePlayer.requestAnimation(actLevelupAnimationId);
     }
   };
-  
+
   // 解除されたステートの表示
   var _Game_Actor_showRemovedStates = Game_Actor.prototype.showRemovedStates;
   Game_Actor.prototype.showRemovedStates = function() {
@@ -2957,7 +2957,8 @@ function Game_Bullet() {
   	}	
   };
   
-  //modified to set up a bounding
+  //modified to set up a bounding box around the boss enemy, so if the player collides
+  //with any part of the enemy they get killed
   _Game_Interpreter_update = Game_Interpreter.prototype.update;
   Game_Interpreter.prototype.update = function() {
     _Game_Interpreter_update.call(this);
@@ -2974,7 +2975,6 @@ function Game_Bullet() {
         	
           //check if it is colliding, if so, set deathCaseControlVariable to 1
           if (eve.isCollidedWithPlayerCharacters(x, y)) {
-          	console.log("Checking", x, y);
             //this kills the player
             var PLAYER = $gameActors.actor(1)
             var HP = -1;
