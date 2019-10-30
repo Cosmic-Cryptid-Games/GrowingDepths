@@ -1376,11 +1376,6 @@ function Game_Bullet() {
         if (this._vy > 0) {
           this.collideMapDown();
           this.collideCharacterDown();
-          
-          //"if travelling downwards and not able to wall jump, change character image"
-          if (this.isFalling() && !this.currentlyCanWallJump()) {
-    	    this.changeAnimation(MCAnimation.FALLING);
-          }
         } else {
           this.collideMapUp();
           this.collideCharacterUp();
@@ -1633,12 +1628,15 @@ function Game_Bullet() {
   };
 
   Game_CharacterBase.prototype.changeAnimation = function(RequestedAnimation) {
+  	
+  	console.log("Current = ", this._CurrentAnimation, "Requested =", RequestedAnimation);
   	if (this._CurrentAnimation !== RequestedAnimation) {
   		if (RequestedAnimation == MCAnimation.IDLE) {
   			this.setStepAnime(true);
   		} else {
   			this.setStepAnime(false);
   		}
+  		console.log(RequestedAnimation);
     	this._CurrentAnimation = RequestedAnimation;
     	var CharacterSheetToLoad = MCAnimation.fileNames[RequestedAnimation]
     	$gameActors.actor(1).setCharacterImage(CharacterSheetToLoad, 1);
@@ -2109,6 +2107,11 @@ function Game_Bullet() {
     this.dashByInput();
     this.guardByInput();
     this.triggerButtonAction();
+              //"if travelling downwards and not able to wall jump, change character image"
+          if (this.isFalling() && !this.currentlyCanWallJump()) {
+          	console.log("vy=", this._vy, "landing region=", this._landingRegion);
+    	    this.changeAnimation(MCAnimation.FALLING);
+          }
   };
   
   Game_Player.prototype.updateIdleCount = function() {
