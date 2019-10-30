@@ -1384,7 +1384,7 @@ function Game_Bullet() {
 
   // 最大落下速度の取得
   Game_CharacterBase.prototype.maxFallSpeed = function() {
-    return this.isSwimming() ? 0.04 : 0.6;
+    return this.isSwimming() ? 0.04 : 0.35;
   };
 
   // 摩擦の処理
