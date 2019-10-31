@@ -1329,7 +1329,7 @@ function Game_Bullet() {
   //checks if the player is against a wall and has 1 less than their max jumps
   Game_CharacterBase.prototype.currentlyCanWallJump = function() {
   	let {x, y} = this.getWallJumpCalculations();
-    return $gameMap.canWallJump(x, y, this._direction) && this._jumpCount != this._mulchJump;
+    return $gameMap.canWallJump(x, y, this._direction) && (this._jumpCount != this._mulchJump || this.isFalling());
   }
 
   // move processing
