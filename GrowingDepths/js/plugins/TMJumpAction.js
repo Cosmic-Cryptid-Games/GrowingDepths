@@ -1401,11 +1401,7 @@ function Game_Bullet() {
 
   // update wind
   Game_CharacterBase.prototype.updateWind = function() {
-    if($gameSwitches.value(3) == true) {
-      this._vx -= this._moveSpeed / 50;
-    } else if ($gameSwitches.value(4) == true) {
-      this._vx += this._moveSpeed / 50;
-    }
+    
   };
 
   // 移動カウントの処理
@@ -2522,8 +2518,13 @@ function Game_Bullet() {
 
   // Update wind
   Game_Player.prototype.updateWind = function() {
-  	  Game_Character.prototype.updateWind.call(this);
-
+      Game_Character.prototype.updateWind.call(this);
+      
+      if($gameSwitches.value(3) == true) {
+        this._vx -= this._moveSpeed / 50;
+      } else if ($gameSwitches.value(4) == true) {
+        this._vx += this._moveSpeed / 50;
+      }
   }
 
   // 泳ぎ状態の更新
