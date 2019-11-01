@@ -2614,7 +2614,7 @@ function Game_Bullet() {
       this._ladderAccele = +(data.meta['ladder_accele'] || 0.003);
       this._jumpInputTime = +(data.meta['jump_input'] || 0);
       this._swimJump = +(data.meta['swim_jump'] || 0.1);
-      this._mulchJump = +(data.meta['mulch_jump'] || 200);
+      this._mulchJump = +(data.meta['mulch_jump'] || 2);
       this._weight = +(data.meta['weight'] || 0);
       this._carryPower = +(data.meta['carry_power'] || 0);
       this._gravity = +(data.meta['gravity'] || 0.0045);
