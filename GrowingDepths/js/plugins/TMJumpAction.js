@@ -937,9 +937,11 @@ function Game_Bullet() {
       
       	//exclude _proto value
         if (this.CloudTimers.hasOwnProperty(regionID)) {
+          //if the regionIDs match, then return "impassable" which allows 
+          //standing and wall jumping
       	  if (rg === parseInt(regionID)) {
-      	  	flag |= 1;
       	  	this.CloudTimers[regionID]["Decreasing"] = "true";
+      	  	return false;
       	  }
         }
       }
@@ -972,6 +974,8 @@ function Game_Bullet() {
   Game_Map.prototype.update = function(sceneActive) {
     _Game_Map_update.call(this, sceneActive);
     this.updateBullets();
+    
+    //update cloud timers for the regions the player is allowed to step on
     for (var regionID in this.CloudTimers) {
       
       //exclude _proto value
