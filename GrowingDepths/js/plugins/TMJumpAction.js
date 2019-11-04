@@ -982,7 +982,15 @@ function Game_Bullet() {
         
           //decrease timer
       	  this.CloudTimers[regionID]["timer"]--;
-      	  console.log(regionID, "->", this.CloudTimers[regionID]["timer"]);
+      	  
+      	  //set opacity based on how much time is left
+      	  var eventID = this.CloudTimers[regionID]["EventID"];
+      	  var eve = this.event(eventID);
+      	  var ratio = this.CloudTimers[regionID]["timer"] / this.MaxCloudTimerValue;
+      	  
+      	  //255 is the max value for opacity, so set this to:
+      	  //the ratio of time left on the timer * max value for opacity
+      	  eve.setOpacity(ratio * 255); 
       	  
       	  //if the timer is 0 then delete the region from the timers and make the player
       	  //fall through this region again
