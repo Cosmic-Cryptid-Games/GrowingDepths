@@ -876,7 +876,18 @@ function Game_Bullet() {
     _Game_Map_setup.call(this, mapId);
     this.setupBullets();
     this.CloudTimer = 700;
+    this.CloudTimers = {};
+    this.MaxCloudTimerValue = 10000;
+    this.setupCloudTimer(12, 4);
   };
+  
+  //setup a timer that will allow the player to stand on `regionID` for
+  //`this.MaxCloudTimerValue` frames.  It will gradually dim the `eventID` and then 
+  //make the player no longer able to stand on `regionID`
+  Game_Map.prototype.setupCloudTimer = function(regionID, eventID) {
+  	this.CloudTimers[regionID] = {"EventID":eventID, "timer":this.MaxCloudTimerValue}
+  	console.log(this.CloudTimers);
+  }
 
   // 弾のセットアップ
   Game_Map.prototype.setupBullets = function() {
@@ -916,13 +927,29 @@ function Game_Bullet() {
     for (var i = 0; i < tiles.length; i++) {
       var flag = flags[tiles[i]];
       if (rg === actStageRegion) flag |= 1;
-      var actCloudRegion1 = 12;
       
-      //XXX
-      console.log(this.CloudTimer);
-      if (this.CloudTimer !== 0 && rg === actCloudRegion1) {
-      	flag |= 1;
+      for (var regionID in this.CloudTimers) {
+      
+      	//exclude _proto value
+        if (this.CloudTimers.hasOwnProperty(regionID)) {
+        
+          //decrease timer
+      	  this.CloudTimers[regionID]["timer"]--;
+      	  
+      	  //if the timer is 0 then delete the region from the timers and make the player
+      	  //fall through this region again
+      	  if (this.CloudTimers[regionID]["timer"] <= 0) {
+      	  	delete this.CloudTimers[regionID];
+      	  
+      	  //otherwise 
+      	  } else {
+      	  	if (rg === parseInt(regionID)) {
+      	  	  flag |= 1;
+      	  	}
+      	  }
+        }
       }
+
       if ((flag & 0x10) !== 0) continue;      // [*] No effect on passage
       if ((flag & bit) === 0) return true;    // [o] Passable
       if ((flag & bit) === bit) return false; // [x] Impassable
@@ -951,8 +978,10 @@ function Game_Bullet() {
   Game_Map.prototype.update = function(sceneActive) {
     _Game_Map_update.call(this, sceneActive);
     this.updateBullets();
-    if (this.CloudTimer > 0) {
-    	this.CloudTimer--;
+    for (var key in this.CloudTimers) {
+      if (this.CloudTimers.hasOwnProperty(key)) {
+        console.log(key + " -> " + this.CloudTimers[key]["timer"]);
+      }
     }
   };
 
