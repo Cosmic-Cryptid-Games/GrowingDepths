@@ -875,10 +875,8 @@ function Game_Bullet() {
   Game_Map.prototype.setup = function(mapId) {
     _Game_Map_setup.call(this, mapId);
     this.setupBullets();
-    this.CloudTimer = 700;
     this.CloudTimers = {};
-    this.MaxCloudTimerValue = 1000;
-    this.setupCloudTimer(12, 4);
+    this.MaxCloudTimerValue = 300;
   };
   
   //setup a timer that will allow the player to stand on `regionID` for
@@ -890,7 +888,6 @@ function Game_Bullet() {
   	  "timer": this.MaxCloudTimerValue,
   	  "Decreasing": "false",
   	}
-  	console.log(this.CloudTimers);
   }
 
   // 弾のセットアップ
@@ -926,26 +923,26 @@ function Game_Bullet() {
     if (!this.isValid(x, y)) return false;
     var rg = this.tileId(x, y, 5);
     if (rg === actWallRegion || rg === actSlipWallRegion) return false;
+    
+    //allow the player to stand and wall jump on all the regionIDs for clouds
+    for (var regionID in this.CloudTimers) {
+      
+      //exclude _proto value
+      if (this.CloudTimers.hasOwnProperty(regionID)) {
+        //if the regionIDs match, then return "impassable" which allows 
+        //standing and wall jumping
+      	if (rg === parseInt(regionID)) {
+      	  this.CloudTimers[regionID]["Decreasing"] = "true";
+      	  return false; //[x] Impassable
+      	}
+      }
+    }
+    
     var flags = this.tilesetFlags();
     var tiles = this.allTiles(x, y);
     for (var i = 0; i < tiles.length; i++) {
       var flag = flags[tiles[i]];
       if (rg === actStageRegion) flag |= 1;
-      
-      //allow the player to stand on all the regionIDs for clouds
-      for (var regionID in this.CloudTimers) {
-      
-      	//exclude _proto value
-        if (this.CloudTimers.hasOwnProperty(regionID)) {
-          //if the regionIDs match, then return "impassable" which allows 
-          //standing and wall jumping
-      	  if (rg === parseInt(regionID)) {
-      	  	this.CloudTimers[regionID]["Decreasing"] = "true";
-      	  	return false;
-      	  }
-        }
-      }
-
       if ((flag & 0x10) !== 0) continue;      // [*] No effect on passage
       if ((flag & bit) === 0) return true;    // [o] Passable
       if ((flag & bit) === bit) return false; // [x] Impassable
