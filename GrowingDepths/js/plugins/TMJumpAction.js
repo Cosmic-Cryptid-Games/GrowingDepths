@@ -875,6 +875,7 @@ function Game_Bullet() {
   Game_Map.prototype.setup = function(mapId) {
     _Game_Map_setup.call(this, mapId);
     this.setupBullets();
+    this.CloudTimer = 700;
   };
 
   // 弾のセットアップ
@@ -915,6 +916,13 @@ function Game_Bullet() {
     for (var i = 0; i < tiles.length; i++) {
       var flag = flags[tiles[i]];
       if (rg === actStageRegion) flag |= 1;
+      var actCloudRegion1 = 12;
+      
+      //XXX
+      console.log(this.CloudTimer);
+      if (this.CloudTimer !== 0 && rg === actCloudRegion1) {
+      	flag |= 1;
+      }
       if ((flag & 0x10) !== 0) continue;      // [*] No effect on passage
       if ((flag & bit) === 0) return true;    // [o] Passable
       if ((flag & bit) === bit) return false; // [x] Impassable
@@ -943,6 +951,9 @@ function Game_Bullet() {
   Game_Map.prototype.update = function(sceneActive) {
     _Game_Map_update.call(this, sceneActive);
     this.updateBullets();
+    if (this.CloudTimer > 0) {
+    	this.CloudTimer--;
+    }
   };
 
   // 弾の更新
