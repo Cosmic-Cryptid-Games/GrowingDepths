@@ -877,7 +877,7 @@ function Game_Bullet() {
     this.setupBullets();
     this.CloudTimer = 700;
     this.CloudTimers = {};
-    this.MaxCloudTimerValue = 10000;
+    this.MaxCloudTimerValue = 1000;
     this.setupCloudTimer(12, 4);
   };
   
@@ -885,7 +885,11 @@ function Game_Bullet() {
   //`this.MaxCloudTimerValue` frames.  It will gradually dim the `eventID` and then 
   //make the player no longer able to stand on `regionID`
   Game_Map.prototype.setupCloudTimer = function(regionID, eventID) {
-  	this.CloudTimers[regionID] = {"EventID":eventID, "timer":this.MaxCloudTimerValue}
+  	this.CloudTimers[regionID] = {
+  	  "EventID": eventID, 
+  	  "timer": this.MaxCloudTimerValue,
+  	  "Decreasing": "false",
+  	}
   	console.log(this.CloudTimers);
   }
 
@@ -928,24 +932,14 @@ function Game_Bullet() {
       var flag = flags[tiles[i]];
       if (rg === actStageRegion) flag |= 1;
       
+      //allow the player to stand on all the regionIDs for clouds
       for (var regionID in this.CloudTimers) {
       
       	//exclude _proto value
         if (this.CloudTimers.hasOwnProperty(regionID)) {
-        
-          //decrease timer
-      	  this.CloudTimers[regionID]["timer"]--;
-      	  
-      	  //if the timer is 0 then delete the region from the timers and make the player
-      	  //fall through this region again
-      	  if (this.CloudTimers[regionID]["timer"] <= 0) {
-      	  	delete this.CloudTimers[regionID];
-      	  
-      	  //otherwise 
-      	  } else {
-      	  	if (rg === parseInt(regionID)) {
-      	  	  flag |= 1;
-      	  	}
+      	  if (rg === parseInt(regionID)) {
+      	  	flag |= 1;
+      	  	this.CloudTimers[regionID]["Decreasing"] = "true";
       	  }
         }
       }
@@ -978,9 +972,23 @@ function Game_Bullet() {
   Game_Map.prototype.update = function(sceneActive) {
     _Game_Map_update.call(this, sceneActive);
     this.updateBullets();
-    for (var key in this.CloudTimers) {
-      if (this.CloudTimers.hasOwnProperty(key)) {
-        console.log(key + " -> " + this.CloudTimers[key]["timer"]);
+    for (var regionID in this.CloudTimers) {
+      
+      //exclude _proto value
+      if (this.CloudTimers.hasOwnProperty(regionID)) {
+        
+      	if (this.CloudTimers[regionID]["Decreasing"] === "true") {
+        
+          //decrease timer
+      	  this.CloudTimers[regionID]["timer"]--;
+      	  console.log(regionID, "->", this.CloudTimers[regionID]["timer"]);
+      	  
+      	  //if the timer is 0 then delete the region from the timers and make the player
+      	  //fall through this region again
+      	  if (this.CloudTimers[regionID]["timer"] <= 0) {
+      	    delete this.CloudTimers[regionID];
+      	  } 
+      	}
       }
     }
   };
