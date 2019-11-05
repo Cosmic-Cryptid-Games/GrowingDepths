@@ -504,6 +504,10 @@ var MCAnimation = {
   }
 };
 
+var lastCheckpointMapID = 0;
+var lastCheckpointX = 0;
+var lastCheckpointY = 0; 
+
 var Imported = Imported || {};
 Imported.TMJumpAction = true;
 
@@ -2940,6 +2944,29 @@ function Game_Bullet() {
     _Game_Interpreter_initialize.call(this);
     this.mushroomSet = {};
   };
+  
+  Game_Interpreter.prototype.triggerCheckpointSFX = function(MapID, x, y) {
+  
+  	//game is a little finicky, so I'm saying that if you're within a bounding box of 4*4
+  	//around the currently active checkpoint, don't play the checkpoint sound again until
+  	//you touch a checkpoint outside of that 4*4 square
+    if (MapID !== lastCheckpointMapID || 
+    	(x >= lastCheckpointX + 2 || x <= lastCheckpointX - 2) || 
+    	(y >= lastCheckpointY + 2 || y <= lastCheckpointY - 2)) {
+    	lastCheckpointMapID = MapID;
+    	lastCheckpointX = x;
+    	lastCheckpointY = y;
+    	//play sound
+  		checkpointSound = {
+  			volume:20,
+  			pitch:100,
+  			pan:0,
+  			name:"Checkpoint"
+  		}
+    	AudioManager.playSe(checkpointSound);
+    }
+  }
+    		
   
   Game_Interpreter.prototype.RegisterBossBaddie = function(eventId) {
   	if (this.BossEventID != eventId) {
