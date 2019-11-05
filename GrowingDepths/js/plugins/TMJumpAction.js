@@ -879,7 +879,20 @@ function Game_Bullet() {
   Game_Map.prototype.setup = function(mapId) {
     _Game_Map_setup.call(this, mapId);
     this.setupBullets();
+    this.CloudTimers = {};
+    this.MaxCloudTimerValue = 300;
   };
+  
+  //setup a timer that will allow the player to stand on `regionID` for
+  //`this.MaxCloudTimerValue` frames.  It will gradually dim the `eventID` and then 
+  //make the player no longer able to stand on `regionID`
+  Game_Map.prototype.setupCloudTimer = function(regionID, eventID) {
+  	this.CloudTimers[regionID] = {
+  	  "EventID": eventID, 
+  	  "timer": this.MaxCloudTimerValue,
+  	  "Decreasing": "false",
+  	}
+  }
 
   // 弾のセットアップ
   Game_Map.prototype.setupBullets = function() {
@@ -914,6 +927,26 @@ function Game_Bullet() {
     if (!this.isValid(x, y)) return false;
     var rg = this.tileId(x, y, 5);
     if (rg === actWallRegion || rg === actSlipWallRegion) return false;
+    
+    //allow the player to stand and wall jump on all the regionIDs for clouds
+    for (var regionID in this.CloudTimers) {
+      
+      //exclude _proto value
+      if (this.CloudTimers.hasOwnProperty(regionID)) {
+        //if the regionIDs match, then return "impassable" which allows 
+        //standing and wall jumping
+      	if (rg === parseInt(regionID)) {
+      	  return false; //[x] Impassable
+      	}
+      }
+    }
+    
+    Game_Map.prototype.playerLandedOnRegion = function(regionID) {
+    	if (regionID in this.CloudTimers) {
+    		this.CloudTimers[regionID]["Decreasing"] = "true";
+    	}
+    }
+    
     var flags = this.tilesetFlags();
     var tiles = this.allTiles(x, y);
     for (var i = 0; i < tiles.length; i++) {
@@ -947,6 +980,35 @@ function Game_Bullet() {
   Game_Map.prototype.update = function(sceneActive) {
     _Game_Map_update.call(this, sceneActive);
     this.updateBullets();
+    
+    //update cloud timers for the regions the player is allowed to step on
+    for (var regionID in this.CloudTimers) {
+      
+      //exclude _proto value
+      if (this.CloudTimers.hasOwnProperty(regionID)) {
+        
+      	if (this.CloudTimers[regionID]["Decreasing"] === "true") {
+        
+          //decrease timer
+      	  this.CloudTimers[regionID]["timer"]--;
+      	  
+      	  //set opacity based on how much time is left
+      	  var eventID = this.CloudTimers[regionID]["EventID"];
+      	  var eve = this.event(eventID);
+      	  var ratio = this.CloudTimers[regionID]["timer"] / this.MaxCloudTimerValue;
+      	  
+      	  //255 is the max value for opacity, so set this to:
+      	  //the ratio of time left on the timer * max value for opacity
+      	  eve.setOpacity(ratio * 255); 
+      	  
+      	  //if the timer is 0 then delete the region from the timers and make the player
+      	  //fall through this region again
+      	  if (this.CloudTimers[regionID]["timer"] <= 0) {
+      	    delete this.CloudTimers[regionID];
+      	  } 
+      	}
+      }
+    }
   };
 
   // 弾の更新
@@ -2166,6 +2228,7 @@ function Game_Bullet() {
         var n = actFriction;
         var speed = this._moveSpeed;
         if (this.isGuarding()) speed = speed * actGuardMoveRate / 100;
+        $gameMap.playerLandedOnRegion(this._landingRegion);
         switch (this._landingRegion) {
         case actSlipFloorRegion:
           this._friction = 0.0025;
@@ -2815,6 +2878,7 @@ function Game_Bullet() {
       }
       if (this.isLanding()) {
         var n = actFriction;
+        $gameMap.playerLandedOnRegion(this._landingRegion);
         switch (this._landingRegion) {
         case actSlipFloorRegion:
           return;
