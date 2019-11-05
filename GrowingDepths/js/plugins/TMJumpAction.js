@@ -880,16 +880,16 @@ function Game_Bullet() {
     _Game_Map_setup.call(this, mapId);
     this.setupBullets();
     this.CloudTimers = {};
-    this.MaxCloudTimerValue = 300;
   };
   
   //setup a timer that will allow the player to stand on `regionID` for
-  //`this.MaxCloudTimerValue` frames.  It will gradually dim the `eventID` and then 
-  //make the player no longer able to stand on `regionID`
-  Game_Map.prototype.setupCloudTimer = function(regionID, eventID) {
+  //`cloudTimer` frames.  It will gradually dim the `eventID` based on the ratio of 
+  //time left on the timer and then make the player no longer able to stand on `regionID`
+  Game_Map.prototype.setupCloudTimer = function(regionID, eventID, cloudTimer) {
   	this.CloudTimers[regionID] = {
   	  "EventID": eventID, 
-  	  "timer": this.MaxCloudTimerValue,
+  	  "timer": cloudTimer,
+  	  "maxTimer": cloudTimer,
   	  "Decreasing": "false",
   	}
   }
@@ -995,7 +995,7 @@ function Game_Bullet() {
       	  //set opacity based on how much time is left
       	  var eventID = this.CloudTimers[regionID]["EventID"];
       	  var eve = this.event(eventID);
-      	  var ratio = this.CloudTimers[regionID]["timer"] / this.MaxCloudTimerValue;
+      	  var ratio = this.CloudTimers[regionID]["timer"] / this.CloudTimers[regionID]["maxTimer"];
       	  
       	  //255 is the max value for opacity, so set this to:
       	  //the ratio of time left on the timer * max value for opacity
