@@ -2198,9 +2198,11 @@ function Game_Bullet() {
   		this.jumpInputCountdown = this.jumpInputCountdown - 1;
   	}
   	
+  	/*
   	if (this.currentlyCanWallJump()) {
   		this.changeAnimation(MCAnimation.WALLSLIDE);
   	}
+  	*/
 
     var lastScrolledX = this.scrolledX();
     var lastScrolledY = this.scrolledY();
@@ -2221,7 +2223,7 @@ function Game_Bullet() {
 
   // input processing
   Game_Player.prototype.updateInput = function() {
-  	this.updateIdleCount();
+  	//this.updateIdleCount();
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
