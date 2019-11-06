@@ -882,7 +882,7 @@ function Game_Bullet() {
     this.CloudTimers = {};
     this.InvisibleClouds = {};
     this.FadingInClouds = {};
-    this.coolDownTimer = 200;
+    this.coolDownTimer = 150;
     this.maxFadeInTimer = 15;
   };
   
