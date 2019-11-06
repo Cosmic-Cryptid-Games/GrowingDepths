@@ -1023,17 +1023,14 @@ function Game_Bullet() {
       	  //the ratio of time left on the timer * max value for opacity
       	  eve.setOpacity(ratio * 255); 
       	  
-      	  console.log(regionID, "->", this.CloudTimers[regionID]["timer"]);
-      	  
       	  //if the timer is 0 then delete the region from the timers and make the player
       	  //fall through this region again
       	  if (this.CloudTimers[regionID]["timer"] <= 0) {
-      	  	//move the value to invisible clouds and set FadedOutTimer
+      	    //move the value to invisible clouds and set FadedOutTimer
       	    var timer = this.CloudTimers[regionID];
       	    timer["FadedOutTimer"] = this.coolDownTimer;
-      	  	this.InvisibleClouds[regionID] = timer;
+      	    this.InvisibleClouds[regionID] = timer;
       	    delete this.CloudTimers[regionID];
-      	    console.log(this.InvisibleClouds[regionID]);
       	  } 
       	}
       }
@@ -1047,7 +1044,6 @@ function Game_Bullet() {
         
         //decrease timer
       	this.InvisibleClouds[regionID]["FadedOutTimer"]--;
-      	console.log(regionID, "->", this.InvisibleClouds[regionID]);
       	  
       	//if the timer is 0 then delete the region from the timers and make the player
       	//fall through this region again
@@ -1070,7 +1066,6 @@ function Game_Bullet() {
       
           //increase timer
       	  this.FadingInClouds[regionID]["FadeInTimer"]++;
-      	  console.log(regionID, "->", this.FadingInClouds[regionID]["FadeInTimer"]);
       	  
       	  //set opacity based on how much time is left
       	  var eventID = this.FadingInClouds[regionID]["EventID"];
