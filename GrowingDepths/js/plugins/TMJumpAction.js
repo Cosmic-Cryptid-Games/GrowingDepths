@@ -1478,9 +1478,9 @@ function Game_Bullet() {
 
   // move processing
   Game_CharacterBase.prototype.updateMove = function() {
-    this.updateGravity();
+    this.updateGravity();        
     this.updateFriction();
-    if ($gameSwitches.value(3) == true || $gameSwitches.value(4) == true) this.updateWind(); // if map has wind then update wind
+    if ($gameSwitches.value(3) == true || $gameSwitches.value(4) == true) this.updateWind(); // if map has wind then update wind    
 
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
@@ -2267,7 +2267,7 @@ function Game_Bullet() {
   };
 
   // friction handling
-  Game_Player.prototype.updateFriction = function() {
+  Game_Player.prototype.updateFriction = function() { 
     Game_Character.prototype.updateFriction.call(this);
     this._friction = 0;
     if (this._ladder) {
@@ -2280,34 +2280,40 @@ function Game_Bullet() {
       if (!this.isDashing()) {
         var n = this.isSwimming() ? this._swimSpeed : this._moveSpeed;
 
-        if($gameSwitches.value(3) == true) { // WIND E TO W
-          var r = this._moveSpeed * .75;
-          var l = -this._moveSpeed * 3;
-          if(this._vx < l) {
-            this._vx = Math.min(this._vx + 0.005, l);
-          } else if (this._vx > r) {
-            this._vx = Math.max(this._vx - 0.005, r);
-          }
-        } else if ($gameSwitches.value(4) == true) {// wind W to E
-          var l = -this._moveSpeed * .75;
-          var r = this._moveSpeed * 2;
-          if(this._vx < l) {
-            this._vx =  Math.max(this._vx + 0.005, l);
-          } else if (this._vx > r) {
-            this._vx = Math.min(this._vx - 0.005, r);
-          }
-        } else { // NO WIND
-          if (this._vx < -n) {
-            this._vx = Math.min(this._vx + 0.005, -n);
-          } else if (this._vx > n) {
-            this._vx = Math.max(this._vx - 0.005, n);
-          }
+          if($gameSwitches.value(3) == true) { // Wind E TO W
+            var r = this._moveSpeed * .75; // Going against the wind slows player to 75% of normal speed
+            var l = -this._moveSpeed * 1.25; // Going with the wind speeds player to 125% of normal speed
+            if(this._vx < l) {
+              // this._vx = Math.min(this._vx + 0.01, l);
+              this._vx = l;
+            } else if (this._vx > r) {
+              // this._vx = Math.max(this._vx - 0.01, r);
+              this._vx = r;
+            }
+          } else if ($gameSwitches.value(4) == true) { // Wind W to E
+            var l = -this._moveSpeed * .75; // Going against the wind slows player to 75% of normal speed
+            var r = this._moveSpeed * 1.25; // Going with the wind speeds player to 125% of normal speed
+            if(this._vx < l) {
+              this._vx =  Math.max(this._vx + 0.025, l);
+            } else if (this._vx > r) {
+              this._vx = Math.min(this._vx - 0.025, r);
+            }
+          } else { // NO WIND
+            if (this._vx < -n) {
+              this._vx = Math.min(this._vx + 0.005, -n);
+            } else if (this._vx > n) {
+              this._vx = Math.max(this._vx - 0.005, n);
+            }
+          
         }
       }
+
       if (this.isLanding()) {
         var n = actFriction;
         var speed = this._moveSpeed;
         if (this.isGuarding()) speed = speed * actGuardMoveRate / 100;
+        
+        // Player Region Logic
         $gameMap.playerLandedOnRegion(this._landingRegion);
         switch (this._landingRegion) {
         case actSlipFloorRegion:
@@ -2334,11 +2340,18 @@ function Game_Bullet() {
           }
           break;
         }
-        if (!this.isMoving()) {
-          if (this._vx > 0) {
-            this._vx = Math.max(this._vx - n, 0);
-          } else if (this._vx < 0) {
-            this._vx = Math.min(this._vx + n, 0);
+
+        if (!this.isMoving()) {        
+            if (this._vx > 0) { // right
+              this._vx = Math.max(this._vx - n, 0);
+            } else if (this._vx < 0) { // left
+              this._vx = Math.min(this._vx + n, 0);
+            }
+        } else { // if moving 
+          if(Input.isPressed('right') && this._vx < 0) {
+            this._vx = Math.min(this._vx + n/10, 0);
+          } else if (Input.isPressed('left') && this._vx > 0) {
+            this._vx = Math.max(this._vx - n/10, 0);
           }
         }
       }
