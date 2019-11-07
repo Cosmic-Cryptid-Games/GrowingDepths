@@ -506,7 +506,7 @@ var MCAnimation = {
 
 var lastCheckpointMapID = 0;
 var lastCheckpointX = 0;
-var lastCheckpointY = 0; 
+var lastCheckpointY = 0;
 
 var Imported = Imported || {};
 Imported.TMJumpAction = true;
@@ -885,13 +885,13 @@ function Game_Bullet() {
     this.coolDownTimer = 150;
     this.maxFadeInTimer = 15;
   };
-  
+
   //setup a timer that will allow the player to stand on `regionID` for
-  //`cloudTimer` frames.  It will gradually dim the `eventID` based on the ratio of 
+  //`cloudTimer` frames.  It will gradually dim the `eventID` based on the ratio of
   //time left on the timer and then make the player no longer able to stand on `regionID`
   Game_Map.prototype.setupCloudTimer = function(regionID, eventID, cloudTimer) {
   	this.CloudTimers[regionID] = {
-  	  "EventID": eventID, 
+  	  "EventID": eventID,
   	  "timer": cloudTimer,
   	  "maxTimer": cloudTimer,
   	  "Decreasing": "false",
@@ -927,7 +927,7 @@ function Game_Bullet() {
     if (this.tileId(x, y, 5) === actSlipWallRegion) return false;
     return !this.isPassable(x, y, d);
   };
-  
+
   Game_Map.prototype.playerLandedOnRegion = function(regionID) {
     if (regionID in this.CloudTimers) {
       this.CloudTimers[regionID]["Decreasing"] = "true";
@@ -939,36 +939,36 @@ function Game_Bullet() {
     if (!this.isValid(x, y)) return false;
     var rg = this.tileId(x, y, 5);
     if (rg === actWallRegion || rg === actSlipWallRegion) return false;
-    
-    
+
+
     //XXX TODO: turn the following 2 loops into a function
-    
+
     //allow the player to stand and wall jump on all the regionIDs for clouds
     for (var regionID in this.CloudTimers) {
-      
+
       //exclude _proto value
       if (this.CloudTimers.hasOwnProperty(regionID)) {
-        //if the regionIDs match, then return "impassable" which allows 
+        //if the regionIDs match, then return "impassable" which allows
         //standing and wall jumping
       	if (rg === parseInt(regionID)) {
       	  return false; //[x] Impassable
       	}
       }
     }
-        
+
     //allow the player to stand and wall jump on all the regionIDs for clouds that are fading in
     for (var regionID in this.FadingInClouds) {
-      
+
       //exclude _proto value
       if (this.FadingInClouds.hasOwnProperty(regionID)) {
-        //if the regionIDs match, then return "impassable" which allows 
+        //if the regionIDs match, then return "impassable" which allows
         //standing and wall jumping
       	if (rg === parseInt(regionID)) {
       	  return false; //[x] Impassable
       	}
       }
     }
-    
+
     var flags = this.tilesetFlags();
     var tiles = this.allTiles(x, y);
     for (var i = 0; i < tiles.length; i++) {
@@ -1002,27 +1002,27 @@ function Game_Bullet() {
   Game_Map.prototype.update = function(sceneActive) {
     _Game_Map_update.call(this, sceneActive);
     this.updateBullets();
-    
+
     //update cloud timers for the regions the player is allowed to step on
     for (var regionID in this.CloudTimers) {
-      
+
       //exclude _proto value
       if (this.CloudTimers.hasOwnProperty(regionID)) {
-        
+
       	if (this.CloudTimers[regionID]["Decreasing"] === "true") {
-        
+
           //decrease timer
       	  this.CloudTimers[regionID]["timer"]--;
-      	  
+
       	  //set opacity based on how much time is left
       	  var eventID = this.CloudTimers[regionID]["EventID"];
       	  var eve = this.event(eventID);
       	  var ratio = this.CloudTimers[regionID]["timer"] / this.CloudTimers[regionID]["maxTimer"];
-      	  
+
       	  //255 is the max value for opacity, so set this to:
       	  //the ratio of time left on the timer * max value for opacity
-      	  eve.setOpacity(ratio * 255); 
-      	  
+      	  eve.setOpacity(ratio * 255);
+
       	  //if the timer is 0 then delete the region from the timers and make the player
       	  //fall through this region again
       	  if (this.CloudTimers[regionID]["timer"] <= 0) {
@@ -1031,24 +1031,24 @@ function Game_Bullet() {
       	    timer["FadedOutTimer"] = this.coolDownTimer;
       	    this.InvisibleClouds[regionID] = timer;
       	    delete this.CloudTimers[regionID];
-      	  } 
+      	  }
       	}
       }
     }
-    
+
     //update cloud timers for the invisible clouds
     for (var regionID in this.InvisibleClouds) {
-      
+
       //exclude _proto value
       if (this.InvisibleClouds.hasOwnProperty(regionID)) {
-        
+
         //decrease timer
       	this.InvisibleClouds[regionID]["FadedOutTimer"]--;
-      	  
+
       	//if the timer is 0 then delete the region from the timers and make the player
       	//fall through this region again
       	if (this.InvisibleClouds[regionID]["FadedOutTimer"] <= 0) {
-      	
+
       	  //move the value to fading in clouds and set FadeInTimer
       	  var timer = this.InvisibleClouds[regionID];
       	  timer["FadeInTimer"] = 0;
@@ -1057,26 +1057,26 @@ function Game_Bullet() {
       	}
       }
     }
-    
+
     //fade in clouds that have finished their cooldown period
     for (var regionID in this.FadingInClouds) {
-      
+
       //exclude _proto value
       if (this.FadingInClouds.hasOwnProperty(regionID)) {
-      
+
           //increase timer
       	  this.FadingInClouds[regionID]["FadeInTimer"]++;
-      	  
+
       	  //set opacity based on how much time is left
       	  var eventID = this.FadingInClouds[regionID]["EventID"];
       	  var eve = this.event(eventID);
       	  var ratio = this.FadingInClouds[regionID]["FadeInTimer"] / this.maxFadeInTimer ;
-      	  
+
       	  //255 is the max value for opacity, so set this to:
       	  //the ratio of time left on the timer * max value for opacity
-      	  eve.setOpacity(ratio * 255); 
-      	  
-      	  //if the timer has reached max then move the timer into the available cloud 
+      	  eve.setOpacity(ratio * 255);
+
+      	  //if the timer has reached max then move the timer into the available cloud
       	  //timers again so the player can re-trigger the cloud
       	  if (this.FadingInClouds[regionID]["FadeInTimer"] >= this.maxFadeInTimer) {
       	  	var timer = this.FadingInClouds[regionID];
@@ -1084,7 +1084,7 @@ function Game_Bullet() {
       	    timer["Decreasing"] = "false";
       	    this.CloudTimers[regionID] = timer;
       	    delete this.FadingInClouds[regionID];
-      	  } 
+      	  }
       	}
       }
   };
@@ -1307,7 +1307,7 @@ function Game_Bullet() {
   var _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     _Game_CharacterBase_initMembers.call(this);
-    
+
     this._CurrentAnimation = MCAnimation.WALK;
     this._needsRefresh = false;
     this._mapPopups = [];
@@ -1458,7 +1458,7 @@ function Game_Bullet() {
     var th = $gameMap.tileHeight();
     return Math.round(this.scrolledY() * th);
   };
-  
+
   //gets the player's x and y coordinates
   Game_CharacterBase.prototype.getWallJumpCalculations = function(x,y) {
     if (this._direction == 4) {
@@ -1469,7 +1469,7 @@ function Game_Bullet() {
     var y = Math.floor(this._realY);
     return { x: x, y: y };
   }
-  
+
   //checks if the player is against a wall and has 1 less than their max jumps
   Game_CharacterBase.prototype.currentlyCanWallJump = function() {
   	let {x, y} = this.getWallJumpCalculations();
@@ -1545,7 +1545,7 @@ function Game_Bullet() {
 
   // update wind
   Game_CharacterBase.prototype.updateWind = function() {
-    
+
   };
 
   // 移動カウントの処理
@@ -1772,7 +1772,7 @@ function Game_Bullet() {
     this._realY = y;
     this._vy = 0;
     this.resetJump();
-    this.resetDash();    
+    this.resetDash();
     if (this._ladder) this.getOffLadder();
     this.resetPeak(); // if fallDamage is reimp, delete
   };
@@ -2158,13 +2158,13 @@ function Game_Bullet() {
       }
     }
   };
-  
+
   //if the player is in the enemy aggression region, let the enemies know
   //if the player is in the instant death region, kill them
   Game_Player.prototype.checkPlayerRegionOverlap = function(x, y) {
     var playerRegionID = $gameMap.regionId(x, y);
     var regionIDAbove = $gameMap.regionId(x, y - 1);
-  
+
   	//If the player is in the enemy aggression region, set enemyAggressionVariable to 1
   	//otherwise set it to 0
   	if (playerRegionID === actEnemyAngerRegion) {
@@ -2172,10 +2172,10 @@ function Game_Bullet() {
     } else {
     	$gameVariables.setValue(enemyAggressionVariable, 0);
     }
-    
+
     //If the player is in the death region or just below spikes, then kill them
   	if (playerRegionID === actInstantKillRegion || regionIDAbove === actInstantKillRegion) {
-  	
+
   		//prevent double death by setting deathCaseControlVariable to 1.  The common event
   		//sets the deathCaseControlVariable back to 0 once it finishes respawning
   		//the player, meaning that there's no way this "if" statement will be entered more
@@ -2187,7 +2187,7 @@ function Game_Bullet() {
         }
     }
   }
-  
+
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
   	this.checkPlayerRegionOverlap($gamePlayer.x, $gamePlayer.y);
@@ -2197,7 +2197,7 @@ function Game_Bullet() {
   	if (this.jumpInputCountdown > 0) {
   		this.jumpInputCountdown = this.jumpInputCountdown - 1;
   	}
-  	
+
   	/*
   	if (this.currentlyCanWallJump()) {
   		this.changeAnimation(MCAnimation.WALLSLIDE);
@@ -2237,13 +2237,13 @@ function Game_Bullet() {
       this.changeAnimation(MCAnimation.FALLING);
     }
   };
-  
+
   //If the player is dashing, then I don't care if they are falling,
   //otherwise check if the player has downards velocity
   Game_Player.prototype.isFalling = function() {
   	return !this.isDashing() && this._vy > 0;
   }
-  
+
   Game_Player.prototype.updateIdleCount = function() {
   	//if the player has no vertical and horizontal velocity on this
   	//frame, then increment the idle counter. Otherwise set the idle timer to 0.
@@ -2528,7 +2528,7 @@ function Game_Bullet() {
       }
     }
   };
-  
+
       // ジャンプカウントのリセット
   var _Game_Player_resetJump = Game_Player.prototype.resetJump;
   Game_Player.prototype.resetJump = function() {
@@ -2555,7 +2555,7 @@ function Game_Bullet() {
       } else {
 
 		//If you can wall jump, do it, (means you have used 1 jump and you're against a wall)
-		//otherwise regular jump (if you can), 
+		//otherwise regular jump (if you can),
 		//otherwise exit routine
         if (this.currentlyCanWallJump()) {
           this.wallJump();
@@ -2666,7 +2666,7 @@ function Game_Bullet() {
   // Update wind
   Game_Player.prototype.updateWind = function() {
       Game_Character.prototype.updateWind.call(this);
-      
+
       if($gameSwitches.value(3) == true) {
         this._vx -= this._moveSpeed / 50;
       } else if ($gameSwitches.value(4) == true) {
@@ -3088,14 +3088,14 @@ function Game_Bullet() {
     _Game_Interpreter_initialize.call(this);
     this.mushroomSet = {};
   };
-  
+
   Game_Interpreter.prototype.triggerCheckpointSFX = function(MapID, x, y) {
-  
+
   	//game is a little finicky, so I'm saying that if you're within a bounding box of 4*4
   	//around the currently active checkpoint, don't play the checkpoint sound again until
   	//you touch a checkpoint outside of that 4*4 square
-    if (MapID !== lastCheckpointMapID || 
-    	(x >= lastCheckpointX + 2 || x <= lastCheckpointX - 2) || 
+    if (MapID !== lastCheckpointMapID ||
+    	(x >= lastCheckpointX + 2 || x <= lastCheckpointX - 2) ||
     	(y >= lastCheckpointY + 2 || y <= lastCheckpointY - 2)) {
     	lastCheckpointMapID = MapID;
     	lastCheckpointX = x;
@@ -3110,30 +3110,30 @@ function Game_Bullet() {
     	AudioManager.playSe(checkpointSound);
     }
   }
-    		
-  
+
+
   Game_Interpreter.prototype.RegisterBossBaddie = function(eventId) {
   	if (this.BossEventID != eventId) {
   		this.BossEventID = eventId;
-  	}	
+  	}
   };
-  
+
   //modified to set up a bounding box around the boss enemy, so if the player collides
   //with any part of the enemy they get killed
   _Game_Interpreter_update = Game_Interpreter.prototype.update;
   Game_Interpreter.prototype.update = function() {
     _Game_Interpreter_update.call(this);
-    
-    //if the boss event ID has been set, and the player isn't currently dying, then 
+
+    //if the boss event ID has been set, and the player isn't currently dying, then
     //check if the player is within a certain area around the boss event
     if (this.BossEventID > 0 && $gameVariables.value(deathCaseControlVariable) == 0) {
-    	
+
       //grab boss event
       var eve = $gameMap.event(this.BossEventID);
       //check in a bounding box around the event (currently set to the big owl)
       for (var x = eve.x - 2; x <= eve.x + 2; x++) {
         for (var y = eve.y - 10; y <= eve.y + 1; y++) {
-        	
+
           //check if it is colliding, if so, set deathCaseControlVariable to 1
           if (eve.isCollidedWithPlayerCharacters(x, y)) {
             //this kills the player
@@ -3144,7 +3144,7 @@ function Game_Bullet() {
             $gameVariables.setValue(deathCaseControlVariable, 1);
           }
   		}
-  	  }	
+  	  }
   	}
   }
 
@@ -3174,19 +3174,19 @@ function Game_Bullet() {
     if (!$gameParty.inBattle()) $gamePlayer.requestRefresh();
     return true;
   };
-  
+
   /*
-  adds a mushroom to the set after checking that it hasn't already been collected and 
+  adds a mushroom to the set after checking that it hasn't already been collected and
   plays the collection sound.
   It adds the mushroom by identifying it with a key built by the following:
-  	"locationID,x,y", 
-  	
+  	"locationID,x,y",
+
   	so by example: Map012, x=1, y=2
-  	trackMushroom(12, 1, 2); 
-  	
+  	trackMushroom(12, 1, 2);
+
   	will use the key
   	"12,1,2"
-  
+
   parameters:
   	locationID: ID of Current Map
   	x: x position of the mushroom
@@ -3200,26 +3200,26 @@ function Game_Bullet() {
   	console.log("adding key:", key);
   	this.mushroomSet[key] = true;
   	console.log(this.mushroomSet);
-  	
+
   	//play sound
   	mushroomCollectionSound = {
-  		volume:50,
+  		volume:75,
   		pitch:100,
   		pan:0,
   		name:"MushroomCollect"
   	}
-  	
+
   	console.log("ding!");
   	AudioManager.playSe(mushroomCollectionSound);
   };
-  
+
   // プラグインコマンド
   var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
     if (command === "trackMushroom") {
     	this.trackMushroom(args[0], args[1], args[2]);
-    	
+
     } else if (command === 'actGainHp') {
       var character = this.character(args[0]);
       if (character && character.isBattler()) {
