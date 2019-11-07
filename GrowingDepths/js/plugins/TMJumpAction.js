@@ -3102,7 +3102,7 @@ function Game_Bullet() {
     	lastCheckpointY = y;
     	//play sound
   		checkpointSound = {
-  			volume:20,
+  			volume:100,
   			pitch:100,
   			pan:0,
   			name:"Checkpoint"
