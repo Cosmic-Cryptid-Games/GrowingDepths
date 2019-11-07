@@ -2222,7 +2222,7 @@ function Game_Bullet() {
   };
 
   // input processing
-  Game_Player.prototype.updateInput = function() {xxxxxx
+  Game_Player.prototype.updateInput = function() {
   	//this.updateIdleCount();
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
@@ -2341,7 +2341,7 @@ function Game_Bullet() {
           break;
         }
 
-        if (!this.isMoving()) {
+        if (!this.isMoving()) {        
             if (this._vx > 0) { // right
               this._vx = Math.max(this._vx - n, 0);
             } else if (this._vx < 0) { // left
