@@ -331,7 +331,7 @@ DataManager.loadSavefileImages = function(info) {
 };
 
 DataManager.maxSavefiles = function() {
-    return 20;
+    return 1;
 };
 
 DataManager.saveGame = function(savefileId) {
@@ -390,6 +390,7 @@ DataManager.loadGameWithoutRescue = function(savefileId) {
         return true;
     } else {
         return false;
+        console.log('You done fucked up');
     }
 };
 
@@ -1177,7 +1178,7 @@ AudioManager.playBgm = function(bgm, pos) {
         this.updateBgmParameters(bgm);
     } else {
         this.stopBgm();
-        if (bgm.name) { 
+        if (bgm.name) {
             if(Decrypter.hasEncryptedAudio && this.shouldUseHtml5Audio()){
                 this.playEncryptedBgm(bgm, pos);
             }
