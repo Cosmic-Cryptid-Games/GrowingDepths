@@ -1480,9 +1480,9 @@ function Game_Bullet() {
 
   // move processing
   Game_CharacterBase.prototype.updateMove = function() {
-    this.updateGravity();        
+    this.updateGravity();
     this.updateFriction();
-    if ($gameSwitches.value(3) == true || $gameSwitches.value(4) == true) this.updateWind(); // if map has wind then update wind    
+    if ($gameSwitches.value(3) == true || $gameSwitches.value(4) == true) this.updateWind(); // if map has wind then update wind
 
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
@@ -2271,7 +2271,7 @@ function Game_Bullet() {
   };
 
   // friction handling
-  Game_Player.prototype.updateFriction = function() { 
+  Game_Player.prototype.updateFriction = function() {
     Game_Character.prototype.updateFriction.call(this);
     this._friction = 0;
     if (this._ladder) {
@@ -2308,7 +2308,7 @@ function Game_Bullet() {
             } else if (this._vx > n) {
               this._vx = Math.max(this._vx - 0.005, n);
             }
-          
+
         }
       }
 
@@ -2316,7 +2316,7 @@ function Game_Bullet() {
         var n = actFriction;
         var speed = this._moveSpeed;
         if (this.isGuarding()) speed = speed * actGuardMoveRate / 100;
-        
+
         // Player Region Logic
         $gameMap.playerLandedOnRegion(this._landingRegion);
         switch (this._landingRegion) {
@@ -2345,13 +2345,13 @@ function Game_Bullet() {
           break;
         }
 
-        if (!this.isMoving()) {        
+        if (!this.isMoving()) {
             if (this._vx > 0) { // right
               this._vx = Math.max(this._vx - n, 0);
             } else if (this._vx < 0) { // left
               this._vx = Math.min(this._vx + n, 0);
             }
-        } else { // if moving 
+        } else { // if moving
           if(Input.isPressed('right') && this._vx < 0) {
             this._vx = Math.min(this._vx + n/10, 0);
           } else if (Input.isPressed('left') && this._vx > 0) {
@@ -3104,6 +3104,8 @@ function Game_Bullet() {
   Game_Interpreter.prototype.initialize = function(mapId, eventId) {
     _Game_Interpreter_initialize.call(this);
     this.mushroomSet = {};
+    // for restoring mushrooms on death
+    this.currentMushroomSet = {};
   };
 
   Game_Interpreter.prototype.triggerCheckpointSFX = function(MapID, x, y) {
@@ -3214,9 +3216,12 @@ function Game_Bullet() {
   	const loc = locationID.toString();
     const key = loc.concat(",", x, ",", y);
   	if (key in this.mushroomSet) return;
-  	console.log("adding key:", key);
-  	this.mushroomSet[key] = true;
-  	console.log(this.mushroomSet);
+  	if (key in this.currentMushroomSet) return;
+    console.log("adding key:", key);
+  	//this.mushroomSet[key] = true;
+  	//console.log(this.mushroomSet);
+    this.currentMushroomSet[key] = true;
+  	console.log(this.currentMushroomSet);
 
   	//play sound
   	mushroomCollectionSound = {
@@ -3230,13 +3235,53 @@ function Game_Bullet() {
   	AudioManager.playSe(mushroomCollectionSound);
   };
 
+  Game_Interpreter.prototype.resetMushrooms = function() {
+    //create a variable for the mushroom set keys
+    var mushStr;
+    //for each key in the set
+    for (mushStr in this.currentMushroomSet) {
+      //split the str into its parts, at the comma
+      var mushSplit = mushStr.split(",");
+      //create an empty set for the info from the string
+      var mushInfo = [];
+      //make an empty variable for the indexs in the split
+      var mushPart;
+      //for each index in the split
+      for (mushPart in mushSplit) {
+        //convert into an int and push to mushInfo
+        mushPartInt = parseInt(mushSplit[mushPart]);
+        mushInfo.push(mushPartInt);
+      }
+      //mushInfo is [mapID, xpos, ypos]
+      //get the mushroom's event ID
+      mushID = $gameMap.eventIdXy(mushInfo[1], mushInfo[2]);
+      //set the mushroom's self switch to false
+      var key = [mushInfo[0], mushID, 'A'];
+      $gameSelfSwitches.setValue(key, false);
+    }
+    //once all mushrooms have been reset, empty the current mushroom set
+    this.currentMushroomSet = {};
+  }
+
+  Game_Interpreter.prototype.addMushrooms = function() {
+    //moves each mushroom from the currentMushroomSet to mushroomSet, then clears
+    var key;
+    for (key in this.currentMushroomSet) {
+      this.mushroomSet[key] = true;
+    }
+    this.currentMushroomSet = {};
+  }
+
   // プラグインコマンド
   var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
     if (command === "trackMushroom") {
     	this.trackMushroom(args[0], args[1], args[2]);
-
+    } else if (command === 'resetMushrooms') {
+      this.resetMushrooms();
+    } else if (command === 'addMushrooms') {
+      this.addMushrooms();
     } else if (command === 'actGainHp') {
       var character = this.character(args[0]);
       if (character && character.isBattler()) {
