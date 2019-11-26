@@ -506,6 +506,9 @@ var MCAnimation = {
   }
 };
 
+var baseNumberOfDashes = 1;
+var baseNumberOfJumps = 2;
+
 var lastCheckpointMapID = 0;
 var lastCheckpointX = 0;
 var lastCheckpointY = 0;
@@ -1331,7 +1334,7 @@ function Game_Bullet() {
     this._moveCount = 0;
     this._jumpInput = 0;
     this._dashCount = 0;
-    this._canDash = true;
+    this._numDashes = baseNumberOfDashes;
     this._friction = 0;
     this._moveSpeed = 0.05;
     this._wallJumpSpeed = 0.12;
@@ -1786,7 +1789,7 @@ function Game_Bullet() {
   };
 
   Game_CharacterBase.prototype.resetDash = function() {
-    this._canDash = true;
+    this._numDashes = baseNumberOfDashes;
   };
 
   // 最高到達点のリセット
@@ -1855,8 +1858,8 @@ function Game_Bullet() {
 
   // ダッシュ（速度指定）
   Game_CharacterBase.prototype.dash = function(vx, vy) {
-    if (!this._canDash) return; //block dashing more than once
-    this._canDash = false;
+    if (this._numDashes <= 0) return; //block dashing if all dashes are exhausted
+    this._numDashes--;
     this._vx = vx;
     this._vy = vy;
     this._dashCount = this._dashCountTime;
@@ -2083,7 +2086,43 @@ function Game_Bullet() {
   Game_Player.prototype.centerX = function() {
     return (Graphics.width / $gameMap.tileWidth() - 1) / 2.0 + 0.5;
   };
-
+  
+  /*
+  Expecting an int for both numJumps and numDashes and a boolean value for takeDamage
+  so something like:
+  $gamePlayer.updateAssistMode(5, 6, true);
+  would give the player 5 jumps, 6 dashes and they will take damage
+  */
+  Game_Player.prototype.updateAssistMode = function(numJumps, numDashes, takeDamage) {
+  	//for persistence through death and reloads
+  	baseNumberOfJumps = numJumps;
+  	baseNumberOfDashes = numDashes;
+  	baseTakeDamage = takeDamage;
+  	
+  	//jumps
+  	this._mulchJump = baseNumberOfJumps;
+  	this._jumpCount = baseNumberOfJumps; 
+  	//dash
+  	this._numDashes = baseNumberOfDashes;
+  	//damage
+  	this.takeDamage = baseTakeDamage;
+  }
+  
+  Game_Player.prototype.DisableAssistMode = function() {
+  	//for persistence through death and reloads
+  	baseNumberOfJumps = 2;
+  	baseNumberOfDashes = 1;
+  	baseTakeDamage = true;
+  	
+  	//jumps
+  	this._mulchJump = baseNumberOfJumps;
+  	this._jumpCount = baseNumberOfJumps; 
+  	//dash
+  	this._numDashes = baseNumberOfDashes;
+  	//damage
+  	this.takeDamage = baseTakeDamage;
+  }
+  	
   // 画面中央の Y 座標
   Game_Player.prototype.centerY = function() {
     return (Graphics.height / $gameMap.tileHeight() - 1) / 2.0 + 0.5;
@@ -2779,7 +2818,7 @@ function Game_Bullet() {
       this._ladderAccele = +(data.meta['ladder_accele'] || 0.003);
       this._jumpInputTime = +(data.meta['jump_input'] || 0);
       this._swimJump = +(data.meta['swim_jump'] || 0.1);
-      this._mulchJump = +(data.meta['mulch_jump'] || 2);
+      this._mulchJump = baseNumberOfJumps;
       this._weight = +(data.meta['weight'] || 0);
       this._carryPower = +(data.meta['carry_power'] || 0);
       this._gravity = +(data.meta['gravity'] || 0.0045);
