@@ -508,7 +508,7 @@ var MCAnimation = {
 
 var baseNumberOfDashes = 1;
 var baseNumberOfJumps = 2;
-var PlayerTakeDamageVariable = 16;
+var PlayerTakeDamageVariable = 17;
 
 var lastCheckpointMapID = 0;
 var lastCheckpointX = 0;
