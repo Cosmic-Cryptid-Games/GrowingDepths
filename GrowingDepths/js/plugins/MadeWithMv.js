@@ -190,6 +190,7 @@ function Scene_Splash() {
     Scene_Splash.prototype.update = function() {
         if (Liquidize.MadeWithMV.ShowMV) {
             if (!this._mvFadeIn) {
+                var myBgm = {  name: "Trailer",  volume: 80,  pitch: 100,  pan: 0};AudioManager.playBgm(myBgm);
                 this.startFadeIn(Liquidize.MadeWithMV.FadeInTime, false);
                 this._mvFadeIn = true;
             } else {
