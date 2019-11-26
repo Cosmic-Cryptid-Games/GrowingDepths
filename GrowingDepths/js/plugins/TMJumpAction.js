@@ -494,6 +494,7 @@ var MCAnimation = {
   FALLING: 4,
   WALLSLIDE: 5,
   IDLE: 6,
+  DEATH:7,
   fileNames: {
     1: "$MCWalk%(6 0 1 2 3 4 5)", //WALK
     2: "$JumpMC%(6 0 1 2 3 4 5)", //JUMP
@@ -501,6 +502,7 @@ var MCAnimation = {
     4: "$FallMC%(6 0 1 2 3 4 5)", //FALL
     5: "$OwlDive%(6 0 1 2 3 4 5)", //WALLSLIDE
     6: "$SnakeAttack%(6 0 1 2 3 4 5)", //IDLE
+    7: "$Bunny%(7 0 1 2 3 4 5 6)", //DEATH
   }
 };
 
@@ -2190,6 +2192,10 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
+    if ($gameVariables.value(deathCaseControlVariable) !== 0) {
+    	this.changeAnimation(MCAnimation.DEATH);
+    	return;
+    }
   	this.checkPlayerRegionOverlap($gamePlayer.x, $gamePlayer.y);
 
   	//prevent jumping for a certain while
@@ -2198,11 +2204,9 @@ function Game_Bullet() {
   		this.jumpInputCountdown = this.jumpInputCountdown - 1;
   	}
 
-  	/*
   	if (this.currentlyCanWallJump()) {
   		this.changeAnimation(MCAnimation.WALLSLIDE);
   	}
-  	*/
 
     var lastScrolledX = this.scrolledX();
     var lastScrolledY = this.scrolledY();
@@ -2223,7 +2227,7 @@ function Game_Bullet() {
 
   // input processing
   Game_Player.prototype.updateInput = function() {
-  	//this.updateIdleCount();
+  	this.updateIdleCount();
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
