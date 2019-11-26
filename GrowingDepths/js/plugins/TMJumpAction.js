@@ -508,6 +508,7 @@ var MCAnimation = {
 
 var baseNumberOfDashes = 1;
 var baseNumberOfJumps = 2;
+var PlayerTakeDamageVariable = 16;
 
 var lastCheckpointMapID = 0;
 var lastCheckpointX = 0;
@@ -1448,7 +1449,6 @@ function Game_Bullet() {
       this.updateStop();
     }
     if (this.isSwimming() !== this._lastSwim) this.updateSwiming();
-    //if (this._needsRefresh) this.refresh();
     if (this.isInvincible()) this._invincibleCount--;
   };
 
@@ -2101,7 +2101,11 @@ function Game_Bullet() {
   	//for persistence through death and reloads
   	baseNumberOfJumps = numJumps;
   	baseNumberOfDashes = numDashes;
-  	baseTakeDamage = takeDamage;
+  	if (takeDamage) {
+  		$gameVariables.setValue(PlayerTakeDamageVariable, 0);
+  	} else {
+  		$gameVariables.setValue(PlayerTakeDamageVariable, 1);
+  	}
   	
   	this._adjustAssistMode()
   }
@@ -2110,7 +2114,7 @@ function Game_Bullet() {
   	//for persistence through death and reloads
   	baseNumberOfJumps = 2;
   	baseNumberOfDashes = 1;
-  	baseTakeDamage = true;
+  	$gameVariables.setValue(PlayerTakeDamageVariable, 0);
   	
   	this._adjustAssistMode()
   }
@@ -2121,8 +2125,6 @@ function Game_Bullet() {
   	this._jumpCount = baseNumberOfJumps; 
   	//dash
   	this._numDashes = baseNumberOfDashes;
-  	//damage
-  	this.takeDamage = baseTakeDamage;
   }
   	
   // 画面中央の Y 座標
