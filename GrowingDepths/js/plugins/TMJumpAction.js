@@ -2087,6 +2087,10 @@ function Game_Bullet() {
     return (Graphics.width / $gameMap.tileWidth() - 1) / 2.0 + 0.5;
   };
   
+  
+  //Assist Mode:
+  //setting : updateAssistMode(numJumps, numDashes, takeDamage)
+  //disabling : disableAssistMode()
   /*
   Expecting an int for both numJumps and numDashes and a boolean value for takeDamage
   so something like:
@@ -2099,21 +2103,19 @@ function Game_Bullet() {
   	baseNumberOfDashes = numDashes;
   	baseTakeDamage = takeDamage;
   	
-  	//jumps
-  	this._mulchJump = baseNumberOfJumps;
-  	this._jumpCount = baseNumberOfJumps; 
-  	//dash
-  	this._numDashes = baseNumberOfDashes;
-  	//damage
-  	this.takeDamage = baseTakeDamage;
+  	this._adjustAssistMode()
   }
   
-  Game_Player.prototype.DisableAssistMode = function() {
+  Game_Player.prototype.disableAssistMode = function() {
   	//for persistence through death and reloads
   	baseNumberOfJumps = 2;
   	baseNumberOfDashes = 1;
   	baseTakeDamage = true;
   	
+  	this._adjustAssistMode()
+  }
+  
+  Game_Player.prototype._adjustAssistMode = function() {
   	//jumps
   	this._mulchJump = baseNumberOfJumps;
   	this._jumpCount = baseNumberOfJumps; 
