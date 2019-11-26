@@ -500,9 +500,9 @@ var MCAnimation = {
     2: "$JumpMC%(6 0 1 2 3 4 5)", //JUMP
     3: "$DashMC%(6 0 1 2 3 4 5)", //DASH
     4: "$FallMC%(6 0 1 2 3 4 5)", //FALL
-    5: "$OwlDive%(6 0 1 2 3 4 5)", //WALLSLIDE
+    5: "$Clings%(4)", //WALLSLIDE
     6: "$SnakeAttack%(6 0 1 2 3 4 5)", //IDLE
-    7: "$Bunny%(7 0 1 2 3 4 5 6)", //DEATH
+    7: "$Ouch%(4)", //DEATH
   }
 };
 
