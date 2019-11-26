@@ -2235,9 +2235,17 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
-    if ($gameVariables.value(deathCaseControlVariable) !== 0) {
-    	this.changeAnimation(MCAnimation.DEATH);
-    	return;
+  
+  	//if the player can take damage
+  	if ($gameVariables.value(PlayerTakeDamageVariable) == 0) {
+  	
+  		//if the player should die right now
+    	if ($gameVariables.value(deathCaseControlVariable) !== 0) {
+    	
+    		//change animation state to death and prevent/freeze player movement
+    		this.changeAnimation(MCAnimation.DEATH);
+    		return;
+    	}
     }
   	this.checkPlayerRegionOverlap($gamePlayer.x, $gamePlayer.y);
 
