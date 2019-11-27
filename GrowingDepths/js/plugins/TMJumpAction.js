@@ -4189,7 +4189,11 @@ function Game_Bullet() {
     var symbol = this.commandSymbol(index);
     var value = this.getConfigValue(symbol);
     if (this.isNum(symbol)) {
+      if(value == -1 || value == 30000) {
+        return 'Infinite'
+      } else {
         return value;
+      }
     } else {
         return this.booleanStatusText(value);
     }
@@ -4206,10 +4210,12 @@ function Game_Bullet() {
     if(this.isCommandEnabled(index)) {
       if (this.isNum(symbol)) {
           value += 1;
-          if (value > 10) {
-              value = 2;
+          if(value >= 30000) {
+            value = 0;
+          } else if (value > 10) {
+            value = -1;
           }
-          value = value.clamp(0, 10);
+          value = value.clamp(-1, 10);
           this.changeValue(symbol, value);
       } else {
           this.changeValue(symbol, !value);
@@ -4237,7 +4243,12 @@ function Game_Bullet() {
     if(this.isCommandEnabled(index)) {
       if (this.isNum(symbol)) {
           value += 1;
-          value = value.clamp(0, 10);
+          if(value >= 30000) {
+            value = 0;
+          } else if (value > 10) {
+            value = -1;
+          }
+          value = value.clamp(-1, 10);
           this.changeValue(symbol, value);
       } else {
           this.changeValue(symbol, true);
@@ -4265,7 +4276,10 @@ function Game_Bullet() {
     if(this.isCommandEnabled(index)) {
       if (this.isNum(symbol)) {
           value -= 1;
-          value = value.clamp(0, 10);
+          if (value < -1) {
+            value = 10;
+          }
+          value = value.clamp(-1, 10);
           this.changeValue(symbol, value);
       } else {
           this.changeValue(symbol, false);
