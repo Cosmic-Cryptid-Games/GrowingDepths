@@ -1762,6 +1762,9 @@ function Game_Bullet() {
 
   Game_CharacterBase.prototype.changeAnimation = function(RequestedAnimation) {
   	  if (this._CurrentAnimation !== RequestedAnimation) {
+  	  	if (RequestedAnimation !== MCAnimation.IDLE && RequestedAnimation !== MCAnimation.LAYINGDOWN) {
+  	  		this.patternIndex = -1;
+  	  	}
   		if (RequestedAnimation == MCAnimation.IDLE) {
   			this.setStepAnime(true);
   		} else {
@@ -2278,13 +2281,12 @@ function Game_Bullet() {
   //  this._followers.update();
   };
 
-  Game_Player.prototype.handleIdleAnimationUpdates = function() {
-  	console.log("CURR ANIMATION:", this._CurrentAnimation, "CURR FRAME:", this.patternIndex);
-  	
-  	if (this._CurrentAnimation == MCAnimation.IDLE) {
-  		if (this.patternIndex == 6) {
-  			this.changeAnimation(MCAnimation.LAYINGDOWN);
-  		}
+  //waits for the 6th frame of the idle animation, then transitions to permanently laying down
+  Game_Player.prototype.handleIdleAnimationUpdates = function() {  	
+    if (this._CurrentAnimation == MCAnimation.IDLE) {
+      if (this.patternIndex == 6) {
+        this.changeAnimation(MCAnimation.LAYINGDOWN);
+      }
   	}
   }
 
