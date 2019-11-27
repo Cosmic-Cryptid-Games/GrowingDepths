@@ -627,6 +627,7 @@ function Game_Bullet() {
   var padConfigCommand = parameters['padConfigCommand'];
   var actStepAnimeConstantA = +(parameters['stepAnimeConstantA'] || 0.1);
   var actStepAnimeConstantB = +(parameters['stepAnimeConstantB'] || 300);
+  var assistMode = false;
 
   //-----------------------------------------------------------------------------
   // Input
@@ -3982,6 +3983,11 @@ function Game_Bullet() {
   // Window_Option
   //
 
+  Window_Command.prototype.setCommandEnabled = function(symbol, b) {
+    index = this.findSymbol(symbol)
+    this._list[index].enabled = b;
+  };
+
   var _Window_Option_makeCommandList = Window_Options.prototype.makeCommandList;
   Window_Options.prototype.makeCommandList = function() {
     _Window_Option_makeCommandList.call(this);
@@ -4139,13 +4145,15 @@ function Game_Bullet() {
   };
 
   Window_AssistOptions.prototype.makeCommandList = function() {
-    this.addCommand('Jumps', 'numJumps')
-    this.addCommand('Dashes', 'numDashes')
-    this.addCommand('Damage', 'boolDamage')    
+    this.addCommand('Assist Mode', 'boolAssist')
+    this.addCommand('Jumps', 'numJumps', assistMode)
+    this.addCommand('Dashes', 'numDashes', assistMode)
+    this.addCommand('Damage', 'boolDamage', assistMode)    
 
-    this.setConfigValue('numJumps', 2);
-    this.setConfigValue('numDashes', 1);
-    this.setConfigValue('boolDamage', true);
+    this.setConfigValue('boolAssist', assistMode);
+    this.setConfigValue('numJumps', baseNumberOfJumps);
+    this.setConfigValue('numDashes', baseNumberOfDashes);
+    this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
   };
 
   Window_AssistOptions.prototype.statusWidth = function() {
@@ -4163,22 +4171,37 @@ function Game_Bullet() {
   };
 
   Window_Options.prototype.isNum = function(symbol) {
-    return !symbol.contains('Damage');
+    return !symbol.contains('bool');
 };
 
   Window_AssistOptions.prototype.processOk = function() {
     var index = this.index();
     var symbol = this.commandSymbol(index);
     var value = this.getConfigValue(symbol);
-    if (this.isNum(symbol)) {
-        value += 1;
-        if (value > 10) {
-            value = 2;
-        }
-        value = value.clamp(2, 10);
-        this.changeValue(symbol, value);
-    } else {
-        this.changeValue(symbol, !value);
+    if(this.isCommandEnabled(index)) {
+      if (this.isNum(symbol)) {
+          value += 1;
+          if (value > 10) {
+              value = 2;
+          }
+          value = value.clamp(0, 10);
+          this.changeValue(symbol, value);
+      } else {
+          this.changeValue(symbol, !value);
+          if(symbol == 'boolAssist') {
+            assistMode = !value; 
+            $gamePlayer.disableAssistMode();
+            this.setConfigValue('numJumps', baseNumberOfJumps);
+            this.setConfigValue('numDashes', baseNumberOfDashes);
+            this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+
+            this.setCommandEnabled('numJumps', !this.isCommandEnabled(this.findSymbol('numJumps')));
+            this.setCommandEnabled('numDashes', !this.isCommandEnabled(this.findSymbol('numDashes')));
+            this.setCommandEnabled('boolDamage', !this.isCommandEnabled(this.findSymbol('boolDamage')));
+
+            this.refresh();
+          }
+      }
     }
   };
 
@@ -4186,12 +4209,27 @@ function Game_Bullet() {
     var index = this.index();
     var symbol = this.commandSymbol(index);
     var value = this.getConfigValue(symbol);
-    if (this.isNum(symbol)) {
-        value += 1;
-        value = value.clamp(2, 10);
-        this.changeValue(symbol, value);
-    } else {
-        this.changeValue(symbol, true);
+    if(this.isCommandEnabled(index)) {
+      if (this.isNum(symbol)) {
+          value += 1;
+          value = value.clamp(0, 10);
+          this.changeValue(symbol, value);
+      } else {
+          this.changeValue(symbol, true);
+          if(symbol == 'boolAssist') {
+            assistMode = true; 
+            $gamePlayer.disableAssistMode();
+            this.setConfigValue('numJumps', baseNumberOfJumps);
+            this.setConfigValue('numDashes', baseNumberOfDashes);
+            this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+
+            this.setCommandEnabled('numJumps', true);
+            this.setCommandEnabled('numDashes', true);
+            this.setCommandEnabled('boolDamage', true);
+
+            this.refresh();
+          }
+      }
     }
 };
 
@@ -4199,23 +4237,37 @@ function Game_Bullet() {
     var index = this.index();
     var symbol = this.commandSymbol(index);
     var value = this.getConfigValue(symbol);
-    if (this.isNum(symbol)) {
-        value -= 1;
-        value = value.clamp(2, 10);
-        this.changeValue(symbol, value);
-    } else {
-        this.changeValue(symbol, false);
+    if(this.isCommandEnabled(index)) {
+      if (this.isNum(symbol)) {
+          value -= 1;
+          value = value.clamp(0, 10);
+          this.changeValue(symbol, value);
+      } else {
+          this.changeValue(symbol, false);
+          if(symbol == 'boolAssist') {
+            assistMode = false; 
+            $gamePlayer.disableAssistMode();
+            this.setConfigValue('numJumps', baseNumberOfJumps);
+            this.setConfigValue('numDashes', baseNumberOfDashes);
+            this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+
+            this.setCommandEnabled('numJumps', false);
+            this.setCommandEnabled('numDashes', false);
+            this.setCommandEnabled('boolDamage', false);
+
+            this.refresh();
+          }
+      }
     }
   };
 
-  // Window_AssistOptions.prototype.changeValue = function(symbol, value) {
-  //   var lastValue = this.getConfigValue(symbol);
-  //   if (lastValue !== value) {
-  //       this.setConfigValue(symbol, value);
-  //       this.redrawItem(this.findSymbol(symbol));
-  //       SoundManager.playCursor();
-  //   }
-  // };
+  Window_AssistOptions.prototype.changeValue = function(symbol, value) {
+    Window_Options.prototype.changeValue.call(this, symbol, value)
+    j = this.getConfigValue('numJumps');
+    d = this.getConfigValue('numDashes');
+    ow = this.getConfigValue('boolDamage');
+    $gamePlayer.updateAssistMode(j, d, ow);
+  };
 
   //-----------------------------------------------------------------------------
   // Scene_Map
