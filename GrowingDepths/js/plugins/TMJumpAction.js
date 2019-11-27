@@ -494,15 +494,17 @@ var MCAnimation = {
   FALLING: 4,
   WALLSLIDE: 5,
   IDLE: 6,
-  DEATH:7,
+  LAYINGDOWN: 7,
+  DEATH:8,
   fileNames: {
     1: "$MCWalk%(6 0 1 2 3 4 5)", //WALK
     2: "$JumpMC%(6 0 1 2 3 4 5)", //JUMP
     3: "$DashMC%(6 0 1 2 3 4 5)", //DASH
     4: "$FallMC%(6 0 1 2 3 4 5)", //FALL
     5: "$Clings%(4)", //WALLSLIDE
-    6: "$SnakeAttack%(6 0 1 2 3 4 5)", //IDLE
-    7: "$Ouch%(4)", //DEATH
+    6: "$SleepCycle%(16)", //IDLE
+    7: "$SleepCycle%(16 6 7 8)", //LAYINGDOWN
+    8: "$Ouch%(4)", //DEATH
   }
 };
 
@@ -1761,7 +1763,10 @@ function Game_Bullet() {
   };
 
   Game_CharacterBase.prototype.changeAnimation = function(RequestedAnimation) {
-  	  	if (this._CurrentAnimation !== RequestedAnimation) {
+  	  if (this._CurrentAnimation !== RequestedAnimation) {
+  	  	if (RequestedAnimation !== MCAnimation.IDLE && RequestedAnimation !== MCAnimation.LAYINGDOWN) {
+  	  		this.patternIndex = -1;
+  	  	}
   		if (RequestedAnimation == MCAnimation.IDLE) {
   			this.setStepAnime(true);
   		} else {
@@ -1771,7 +1776,7 @@ function Game_Bullet() {
     	var CharacterSheetToLoad = MCAnimation.fileNames[RequestedAnimation]
     	$gameActors.actor(1).setCharacterImage(CharacterSheetToLoad, 1);
 		$gamePlayer.refresh();
-	}
+	  }
   }
 
   // 地面に降りる
@@ -2278,9 +2283,19 @@ function Game_Bullet() {
   //  this._followers.update();
   };
 
+  //waits for the 6th frame of the idle animation, then transitions to permanently laying down
+  Game_Player.prototype.handleIdleAnimationUpdates = function() {  	
+    if (this._CurrentAnimation == MCAnimation.IDLE) {
+      if (this.patternIndex == 6) {
+        this.changeAnimation(MCAnimation.LAYINGDOWN);
+      }
+  	}
+  }
+
   // input processing
   Game_Player.prototype.updateInput = function() {
   	this.updateIdleCount();
+  	this.handleIdleAnimationUpdates();
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
     this.attackByInput();
