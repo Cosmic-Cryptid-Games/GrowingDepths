@@ -2084,7 +2084,7 @@ function Game_Bullet() {
     this._carryingObject = null;
     this.jumpInputCountdown = 0;
     this.idleTimer = 0;
-    this.idleFramesStartAnimation = 100;
+    this.idleFramesStartAnimation = 400;
   };
 
   // 画面中央の X 座標
@@ -2292,7 +2292,6 @@ function Game_Bullet() {
 
   // input processing
   Game_Player.prototype.updateInput = function() {
-  	
   	this.updateIdleCount();
   	this.handleIdleAnimationUpdates();
     this.carryByInput();
