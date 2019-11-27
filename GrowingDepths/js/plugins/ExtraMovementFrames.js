@@ -271,6 +271,7 @@ ModernAlgebra.EMF = {};
                                 return this.emfCharacterState().idleFrame; // Idle Frame if _pattern < 0
                         } else {
                                 var patternIndex = (this._pattern % this.emfCharacterState().pattern.length);
+                                this.patternIndex = patternIndex;
                                 return this.emfCharacterState().pattern[patternIndex]; // index of pattern array
                         }
                 } else {

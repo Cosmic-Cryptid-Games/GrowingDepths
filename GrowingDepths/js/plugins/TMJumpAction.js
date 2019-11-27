@@ -503,7 +503,7 @@ var MCAnimation = {
     4: "$FallMC%(6 0 1 2 3 4 5)", //FALL
     5: "$Clings%(4)", //WALLSLIDE
     6: "$SleepCycle%(16)", //IDLE
-    7: "$SleepCycle%(16 9)", //LAYINGDOWN
+    7: "$SleepCycle%(16 6 7 8)", //LAYINGDOWN
     8: "$Ouch%(4)", //DEATH
   }
 };
@@ -2282,7 +2282,7 @@ function Game_Bullet() {
   	console.log("CURR ANIMATION:", this._CurrentAnimation, "CURR FRAME:", this.patternIndex);
   	
   	if (this._CurrentAnimation == MCAnimation.IDLE) {
-  		if (this.patternIndex == 8) {
+  		if (this.patternIndex == 6) {
   			this.changeAnimation(MCAnimation.LAYINGDOWN);
   		}
   	}
