@@ -500,11 +500,15 @@ var MCAnimation = {
     2: "$JumpMC%(6 0 1 2 3 4 5)", //JUMP
     3: "$DashMC%(6 0 1 2 3 4 5)", //DASH
     4: "$FallMC%(6 0 1 2 3 4 5)", //FALL
-    5: "$OwlDive%(6 0 1 2 3 4 5)", //WALLSLIDE
+    5: "$Clings%(4)", //WALLSLIDE
     6: "$SnakeAttack%(6 0 1 2 3 4 5)", //IDLE
-    7: "$Bunny%(7 0 1 2 3 4 5 6)", //DEATH
+    7: "$Ouch%(4)", //DEATH
   }
 };
+
+var baseNumberOfDashes = 1;
+var baseNumberOfJumps = 2;
+var PlayerTakeDamageVariable = 17;
 
 var lastCheckpointMapID = 0;
 var lastCheckpointX = 0;
@@ -1332,7 +1336,7 @@ function Game_Bullet() {
     this._moveCount = 0;
     this._jumpInput = 0;
     this._dashCount = 0;
-    this._canDash = true;
+    this._numDashes = baseNumberOfDashes;
     this._friction = 0;
     this._moveSpeed = 0.05;
     this._wallJumpSpeed = 0.12;
@@ -1446,7 +1450,6 @@ function Game_Bullet() {
       this.updateStop();
     }
     if (this.isSwimming() !== this._lastSwim) this.updateSwiming();
-    //if (this._needsRefresh) this.refresh();
     if (this.isInvincible()) this._invincibleCount--;
   };
 
@@ -1481,9 +1484,9 @@ function Game_Bullet() {
 
   // move processing
   Game_CharacterBase.prototype.updateMove = function() {
-    this.updateGravity();        
+    this.updateGravity();
     this.updateFriction();
-    if ($gameSwitches.value(3) == true || $gameSwitches.value(4) == true) this.updateWind(); // if map has wind then update wind    
+    if ($gameSwitches.value(3) == true || $gameSwitches.value(4) == true) this.updateWind(); // if map has wind then update wind
 
     if (this._vx !== 0 || this._vxPlus !== 0) {
       this._realX += this._vx + this._vxPlus;
@@ -1787,7 +1790,7 @@ function Game_Bullet() {
   };
 
   Game_CharacterBase.prototype.resetDash = function() {
-    this._canDash = true;
+    this._numDashes = baseNumberOfDashes;
   };
 
   // 最高到達点のリセット
@@ -1856,8 +1859,8 @@ function Game_Bullet() {
 
   // ダッシュ（速度指定）
   Game_CharacterBase.prototype.dash = function(vx, vy) {
-    if (!this._canDash) return; //block dashing more than once
-    this._canDash = false;
+    if (this._numDashes <= 0) return; //block dashing if all dashes are exhausted
+    this._numDashes--;
     this._vx = vx;
     this._vy = vy;
     this._dashCount = this._dashCountTime;
@@ -2084,7 +2087,47 @@ function Game_Bullet() {
   Game_Player.prototype.centerX = function() {
     return (Graphics.width / $gameMap.tileWidth() - 1) / 2.0 + 0.5;
   };
-
+  
+  
+  //Assist Mode:
+  //setting : updateAssistMode(numJumps, numDashes, takeDamage)
+  //disabling : disableAssistMode()
+  /*
+  Expecting an int for both numJumps and numDashes and a boolean value for takeDamage
+  so something like:
+  $gamePlayer.updateAssistMode(5, 6, true);
+  would give the player 5 jumps, 6 dashes and they will take damage
+  */
+  Game_Player.prototype.updateAssistMode = function(numJumps, numDashes, takeDamage) {
+  	//for persistence through death and reloads
+  	baseNumberOfJumps = numJumps;
+  	baseNumberOfDashes = numDashes;
+  	if (takeDamage) {
+  		$gameVariables.setValue(PlayerTakeDamageVariable, 0);
+  	} else {
+  		$gameVariables.setValue(PlayerTakeDamageVariable, 1);
+  	}
+  	
+  	this._adjustAssistMode()
+  }
+  
+  Game_Player.prototype.disableAssistMode = function() {
+  	//for persistence through death and reloads
+  	baseNumberOfJumps = 2;
+  	baseNumberOfDashes = 1;
+  	$gameVariables.setValue(PlayerTakeDamageVariable, 0);
+  	
+  	this._adjustAssistMode()
+  }
+  
+  Game_Player.prototype._adjustAssistMode = function() {
+  	//jumps
+  	this._mulchJump = baseNumberOfJumps;
+  	this._jumpCount = baseNumberOfJumps; 
+  	//dash
+  	this._numDashes = baseNumberOfDashes;
+  }
+  	
   // 画面中央の Y 座標
   Game_Player.prototype.centerY = function() {
     return (Graphics.height / $gameMap.tileHeight() - 1) / 2.0 + 0.5;
@@ -2193,9 +2236,17 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
-    if ($gameVariables.value(deathCaseControlVariable) !== 0) {
-    	this.changeAnimation(MCAnimation.DEATH);
-    	return;
+  
+  	//if the player can take damage
+  	if ($gameVariables.value(PlayerTakeDamageVariable) == 0) {
+  	
+  		//if the player should die right now
+    	if ($gameVariables.value(deathCaseControlVariable) !== 0) {
+    	
+    		//change animation state to death and prevent/freeze player movement
+    		this.changeAnimation(MCAnimation.DEATH);
+    		return;
+    	}
     }
   	this.checkPlayerRegionOverlap($gamePlayer.x, $gamePlayer.y);
 
@@ -2272,7 +2323,7 @@ function Game_Bullet() {
   };
 
   // friction handling
-  Game_Player.prototype.updateFriction = function() { 
+  Game_Player.prototype.updateFriction = function() {
     Game_Character.prototype.updateFriction.call(this);
     this._friction = 0;
     if (this._ladder) {
@@ -2309,7 +2360,7 @@ function Game_Bullet() {
             } else if (this._vx > n) {
               this._vx = Math.max(this._vx - 0.005, n);
             }
-          
+
         }
       }
 
@@ -2317,7 +2368,7 @@ function Game_Bullet() {
         var n = actFriction;
         var speed = this._moveSpeed;
         if (this.isGuarding()) speed = speed * actGuardMoveRate / 100;
-        
+
         // Player Region Logic
         $gameMap.playerLandedOnRegion(this._landingRegion);
         switch (this._landingRegion) {
@@ -2346,13 +2397,13 @@ function Game_Bullet() {
           break;
         }
 
-        if (!this.isMoving()) {        
+        if (!this.isMoving()) {
             if (this._vx > 0) { // right
               this._vx = Math.max(this._vx - n, 0);
             } else if (this._vx < 0) { // left
               this._vx = Math.min(this._vx + n, 0);
             }
-        } else { // if moving 
+        } else { // if moving
           if(Input.isPressed('right') && this._vx < 0) {
             this._vx = Math.min(this._vx + n/10, 0);
           } else if (Input.isPressed('left') && this._vx > 0) {
@@ -2780,7 +2831,7 @@ function Game_Bullet() {
       this._ladderAccele = +(data.meta['ladder_accele'] || 0.003);
       this._jumpInputTime = +(data.meta['jump_input'] || 0);
       this._swimJump = +(data.meta['swim_jump'] || 0.1);
-      this._mulchJump = +(data.meta['mulch_jump'] || 2);
+      this._mulchJump = baseNumberOfJumps;
       this._weight = +(data.meta['weight'] || 0);
       this._carryPower = +(data.meta['carry_power'] || 0);
       this._gravity = +(data.meta['gravity'] || 0.0045);
@@ -3105,6 +3156,8 @@ function Game_Bullet() {
   Game_Interpreter.prototype.initialize = function(mapId, eventId) {
     _Game_Interpreter_initialize.call(this);
     this.mushroomSet = {};
+    // for restoring mushrooms on death
+    this.currentMushroomSet = {};
   };
 
   Game_Interpreter.prototype.triggerCheckpointSFX = function(MapID, x, y) {
@@ -3215,9 +3268,12 @@ function Game_Bullet() {
   	const loc = locationID.toString();
     const key = loc.concat(",", x, ",", y);
   	if (key in this.mushroomSet) return;
-  	console.log("adding key:", key);
-  	this.mushroomSet[key] = true;
-  	console.log(this.mushroomSet);
+  	if (key in this.currentMushroomSet) return;
+    console.log("adding key:", key);
+  	//this.mushroomSet[key] = true;
+  	//console.log(this.mushroomSet);
+    this.currentMushroomSet[key] = true;
+  	console.log(this.currentMushroomSet);
 
   	//play sound
   	mushroomCollectionSound = {
@@ -3231,13 +3287,53 @@ function Game_Bullet() {
   	AudioManager.playSe(mushroomCollectionSound);
   };
 
+  Game_Interpreter.prototype.resetMushrooms = function() {
+    //create a variable for the mushroom set keys
+    var mushStr;
+    //for each key in the set
+    for (mushStr in this.currentMushroomSet) {
+      //split the str into its parts, at the comma
+      var mushSplit = mushStr.split(",");
+      //create an empty set for the info from the string
+      var mushInfo = [];
+      //make an empty variable for the indexs in the split
+      var mushPart;
+      //for each index in the split
+      for (mushPart in mushSplit) {
+        //convert into an int and push to mushInfo
+        mushPartInt = parseInt(mushSplit[mushPart]);
+        mushInfo.push(mushPartInt);
+      }
+      //mushInfo is [mapID, xpos, ypos]
+      //get the mushroom's event ID
+      mushID = $gameMap.eventIdXy(mushInfo[1], mushInfo[2]);
+      //set the mushroom's self switch to false
+      var key = [mushInfo[0], mushID, 'A'];
+      $gameSelfSwitches.setValue(key, false);
+    }
+    //once all mushrooms have been reset, empty the current mushroom set
+    this.currentMushroomSet = {};
+  }
+
+  Game_Interpreter.prototype.addMushrooms = function() {
+    //moves each mushroom from the currentMushroomSet to mushroomSet, then clears
+    var key;
+    for (key in this.currentMushroomSet) {
+      this.mushroomSet[key] = true;
+    }
+    this.currentMushroomSet = {};
+  }
+
   // プラグインコマンド
   var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
     if (command === "trackMushroom") {
     	this.trackMushroom(args[0], args[1], args[2]);
-
+    } else if (command === 'resetMushrooms') {
+      this.resetMushrooms();
+    } else if (command === 'addMushrooms') {
+      this.addMushrooms();
     } else if (command === 'actGainHp') {
       var character = this.character(args[0]);
       if (character && character.isBattler()) {
