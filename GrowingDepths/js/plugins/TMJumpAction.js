@@ -506,6 +506,10 @@ var MCAnimation = {
   }
 };
 
+var baseNumberOfDashes = 1;
+var baseNumberOfJumps = 2;
+var PlayerTakeDamageVariable = 17;
+
 var lastCheckpointMapID = 0;
 var lastCheckpointX = 0;
 var lastCheckpointY = 0;
@@ -1331,7 +1335,7 @@ function Game_Bullet() {
     this._moveCount = 0;
     this._jumpInput = 0;
     this._dashCount = 0;
-    this._canDash = true;
+    this._numDashes = baseNumberOfDashes;
     this._friction = 0;
     this._moveSpeed = 0.05;
     this._wallJumpSpeed = 0.12;
@@ -1445,7 +1449,6 @@ function Game_Bullet() {
       this.updateStop();
     }
     if (this.isSwimming() !== this._lastSwim) this.updateSwiming();
-    //if (this._needsRefresh) this.refresh();
     if (this.isInvincible()) this._invincibleCount--;
   };
 
@@ -1786,7 +1789,7 @@ function Game_Bullet() {
   };
 
   Game_CharacterBase.prototype.resetDash = function() {
-    this._canDash = true;
+    this._numDashes = baseNumberOfDashes;
   };
 
   // 最高到達点のリセット
@@ -1855,8 +1858,8 @@ function Game_Bullet() {
 
   // ダッシュ（速度指定）
   Game_CharacterBase.prototype.dash = function(vx, vy) {
-    if (!this._canDash) return; //block dashing more than once
-    this._canDash = false;
+    if (this._numDashes <= 0) return; //block dashing if all dashes are exhausted
+    this._numDashes--;
     this._vx = vx;
     this._vy = vy;
     this._dashCount = this._dashCountTime;
@@ -2083,7 +2086,47 @@ function Game_Bullet() {
   Game_Player.prototype.centerX = function() {
     return (Graphics.width / $gameMap.tileWidth() - 1) / 2.0 + 0.5;
   };
-
+  
+  
+  //Assist Mode:
+  //setting : updateAssistMode(numJumps, numDashes, takeDamage)
+  //disabling : disableAssistMode()
+  /*
+  Expecting an int for both numJumps and numDashes and a boolean value for takeDamage
+  so something like:
+  $gamePlayer.updateAssistMode(5, 6, true);
+  would give the player 5 jumps, 6 dashes and they will take damage
+  */
+  Game_Player.prototype.updateAssistMode = function(numJumps, numDashes, takeDamage) {
+  	//for persistence through death and reloads
+  	baseNumberOfJumps = numJumps;
+  	baseNumberOfDashes = numDashes;
+  	if (takeDamage) {
+  		$gameVariables.setValue(PlayerTakeDamageVariable, 0);
+  	} else {
+  		$gameVariables.setValue(PlayerTakeDamageVariable, 1);
+  	}
+  	
+  	this._adjustAssistMode()
+  }
+  
+  Game_Player.prototype.disableAssistMode = function() {
+  	//for persistence through death and reloads
+  	baseNumberOfJumps = 2;
+  	baseNumberOfDashes = 1;
+  	$gameVariables.setValue(PlayerTakeDamageVariable, 0);
+  	
+  	this._adjustAssistMode()
+  }
+  
+  Game_Player.prototype._adjustAssistMode = function() {
+  	//jumps
+  	this._mulchJump = baseNumberOfJumps;
+  	this._jumpCount = baseNumberOfJumps; 
+  	//dash
+  	this._numDashes = baseNumberOfDashes;
+  }
+  	
   // 画面中央の Y 座標
   Game_Player.prototype.centerY = function() {
     return (Graphics.height / $gameMap.tileHeight() - 1) / 2.0 + 0.5;
@@ -2192,9 +2235,17 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
-    if ($gameVariables.value(deathCaseControlVariable) !== 0) {
-    	this.changeAnimation(MCAnimation.DEATH);
-    	return;
+  
+  	//if the player can take damage
+  	if ($gameVariables.value(PlayerTakeDamageVariable) == 0) {
+  	
+  		//if the player should die right now
+    	if ($gameVariables.value(deathCaseControlVariable) !== 0) {
+    	
+    		//change animation state to death and prevent/freeze player movement
+    		this.changeAnimation(MCAnimation.DEATH);
+    		return;
+    	}
     }
   	this.checkPlayerRegionOverlap($gamePlayer.x, $gamePlayer.y);
 
@@ -2779,7 +2830,7 @@ function Game_Bullet() {
       this._ladderAccele = +(data.meta['ladder_accele'] || 0.003);
       this._jumpInputTime = +(data.meta['jump_input'] || 0);
       this._swimJump = +(data.meta['swim_jump'] || 0.1);
-      this._mulchJump = +(data.meta['mulch_jump'] || 2);
+      this._mulchJump = baseNumberOfJumps;
       this._weight = +(data.meta['weight'] || 0);
       this._carryPower = +(data.meta['carry_power'] || 0);
       this._gravity = +(data.meta['gravity'] || 0.0045);
