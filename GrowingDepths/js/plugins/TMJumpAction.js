@@ -2101,11 +2101,21 @@ function Game_Bullet() {
   so something like:
   $gamePlayer.updateAssistMode(5, 6, true);
   would give the player 5 jumps, 6 dashes and they will take damage
+  set numJumps or numDashes to -1 and the player will essentially have unlimited.
   */
   Game_Player.prototype.updateAssistMode = function(numJumps, numDashes, takeDamage) {
-  	//for persistence through death and reloads
-  	baseNumberOfJumps = numJumps;
-  	baseNumberOfDashes = numDashes;
+  	 //for persistence through death and screen reloads, set global variables
+  	if (numJumps === -1) {
+  		 baseNumberOfJumps = 30000;
+  	} else {
+  		  baseNumberOfJumps = numJumps;
+  	}
+	if (numDashes === -1) {
+  		 baseNumberOfDashes = 30000;
+  	} else {
+  		  baseNumberOfDashes = numDashes;
+  	}
+
   	if (takeDamage) {
   		$gameVariables.setValue(PlayerTakeDamageVariable, 0);
   	} else {
