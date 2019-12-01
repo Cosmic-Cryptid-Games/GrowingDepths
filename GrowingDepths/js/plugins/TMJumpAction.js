@@ -1329,7 +1329,7 @@ function Game_Bullet() {
     this._previousY = 0;
     this._lastSwim = false;
     this._collideW = 0.375;
-    this._collideH = 0.75;
+    this._collideH = 1.5;
     this._collideIds = [];
     this._landingObject = null;
     this._landingRegion = 0;
@@ -2093,8 +2093,8 @@ function Game_Bullet() {
   Game_Player.prototype.centerX = function() {
     return (Graphics.width / $gameMap.tileWidth() - 1) / 2.0 + 0.5;
   };
-  
-  
+
+
   //Assist Mode:
   //setting : updateAssistMode(numJumps, numDashes, takeDamage)
   //disabling : disableAssistMode()
@@ -2123,27 +2123,27 @@ function Game_Bullet() {
   	} else {
   		$gameVariables.setValue(PlayerTakeDamageVariable, 1);
   	}
-  	
+
   	this._adjustAssistMode()
   }
-  
+
   Game_Player.prototype.disableAssistMode = function() {
   	//for persistence through death and reloads
   	baseNumberOfJumps = 2;
   	baseNumberOfDashes = 1;
   	$gameVariables.setValue(PlayerTakeDamageVariable, 0);
-  	
+
   	this._adjustAssistMode()
   }
-  
+
   Game_Player.prototype._adjustAssistMode = function() {
   	//jumps
   	this._mulchJump = baseNumberOfJumps;
-  	this._jumpCount = baseNumberOfJumps; 
+  	this._jumpCount = baseNumberOfJumps;
   	//dash
   	this._numDashes = baseNumberOfDashes;
   }
-  	
+
   // 画面中央の Y 座標
   Game_Player.prototype.centerY = function() {
     return (Graphics.height / $gameMap.tileHeight() - 1) / 2.0 + 0.5;
@@ -2252,13 +2252,13 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
-  
+
   	//if the player can take damage
   	if ($gameVariables.value(PlayerTakeDamageVariable) == 0) {
-  	
+
   		//if the player should die right now
     	if ($gameVariables.value(deathCaseControlVariable) !== 0) {
-    	
+
     		//change animation state to death and prevent/freeze player movement
     		this.changeAnimation(MCAnimation.DEATH);
     		return;
@@ -2294,7 +2294,7 @@ function Game_Bullet() {
   };
 
   //waits for the 6th frame of the idle animation, then transitions to permanently laying down
-  Game_Player.prototype.handleIdleAnimationUpdates = function() {  	
+  Game_Player.prototype.handleIdleAnimationUpdates = function() {
     if (this._CurrentAnimation == MCAnimation.IDLE) {
       if (this.patternIndex == 6) {
         this.changeAnimation(MCAnimation.LAYINGDOWN);
@@ -4016,10 +4016,10 @@ function Game_Bullet() {
   var _Window_Option_makeCommandList = Window_Options.prototype.makeCommandList;
   Window_Options.prototype.makeCommandList = function() {
     _Window_Option_makeCommandList.call(this);
-    
+
     this.addCommand('Assist Mode', 'assist')
-    
-    if (padConfigCommand) this.addCommand(padConfigCommand, 'padConfig');    
+
+    if (padConfigCommand) this.addCommand(padConfigCommand, 'padConfig');
 
     // Because dashes are always unnecessary, they are deleted.
     for (var i = 0; i < this._list.length; i++) {
@@ -4173,7 +4173,7 @@ function Game_Bullet() {
     this.addCommand('Assist Mode', 'boolAssist')
     this.addCommand('Jumps', 'numJumps', assistMode)
     this.addCommand('Dashes', 'numDashes', assistMode)
-    this.addCommand('Damage', 'boolDamage', assistMode)    
+    this.addCommand('Damage', 'boolDamage', assistMode)
 
     this.setConfigValue('boolAssist', assistMode);
     this.setConfigValue('numJumps', baseNumberOfJumps);
@@ -4220,7 +4220,7 @@ function Game_Bullet() {
       } else {
           this.changeValue(symbol, !value);
           if(symbol == 'boolAssist') {
-            assistMode = !value; 
+            assistMode = !value;
             $gamePlayer.disableAssistMode();
             this.setConfigValue('numJumps', baseNumberOfJumps);
             this.setConfigValue('numDashes', baseNumberOfDashes);
@@ -4253,7 +4253,7 @@ function Game_Bullet() {
       } else {
           this.changeValue(symbol, true);
           if(symbol == 'boolAssist') {
-            assistMode = true; 
+            assistMode = true;
             $gamePlayer.disableAssistMode();
             this.setConfigValue('numJumps', baseNumberOfJumps);
             this.setConfigValue('numDashes', baseNumberOfDashes);
@@ -4284,7 +4284,7 @@ function Game_Bullet() {
       } else {
           this.changeValue(symbol, false);
           if(symbol == 'boolAssist') {
-            assistMode = false; 
+            assistMode = false;
             $gamePlayer.disableAssistMode();
             this.setConfigValue('numJumps', baseNumberOfJumps);
             this.setConfigValue('numDashes', baseNumberOfDashes);
