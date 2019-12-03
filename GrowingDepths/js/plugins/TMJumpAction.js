@@ -512,6 +512,8 @@ var baseNumberOfDashes = 1;
 var baseNumberOfJumps = 2;
 var PlayerTakeDamageVariable = 17;
 
+var FinalCutsceneVariable = 19;
+
 var lastCheckpointMapID = 0;
 var lastCheckpointX = 0;
 var lastCheckpointY = 0;
@@ -2252,6 +2254,9 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
+  
+  	//if the player is in the final cutscene, take away control
+  	if ($gameVariables.value(FinalCutsceneVariable) == 1) return;
 
   	//if the player can take damage
   	if ($gameVariables.value(PlayerTakeDamageVariable) == 0) {
