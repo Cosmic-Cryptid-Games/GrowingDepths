@@ -7393,7 +7393,7 @@ Weather.prototype._updateSprite = function(sprite) {
 Weather.prototype._updateRainSprite = function(sprite) {
     sprite.bitmap = this._rainBitmap;
     sprite.rotation = Math.PI / 16;
-    sprite.ax -= 10 * Math.sin(sprite.rotation);
+    sprite.ax -= 6 * Math.sin(sprite.rotation);
     sprite.ay += 6 * Math.cos(sprite.rotation);
     sprite.opacity -= 6;
 };
@@ -7401,7 +7401,7 @@ Weather.prototype._updateRainSprite = function(sprite) {
 Weather.prototype._updateRainSpriteReverse = function(sprite) {
     sprite.bitmap = this._rainBitmap;
     sprite.rotation = Math.PI - (Math.PI / 16);
-    sprite.ax += 10 * Math.sin(sprite.rotation);
+    sprite.ax += 6 * Math.sin(sprite.rotation);
     sprite.ay -= 6 * Math.cos(sprite.rotation);
     sprite.opacity -= 6;
 };
