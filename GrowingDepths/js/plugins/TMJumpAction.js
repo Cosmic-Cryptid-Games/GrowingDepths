@@ -2026,7 +2026,7 @@ function Game_Bullet() {
   Game_Character.prototype.nwayShot = function(n, space, angle, speed, count, type, index, skillId) {
     angle = angle - (space * (n - 1) / 2);
     for (var i = 0; i < n; i++) {
-      $gameMap.addBullet(this._realX, this._realY - this._collideH / 2, 200 + i,
+      $gameMap.addBullet(this._realX - this._collideW, this._realY - (this._collideH * 1.5), 200 + i,
                          Math.cos(angle) * speed, Math.sin(angle) * speed, angle, count, type, index,
                          this.battler().isEnemy(), skillId, this);
       angle += space;
