@@ -906,7 +906,8 @@ function Game_Bullet() {
   	  "maxTimer": cloudTimer,
   	  "Decreasing": "false",
   	  "FadedOutTimer": this.coolDownTimer,
-  	  "FadeInTimer": 0
+  	  "FadeInTimer": 0,
+  	  "SoundTriggered": false
   	}
   }
 
@@ -941,6 +942,17 @@ function Game_Bullet() {
   Game_Map.prototype.playerLandedOnRegion = function(regionID) {
     if (regionID in this.CloudTimers) {
       this.CloudTimers[regionID]["Decreasing"] = "true";
+      if (this.CloudTimers[regionID]["SoundTriggered"] == false) {
+        //play sound
+        cloudLandingSound = {
+          volume:75,
+          pitch:100,
+          pan:0,
+          name:"Landing3"
+        }
+        AudioManager.playSe(cloudLandingSound);
+        this.CloudTimers[regionID]["SoundTriggered"] = true;
+      }
     }
   }
 
@@ -1062,6 +1074,7 @@ function Game_Bullet() {
       	  //move the value to fading in clouds and set FadeInTimer
       	  var timer = this.InvisibleClouds[regionID];
       	  timer["FadeInTimer"] = 0;
+      	  timer["SoundTriggered"] = false;
       	  this.FadingInClouds[regionID] = timer;
       	  delete this.InvisibleClouds[regionID];
       	}
