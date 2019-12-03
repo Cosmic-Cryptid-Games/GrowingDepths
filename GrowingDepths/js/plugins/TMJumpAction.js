@@ -2271,9 +2271,17 @@ function Game_Bullet() {
   	if (this.jumpInputCountdown > 0) {
   		this.jumpInputCountdown = this.jumpInputCountdown - 1;
   	}
-
+	
   	if (this.currentlyCanWallJump()) {
   		this.changeAnimation(MCAnimation.WALLSLIDE);
+  	} else {
+  		if (this._CurrentAnimation == MCAnimation.WALLSLIDE) {
+  			if (this._vy < 0) {
+  				this.changeAnimation(MCAnimation.JUMP);
+  			} else {
+  				this.changeAnimation(MCAnimation.FALLING);
+  			}
+  		}
   	}
 
     var lastScrolledX = this.scrolledX();
