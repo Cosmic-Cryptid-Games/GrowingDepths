@@ -518,6 +518,8 @@ var lastCheckpointMapID = 0;
 var lastCheckpointX = 0;
 var lastCheckpointY = 0;
 
+var assistMode = false;
+
 var Imported = Imported || {};
 Imported.TMJumpAction = true;
 
@@ -631,7 +633,6 @@ function Game_Bullet() {
   var padConfigCommand = parameters['padConfigCommand'];
   var actStepAnimeConstantA = +(parameters['stepAnimeConstantA'] || 0.1);
   var actStepAnimeConstantB = +(parameters['stepAnimeConstantB'] || 300);
-  var assistMode = false;
 
   //-----------------------------------------------------------------------------
   // Input
@@ -2284,6 +2285,11 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
+  
+  	//disable death every frame if assist mode is active
+  	if (assistMode) {
+  		$gameVariables.setValue(deathCaseControlVariable, 0);
+  	}
 
   	//if the player is in the final cutscene, take away control
   	if ($gameVariables.value(FinalCutsceneVariable) == 1) return;
