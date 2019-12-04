@@ -899,6 +899,7 @@ function Game_Bullet() {
     this.FadingInClouds = {};
     this.coolDownTimer = 150;
     this.maxFadeInTimer = 15;
+    $gamePlayer.resetSpawn()
   };
 
   //setup a timer that will allow the player to stand on `regionID` for
@@ -960,15 +961,24 @@ function Game_Bullet() {
       }
     }
     else {
-      if ($gamePlayer.landingSoundTriggered == false) {
-        landingSound = {
-          volume:20,
-          pitch:100,
-          pan:0,
-          name:"Landing2"
+      console.log("In here");
+      if ($gamePlayer.JustSpawned == true) {
+        console.log("No ding");
+      	$gamePlayer.landingSoundTriggered = true;
+      	$gamePlayer.JustSpawned = false;
+      } else {
+        
+        if ($gamePlayer.landingSoundTriggered == false) {
+          console.log("ding all around");
+          landingSound = {
+            volume:20,
+            pitch:100,
+            pan:0,
+            name:"Landing2"
+          }
+          AudioManager.playSe(landingSound);
+          $gamePlayer.landingSoundTriggered = true;
         }
-        AudioManager.playSe(landingSound);
-        $gamePlayer.landingSoundTriggered = true;
       }
     }
   }
@@ -2119,6 +2129,7 @@ function Game_Bullet() {
     this.idleFramesStartAnimation = 400;
     this.playerBounds = [];
     this.landingSoundTriggered = true;
+	this.JustSpawned = true
   };
 
   // 画面中央の X 座標
@@ -2293,6 +2304,11 @@ function Game_Bullet() {
     var bottomLeftBound = [Math.floor(this._realX - this._collideW), Math.floor(this._realY)];
     var bottomRightBound = [Math.floor(this._realX + this._collideW), Math.floor(this._realY)];
     this.playerBounds = [topLeftBound, topRightBound, bottomLeftBound, bottomRightBound];
+  }
+  
+  Game_Player.prototype.resetSpawn = function() {
+  	console.log("True baby");
+  	this.JustSpawned = true
   }
 
   // frame update
@@ -2693,7 +2709,8 @@ function Game_Bullet() {
         if (this.isCollideLadder(true)) this.getOnLadder(true);
       }
     }
-    if (this._vy > 0) {
+
+    if (this._landingObject == null) {
       this.landingSoundTriggered = false;
     }
   };
