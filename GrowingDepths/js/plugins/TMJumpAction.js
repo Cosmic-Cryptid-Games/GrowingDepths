@@ -1343,8 +1343,8 @@ function Game_Bullet() {
     this._latestY = 0;
     this._previousY = 0;
     this._lastSwim = false;
-    this._collideW = 0.5;
-    this._collideH = 1.75;
+    this._collideW = 0.425;
+    this._collideH = 1.5;
     this._collideIds = [];
     this._landingObject = null;
     this._landingRegion = 0;
@@ -1486,9 +1486,9 @@ function Game_Bullet() {
   //gets the player's x and y coordinates
   Game_CharacterBase.prototype.getWallJumpCalculations = function(x,y) {
     if (this._direction == 4) {
-      var x = Math.floor(this._realX - this._collideW - 0.16);
+      var x = Math.floor(this._realX - 0.535);
 	} else {
-      var x = Math.floor(this._realX + this._collideW + 0.16);
+      var x = Math.floor(this._realX + 0.535);
     }
     var y = Math.floor(this._realY);
     return { x: x, y: y };
@@ -2102,6 +2102,7 @@ function Game_Bullet() {
     this.jumpInputCountdown = 0;
     this.idleTimer = 0;
     this.idleFramesStartAnimation = 400;
+    this.playerBounds = [];
   };
 
   // 画面中央の X 座標
@@ -2239,8 +2240,7 @@ function Game_Bullet() {
   //if the player is in the enemy aggression region, let the enemies know
   //if the player is in the instant death region, kill them
   Game_Player.prototype.checkPlayerRegionOverlap = function(x, y) {
-    var playerRegionID = $gameMap.regionId(x, y);
-    var regionIDAbove = $gameMap.regionId(x, y - 1);
+    var playerRegionID = $gameMap.regionId(x, y)
 
   	//If the player is in the enemy aggression region, set enemyAggressionVariable to 1
   	//otherwise set it to 0
@@ -2251,7 +2251,7 @@ function Game_Bullet() {
     }
 
     //If the player is in the death region or just below spikes, then kill them
-  	if (playerRegionID === actInstantKillRegion || regionIDAbove === actInstantKillRegion) {
+  	if (playerRegionID === actInstantKillRegion) {
 
   		//prevent double death by setting deathCaseControlVariable to 1.  The common event
   		//sets the deathCaseControlVariable back to 0 once it finishes respawning
@@ -2263,6 +2263,14 @@ function Game_Bullet() {
           	battler.addState(0001)
         }
     }
+  }
+
+  Game_Player.prototype.updatePlayerBounds = function() {
+    var topLeftBound = [Math.floor(this._realX - this._collideW), Math.floor(this._realY - this._collideH)];
+    var topRightBound = [Math.floor(this._realX + this._collideW), Math.floor(this._realY - this._collideH)];
+    var bottomLeftBound = [Math.floor(this._realX - this._collideW), Math.floor(this._realY)];
+    var bottomRightBound = [Math.floor(this._realX + this._collideW), Math.floor(this._realY)];
+    this.playerBounds = [topLeftBound, topRightBound, bottomLeftBound, bottomRightBound];
   }
 
   // frame update
@@ -2282,7 +2290,14 @@ function Game_Bullet() {
     		return;
     	}
     }
-  	this.checkPlayerRegionOverlap($gamePlayer.x, $gamePlayer.y);
+    this.updatePlayerBounds();
+    console.log(this.playerBounds);
+    for (i = 0; i < this.playerBounds.length; i++) {
+      xy = this.playerBounds[i];
+      x = xy[0];
+      y = xy[1];
+      this.checkPlayerRegionOverlap(x, y);
+    }
 
   	//prevent jumping for a certain while
   	//remove 1 tick every update frame
