@@ -2139,6 +2139,9 @@ function Game_Bullet() {
   	} else {
   		$gameVariables.setValue(PlayerTakeDamageVariable, 1);
   	}
+  	
+  	//clear death state if it exists
+  	$gameVariables.setValue(deathCaseControlVariable, 0)
 
   	this._adjustAssistMode()
   }
@@ -2148,6 +2151,9 @@ function Game_Bullet() {
   	baseNumberOfJumps = 2;
   	baseNumberOfDashes = 1;
   	$gameVariables.setValue(PlayerTakeDamageVariable, 0);
+  	
+  	//clear death state if it exists
+  	$gameVariables.setValue(deathCaseControlVariable, 0)
 
   	this._adjustAssistMode()
   }
@@ -2291,7 +2297,6 @@ function Game_Bullet() {
     	}
     }
     this.updatePlayerBounds();
-    console.log(this.playerBounds);
     for (i = 0; i < this.playerBounds.length; i++) {
       xy = this.playerBounds[i];
       x = xy[0];
