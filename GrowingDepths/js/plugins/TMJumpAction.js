@@ -961,17 +961,17 @@ function Game_Bullet() {
       }
     }
     else {
-      console.log("In here");
-      if ($gamePlayer.JustSpawned == true) {
-        console.log("No ding");
+      //skip playing the sound `$gamePlayer.JustSpawned` times when landing as the player
+      //touches the ground a few times before gaining control
+      if ($gamePlayer.JustSpawned > 0) {
       	$gamePlayer.landingSoundTriggered = true;
-      	$gamePlayer.JustSpawned = false;
+      	$gamePlayer.JustSpawned--;
+      	
+      //play the sound
       } else {
-        
         if ($gamePlayer.landingSoundTriggered == false) {
-          console.log("ding all around");
           landingSound = {
-            volume:20,
+            volume:40,
             pitch:100,
             pan:0,
             name:"Landing2"
@@ -2129,7 +2129,7 @@ function Game_Bullet() {
     this.idleFramesStartAnimation = 400;
     this.playerBounds = [];
     this.landingSoundTriggered = true;
-	this.JustSpawned = true
+	this.JustSpawned = 0;
   };
 
   // 画面中央の X 座標
@@ -2307,8 +2307,7 @@ function Game_Bullet() {
   }
   
   Game_Player.prototype.resetSpawn = function() {
-  	console.log("True baby");
-  	this.JustSpawned = true
+  	this.JustSpawned = 2; //player touches ground twice before getting control
   }
 
   // frame update
