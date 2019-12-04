@@ -959,6 +959,18 @@ function Game_Bullet() {
         this.CloudTimers[regionID]["SoundTriggered"] = true;
       }
     }
+    else {
+      if ($gamePlayer.landingSoundTriggered == false) {
+        landingSound = {
+          volume:20,
+          pitch:100,
+          pan:0,
+          name:"Landing2"
+        }
+        AudioManager.playSe(landingSound);
+        $gamePlayer.landingSoundTriggered = true;
+      }
+    }
   }
 
   // 通行チェック
@@ -2106,6 +2118,7 @@ function Game_Bullet() {
     this.idleTimer = 0;
     this.idleFramesStartAnimation = 400;
     this.playerBounds = [];
+    this.landingSoundTriggered = true;
   };
 
   // 画面中央の X 座標
@@ -2679,6 +2692,9 @@ function Game_Bullet() {
       } else if (Input.isPressed('down')) {
         if (this.isCollideLadder(true)) this.getOnLadder(true);
       }
+    }
+    if (this._vy > 0) {
+      this.landingSoundTriggered = false;
     }
   };
 
