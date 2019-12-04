@@ -1343,7 +1343,7 @@ function Game_Bullet() {
     this._latestY = 0;
     this._previousY = 0;
     this._lastSwim = false;
-    this._collideW = 0.375;
+    this._collideW = 0.425;
     this._collideH = 1.5;
     this._collideIds = [];
     this._landingObject = null;
@@ -1486,9 +1486,9 @@ function Game_Bullet() {
   //gets the player's x and y coordinates
   Game_CharacterBase.prototype.getWallJumpCalculations = function(x,y) {
     if (this._direction == 4) {
-      var x = Math.floor(this._realX - this._collideW - 0.16);
+      var x = Math.floor(this._realX - 0.535);
 	} else {
-      var x = Math.floor(this._realX + this._collideW + 0.16);
+      var x = Math.floor(this._realX + 0.535);
     }
     var y = Math.floor(this._realY);
     return { x: x, y: y };
@@ -2102,6 +2102,7 @@ function Game_Bullet() {
     this.jumpInputCountdown = 0;
     this.idleTimer = 0;
     this.idleFramesStartAnimation = 400;
+    this.playerBounds = [];
   };
 
   // 画面中央の X 座標
@@ -2138,6 +2139,9 @@ function Game_Bullet() {
   	} else {
   		$gameVariables.setValue(PlayerTakeDamageVariable, 1);
   	}
+  	
+  	//clear death state if it exists
+  	$gameVariables.setValue(deathCaseControlVariable, 0)
 
   	this._adjustAssistMode()
   }
@@ -2147,6 +2151,9 @@ function Game_Bullet() {
   	baseNumberOfJumps = 2;
   	baseNumberOfDashes = 1;
   	$gameVariables.setValue(PlayerTakeDamageVariable, 0);
+  	
+  	//clear death state if it exists
+  	$gameVariables.setValue(deathCaseControlVariable, 0)
 
   	this._adjustAssistMode()
   }
@@ -2239,8 +2246,7 @@ function Game_Bullet() {
   //if the player is in the enemy aggression region, let the enemies know
   //if the player is in the instant death region, kill them
   Game_Player.prototype.checkPlayerRegionOverlap = function(x, y) {
-    var playerRegionID = $gameMap.regionId(x, y);
-    var regionIDAbove = $gameMap.regionId(x, y - 1);
+    var playerRegionID = $gameMap.regionId(x, y)
 
   	//If the player is in the enemy aggression region, set enemyAggressionVariable to 1
   	//otherwise set it to 0
@@ -2251,7 +2257,7 @@ function Game_Bullet() {
     }
 
     //If the player is in the death region or just below spikes, then kill them
-  	if (playerRegionID === actInstantKillRegion || regionIDAbove === actInstantKillRegion) {
+  	if (playerRegionID === actInstantKillRegion) {
 
   		//prevent double death by setting deathCaseControlVariable to 1.  The common event
   		//sets the deathCaseControlVariable back to 0 once it finishes respawning
@@ -2265,9 +2271,17 @@ function Game_Bullet() {
     }
   }
 
+  Game_Player.prototype.updatePlayerBounds = function() {
+    var topLeftBound = [Math.floor(this._realX - this._collideW), Math.floor(this._realY - this._collideH)];
+    var topRightBound = [Math.floor(this._realX + this._collideW), Math.floor(this._realY - this._collideH)];
+    var bottomLeftBound = [Math.floor(this._realX - this._collideW), Math.floor(this._realY)];
+    var bottomRightBound = [Math.floor(this._realX + this._collideW), Math.floor(this._realY)];
+    this.playerBounds = [topLeftBound, topRightBound, bottomLeftBound, bottomRightBound];
+  }
+
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
-  
+
   	//if the player is in the final cutscene, take away control
   	if ($gameVariables.value(FinalCutsceneVariable) == 1) return;
 
@@ -2282,14 +2296,20 @@ function Game_Bullet() {
     		return;
     	}
     }
-  	this.checkPlayerRegionOverlap($gamePlayer.x, $gamePlayer.y);
+    this.updatePlayerBounds();
+    for (i = 0; i < this.playerBounds.length; i++) {
+      xy = this.playerBounds[i];
+      x = xy[0];
+      y = xy[1];
+      this.checkPlayerRegionOverlap(x, y);
+    }
 
   	//prevent jumping for a certain while
   	//remove 1 tick every update frame
   	if (this.jumpInputCountdown > 0) {
   		this.jumpInputCountdown = this.jumpInputCountdown - 1;
   	}
-	
+
   	if (this.currentlyCanWallJump()) {
   		this.changeAnimation(MCAnimation.WALLSLIDE);
   	} else {
@@ -2892,8 +2912,6 @@ function Game_Bullet() {
       this._dashCountTime = +(data.meta['dash_count'] || 15);
       this._dashDelayTime = +(data.meta['dash_delay'] || 30);
       this._dashMpCost = +(data.meta['dash_mp_cost'] || 0);
-      this._collideW = +(data.meta['w'] || 0.375);
-      this._collideH = +(data.meta['h'] || 0.75);
       this._fallGuard = +(data.meta['fall_guard'] || 0);
       this._guardSpeed = +(data.meta['guard_speed'] || 0);
       this._invincibleTime = +(data.meta['invincible_time'] || 30);
