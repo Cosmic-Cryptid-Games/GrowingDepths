@@ -971,7 +971,7 @@ function Game_Bullet() {
       } else {
         if ($gamePlayer.landingSoundTriggered == false) {
           landingSound = {
-            volume:40,
+            volume:20,
             pitch:100,
             pan:0,
             name:"Landing2"
