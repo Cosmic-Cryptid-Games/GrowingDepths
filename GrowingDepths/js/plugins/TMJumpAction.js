@@ -1343,8 +1343,8 @@ function Game_Bullet() {
     this._latestY = 0;
     this._previousY = 0;
     this._lastSwim = false;
-    this._collideW = 0.375;
-    this._collideH = 1.5;
+    this._collideW = 0.5;
+    this._collideH = 1.75;
     this._collideIds = [];
     this._landingObject = null;
     this._landingRegion = 0;
@@ -2267,7 +2267,7 @@ function Game_Bullet() {
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
-  
+
   	//if the player is in the final cutscene, take away control
   	if ($gameVariables.value(FinalCutsceneVariable) == 1) return;
 
@@ -2289,7 +2289,7 @@ function Game_Bullet() {
   	if (this.jumpInputCountdown > 0) {
   		this.jumpInputCountdown = this.jumpInputCountdown - 1;
   	}
-	
+
   	if (this.currentlyCanWallJump()) {
   		this.changeAnimation(MCAnimation.WALLSLIDE);
   	} else {
@@ -2892,8 +2892,6 @@ function Game_Bullet() {
       this._dashCountTime = +(data.meta['dash_count'] || 15);
       this._dashDelayTime = +(data.meta['dash_delay'] || 30);
       this._dashMpCost = +(data.meta['dash_mp_cost'] || 0);
-      this._collideW = +(data.meta['w'] || 0.375);
-      this._collideH = +(data.meta['h'] || 0.75);
       this._fallGuard = +(data.meta['fall_guard'] || 0);
       this._guardSpeed = +(data.meta['guard_speed'] || 0);
       this._invincibleTime = +(data.meta['invincible_time'] || 30);
