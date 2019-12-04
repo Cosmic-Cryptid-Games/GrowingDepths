@@ -646,6 +646,9 @@ function Game_Bullet() {
   if (parameters['dashKey']) {
     Input.keyMapper[parameters['dashKey'].charCodeAt()] = 'dash';
   }
+  if (parameters['deathKey']) {
+    Input.keyMapper[parameters['deathKey'].charCodeAt()] = 'death';
+  }
 
   //-----------------------------------------------------------------------------
   // ConfigManager
@@ -2139,7 +2142,7 @@ function Game_Bullet() {
   	} else {
   		$gameVariables.setValue(PlayerTakeDamageVariable, 1);
   	}
-  	
+
   	//clear death state if it exists
   	$gameVariables.setValue(deathCaseControlVariable, 0)
 
@@ -2151,7 +2154,7 @@ function Game_Bullet() {
   	baseNumberOfJumps = 2;
   	baseNumberOfDashes = 1;
   	$gameVariables.setValue(PlayerTakeDamageVariable, 0);
-  	
+
   	//clear death state if it exists
   	$gameVariables.setValue(deathCaseControlVariable, 0)
 
@@ -2350,7 +2353,8 @@ function Game_Bullet() {
 
   // input processing
   Game_Player.prototype.updateInput = function() {
-  	this.updateIdleCount();
+    this.deathByInput();
+    this.updateIdleCount();
   	this.handleIdleAnimationUpdates();
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
@@ -2365,6 +2369,14 @@ function Game_Bullet() {
       this.changeAnimation(MCAnimation.FALLING);
     }
   };
+
+  Game_Player.prototype.deathByInput = function() {
+    if (Input.isPressed('death')) {
+      $gameVariables.setValue(deathCaseControlVariable, 1);
+      var battler = this.actor();
+      battler.addState(0001);
+    }
+  }
 
   //If the player is dashing, then I don't care if they are falling,
   //otherwise check if the player has downards velocity
@@ -2458,8 +2470,8 @@ function Game_Bullet() {
         case actInstantKillRegion:
           if ($gameVariables.value(deathCaseControlVariable) == 0) {
           	$gameVariables.setValue(deathCaseControlVariable, 1);
-          	var battler = this.actor()
-          	battler.addState(0001)
+          	var battler = this.actor();
+          	battler.addState(0001);
           }
           break;
         default:
