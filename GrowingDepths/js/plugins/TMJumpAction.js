@@ -904,6 +904,7 @@ function Game_Bullet() {
     this.coolDownTimer = 150;
     this.maxFadeInTimer = 15;
     $gamePlayer.resetSpawn()
+    $gameSwitches.setValue(5, false); //turn off the switch controlling fadeout
   };
 
   //setup a timer that will allow the player to stand on `regionID` for
