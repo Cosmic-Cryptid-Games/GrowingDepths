@@ -523,6 +523,8 @@ var assistMode = false;
 var Imported = Imported || {};
 Imported.TMJumpAction = true;
 
+var dispMushroom = {};
+
 if (!Imported.TMEventBase) {
   Imported.TMEventBase = true;
   (function() {
@@ -575,6 +577,7 @@ function Game_Bullet() {
 
   var deathCaseControlVariable = +(parameters['deathCaseControlVariable'] || 4);
   var enemyAggressionVariable = +(parameters['enemyAggressionVariable'] || 9);
+  var mushCounter = 25;
   var actGravity = +(parameters['gravity'] || 0.004);
   var actFriction = +(parameters['friction'] || 0.001);
   var actStepsForTurn = +(parameters['stepsForTurn'] || 20);
@@ -900,6 +903,7 @@ function Game_Bullet() {
     this.FadingInClouds = {};
     this.coolDownTimer = 150;
     this.maxFadeInTimer = 15;
+    $gamePlayer.resetSpawn()
   };
 
   //setup a timer that will allow the player to stand on `regionID` for
@@ -958,6 +962,27 @@ function Game_Bullet() {
         }
         AudioManager.playSe(cloudLandingSound);
         this.CloudTimers[regionID]["SoundTriggered"] = true;
+      }
+    }
+    else {
+      //skip playing the sound `$gamePlayer.JustSpawned` times when landing as the player
+      //touches the ground a few times before gaining control
+      if ($gamePlayer.JustSpawned > 0) {
+      	$gamePlayer.landingSoundTriggered = true;
+      	$gamePlayer.JustSpawned--;
+      	
+      //play the sound
+      } else {
+        if ($gamePlayer.landingSoundTriggered == false) {
+          landingSound = {
+            volume:20,
+            pitch:100,
+            pan:0,
+            name:"Landing2"
+          }
+          AudioManager.playSe(landingSound);
+          $gamePlayer.landingSoundTriggered = true;
+        }
       }
     }
   }
@@ -2107,6 +2132,8 @@ function Game_Bullet() {
     this.idleTimer = 0;
     this.idleFramesStartAnimation = 400;
     this.playerBounds = [];
+    this.landingSoundTriggered = true;
+	this.JustSpawned = 0;
   };
 
   // 画面中央の X 座標
@@ -2281,6 +2308,10 @@ function Game_Bullet() {
     var bottomLeftBound = [Math.floor(this._realX - this._collideW), Math.floor(this._realY)];
     var bottomRightBound = [Math.floor(this._realX + this._collideW), Math.floor(this._realY)];
     this.playerBounds = [topLeftBound, topRightBound, bottomLeftBound, bottomRightBound];
+  }
+  
+  Game_Player.prototype.resetSpawn = function() {
+  	this.JustSpawned = 2; //player touches ground twice before getting control
   }
 
   // frame update
@@ -2685,6 +2716,10 @@ function Game_Bullet() {
       } else if (Input.isPressed('down')) {
         if (this.isCollideLadder(true)) this.getOnLadder(true);
       }
+    }
+
+    if (this._landingObject == null) {
+      this.landingSoundTriggered = false;
     }
   };
 
@@ -3409,6 +3444,10 @@ function Game_Bullet() {
     for (key in this.currentMushroomSet) {
       this.mushroomSet[key] = true;
     }
+
+    var mush = Object.keys(this.mushroomSet).length
+    $gameVariables.setValue(mushCounter, mush);
+
     this.currentMushroomSet = {};
   }
 
@@ -4439,5 +4478,140 @@ function Game_Bullet() {
     this._optionsWindow.show();
     this._optionsWindow.activate();
   };
+
+  //-----------------------------------------------------------------------------
+  // Scene_DisplayMushrooms
+  //
+
+  dispMushroom.start = function() {
+    SceneManager.push(Scene_DisplayMushrooms);
+  };
+
+  function Scene_DisplayMushrooms() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Scene_DisplayMushrooms.prototype = Object.create(Scene_MenuBase.prototype);
+  Scene_DisplayMushrooms.prototype.constructor = Scene_DisplayMushrooms;
+
+  Scene_DisplayMushrooms.prototype.initialize = function() {
+    Scene_MenuBase.prototype.initialize.call(this);
+  };
+
+  Scene_DisplayMushrooms.prototype.create = function() {
+    Scene_MenuBase.prototype.create.call(this);
+    this.createWindow();    
+  };
+
+  Scene_DisplayMushrooms.prototype.createWindow = function() {
+    this._window = new Window_DisplayMushrooms();
+
+    this.addWindow(this._window);
+  }
+
+  Scene_DisplayMushrooms.prototype.endScene = function() {
+    //  SoundManager.playOk();
+      SceneManager.pop();
+  }
+
+  Scene_DisplayMushrooms.prototype.update = function() {
+    Scene_MenuBase.prototype.update.call(this);
+    // if(Input.isTriggered('cancel')) {
+    //   SoundManager.playOk();
+    //   SceneManager.pop();
+    // }
+  }
+
+  //-----------------------------------------------------------------------------
+  // Window_DisplayMushrooms
+  //
+
+  function Window_DisplayMushrooms() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Window_DisplayMushrooms.prototype = Object.create(Window_Base.prototype);
+  Window_DisplayMushrooms.prototype.constructor = Window_DisplayMushrooms;
+
+  Window_DisplayMushrooms.prototype.initialize = function() {
+    var width = Graphics.boxWidth;
+    var height = Graphics.boxHeight;
+
+    Window_Base.prototype.initialize.call(this, 0, 0, width, height);
+    
+    this.setBackgroundType(2) // transparent background
+    this.width = 500;
+    this.height = 400;
+    this.updatePlacement();
+
+    // this.refresh();
+
+    this.mush = 0;
+    this.timer = 0;
+    this.howLong = 350;
+
+    var bitmap = ImageManager.loadPicture("mushroom")
+    var sprite = new Sprite(bitmap);
+    sprite.x = this.width / 2 - 80;
+    sprite.y = this.height / 2 - 50;
+
+    this.addChild(sprite);
+    this.makeFontBigger();
+
+    // this.drawText("x ", this.width / 2 - 40, this.height / 2 - 40, 100, 'center');
+    // this.drawText($gameVariables.value(mushCounter), this.width / 2 - 7, this.height / 2 - 37, 100, 'center');
+    // this.drawText(this.mush, this.width / 2 - 7, this.height / 2 - 37, 100, 'center');
+    // this.drawTextEx("x " + $gameVariables.value(mushCounter), this.width / 2, this.height / 2 - 43);
+
+    // $gameVariables.setValue(mushCounter, 50);
+    
+    this.refresh();
+  };
+
+  Window_DisplayMushrooms.prototype.updatePlacement = function() {
+    this.x = (Graphics.boxWidth - this.width) / 2;
+    this.y = (Graphics.boxHeight - this.height) / 2;
+  };
+
+  Window_DisplayMushrooms.prototype.update = function() {
+    // Window_Base.prototype.update.call(this);
+    if(this.mush < $gameVariables.value(mushCounter)) {
+      if(this.timer >= 75) {
+        this.mush++;
+      }
+
+      if(this.mush == $gameVariables.value(mushCounter)) {
+        mushroomCollectionSound = {
+          volume:75,
+          pitch:100,
+          pan:0,
+          name:"MushroomCollect"
+        }
+    
+        AudioManager.playSe(mushroomCollectionSound);
+      }
+
+      this.refresh();
+    }
+
+    this.timer++;
+    console.log(this.timer);
+    
+    if(this.timer >= this.howLong) {
+      SceneManager._scene.endScene();
+    }
+  }
+
+  Window_DisplayMushrooms.prototype.refresh = function() {
+    Window_Base.prototype.update.call(this);
+
+    this.contents.clear();
+    // this.drawText("MUSHROOM: ", 0, 0, 100, 'center');
+    // mush = Object.keys($gameSystem.mushroomSet).length;
+    // this.drawTextEx("MUSHROOM: " + $gameVariables.value(mushCounter), this.width / 2, this.height / 2);
+
+    this.drawText("x ", this.width / 2 - 40, this.height / 2 - 40, 100, 'center');
+    this.drawText(this.mush, this.width / 2 - 7, this.height / 2 - 37, 100, 'center');
+  }
 
 })();
