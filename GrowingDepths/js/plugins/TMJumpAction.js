@@ -971,7 +971,7 @@ function Game_Bullet() {
       if ($gamePlayer.JustSpawned > 0) {
       	$gamePlayer.landingSoundTriggered = true;
       	$gamePlayer.JustSpawned--;
-      	
+
       //play the sound
       } else {
         if ($gamePlayer.landingSoundTriggered == false) {
@@ -2310,18 +2310,13 @@ function Game_Bullet() {
     var bottomRightBound = [Math.floor(this._realX + this._collideW), Math.floor(this._realY)];
     this.playerBounds = [topLeftBound, topRightBound, bottomLeftBound, bottomRightBound];
   }
-  
+
   Game_Player.prototype.resetSpawn = function() {
   	this.JustSpawned = 2; //player touches ground twice before getting control
   }
 
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
-  
-  	//disable death every frame if assist mode is active
-  	if (assistMode) {
-  		$gameVariables.setValue(deathCaseControlVariable, 0);
-  	}
 
   	//if the player is in the final cutscene, take away control
   	if ($gameVariables.value(FinalCutsceneVariable) == 1) return;
