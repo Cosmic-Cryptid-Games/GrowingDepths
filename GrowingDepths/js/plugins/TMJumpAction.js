@@ -4279,7 +4279,7 @@ function Game_Bullet() {
     this.setConfigValue('boolAssist', assistMode);
     this.setConfigValue('numJumps', baseNumberOfJumps);
     this.setConfigValue('numDashes', baseNumberOfDashes);
-    this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+    this.setConfigValue('boolDamage', !$gameVariables.value(PlayerTakeDamageVariable));
   };
 
   Window_AssistOptions.prototype.statusWidth = function() {
@@ -4325,7 +4325,7 @@ function Game_Bullet() {
             $gamePlayer.disableAssistMode();
             this.setConfigValue('numJumps', baseNumberOfJumps);
             this.setConfigValue('numDashes', baseNumberOfDashes);
-            this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+            this.setConfigValue('boolDamage', true);
 
             this.setCommandEnabled('numJumps', !this.isCommandEnabled(this.findSymbol('numJumps')));
             this.setCommandEnabled('numDashes', !this.isCommandEnabled(this.findSymbol('numDashes')));
@@ -4351,14 +4351,13 @@ function Game_Bullet() {
           }
           value = value.clamp(-1, 10);
           this.changeValue(symbol, value);
-      } else {
           this.changeValue(symbol, true);
           if(symbol == 'boolAssist') {
             assistMode = true;
             $gamePlayer.disableAssistMode();
             this.setConfigValue('numJumps', baseNumberOfJumps);
             this.setConfigValue('numDashes', baseNumberOfDashes);
-            this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+            this.setConfigValue('boolDamage', true);
 
             this.setCommandEnabled('numJumps', true);
             this.setCommandEnabled('numDashes', true);
@@ -4389,7 +4388,7 @@ function Game_Bullet() {
             $gamePlayer.disableAssistMode();
             this.setConfigValue('numJumps', baseNumberOfJumps);
             this.setConfigValue('numDashes', baseNumberOfDashes);
-            this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+            this.setConfigValue('boolDamage', true);
 
             this.setCommandEnabled('numJumps', false);
             this.setCommandEnabled('numDashes', false);
