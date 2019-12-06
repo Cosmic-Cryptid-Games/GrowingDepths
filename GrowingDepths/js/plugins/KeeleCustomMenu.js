@@ -35,7 +35,7 @@
     var parameters = PluginManager.parameters('KeeleCustomMenu');
     var offsetX = Number(parameters['Offset X'] || 0);
     var offsetY = Number(parameters['Offset Y'] || 0);
-    var width = Number(parameters['Width'] || 240);
+    var width = Number(parameters['Width'] || 400);
     var background = Number(parameters['Background'] || 0);
     
     var _Window_TitleCommand_updatePlacement = Window_TitleCommand.prototype.updatePlacement;
@@ -51,11 +51,11 @@
     };
 
     Window_TitleCommand.prototype.maxCols = function() {
-        return 3;
+        return 2;
     }
 
     Window_TitleCommand.prototype.numVisibleRows = function() {
-        return 1;
+        return 2;
     }
 
     Window_TitleCommand.prototype.itemTextAlign = function() {

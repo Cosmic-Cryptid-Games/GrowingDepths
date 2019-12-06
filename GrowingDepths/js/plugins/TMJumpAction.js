@@ -4114,9 +4114,10 @@ function Game_Bullet() {
   Window_Options.prototype.makeCommandList = function() {
     _Window_Option_makeCommandList.call(this);
 
-    this.addCommand('Assist Mode', 'assist')
+    this.addCommand('Assist Mode', 'assist');
+    this.addCommand('Controls', 'controls');
 
-    if (padConfigCommand) this.addCommand(padConfigCommand, 'padConfig');
+    // if (padConfigCommand) this.addCommand(padConfigCommand, 'padConfig');
 
     // Because dashes are always unnecessary, they are deleted.
     for (var i = 0; i < this._list.length; i++) {
@@ -4132,6 +4133,7 @@ function Game_Bullet() {
     var symbol = this.commandSymbol(index);
     if (symbol === 'padConfig') return '';
     if (symbol === 'assist') return '';
+    if (symbol === 'controls') return ''; 
     return _Window_Options_statusText.call(this, index);
   };
 
@@ -4153,6 +4155,11 @@ function Game_Bullet() {
       this.updateInputData();
       this.deactivate();
       this.callHandler('assist');
+    } else if (symbol === 'controls'){
+      this.playOkSound();
+      this.updateInputData();
+      this.deactivate();
+      this.callHandler('controls');
     } else {
       _Window_Options_processOk.call(this);
     }
@@ -4162,7 +4169,7 @@ function Game_Bullet() {
   Window_Options.prototype.cursorRight = function(wrap) {
     var index = this.index();
     var symbol = this.commandSymbol(index);
-    if (symbol !== 'padConfig' || symbol !== 'assist') {
+    if (symbol !== 'padConfig' || symbol !== 'assist' || symbol !== 'controls') {
       _Window_Options_cursorRight.call(this, wrap);
     }
   };
@@ -4171,7 +4178,7 @@ function Game_Bullet() {
   Window_Options.prototype.cursorLeft = function(wrap) {
     var index = this.index();
     var symbol = this.commandSymbol(index);
-    if (symbol !== 'padConfig' || symbol !== 'assist') {
+    if (symbol !== 'padConfig' || symbol !== 'assist' || symbol !== 'controls') {
       _Window_Options_cursorLeft.call(this, wrap);
     }
   };
@@ -4430,6 +4437,7 @@ function Game_Bullet() {
     _Scene_Options_create.call(this);
     this.createPadOptionsWindow();
     this.createAssistOptionsWindow();
+    this.createControlsWindow();
   };
 
   var _Scene_Options_createOptionsWindow = Scene_Options.prototype.createOptionsWindow;
@@ -4437,6 +4445,7 @@ function Game_Bullet() {
     _Scene_Options_createOptionsWindow.call(this);
     this._optionsWindow.setHandler('padConfig', this.onPadConfig.bind(this));
     this._optionsWindow.setHandler('assist', this.onAssist.bind(this));
+    this._optionsWindow.setHandler('controls', this.onControls.bind(this));
   };
 
   Scene_Options.prototype.createPadOptionsWindow = function() {
@@ -4471,6 +4480,24 @@ function Game_Bullet() {
 
   Scene_Options.prototype.cancelAssist = function() {
     this._assistOptionsWindow.hide();
+    this._optionsWindow.show();
+    this._optionsWindow.activate();
+  };
+
+  Scene_Options.prototype.createControlsWindow = function() {
+    this._controlsWindow = new Window_Controls();
+    this._controlsWindow.setHandler('cancel', this.cancelControls.bind(this));
+    this.addWindow(this._controlsWindow);
+  };
+
+  Scene_Options.prototype.onControls = function() {
+    this._optionsWindow.hide();
+    this._controlsWindow.show();
+    this._controlsWindow.activate();
+  };
+
+  Scene_Options.prototype.cancelControls = function() {
+    this._controlsWindow.hide();
     this._optionsWindow.show();
     this._optionsWindow.activate();
   };
@@ -4609,5 +4636,67 @@ function Game_Bullet() {
     this.drawText("x ", this.width / 2 - 40, this.height / 2 - 40, 100, 'center');
     this.drawText(this.mush, this.width / 2 - 7, this.height / 2 - 37, 100, 'center');
   }
+
+  //-----------------------------------------------------------------------------
+  // Window_AssistOptions
+  //
+
+  function Window_Controls() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Window_Controls.prototype = Object.create(Window_Options.prototype);
+  Window_Controls.prototype.constructor = Window_Controls;
+
+  Window_Controls.prototype.initialize = function() {
+    Window_Options.prototype.initialize.call(this, 0, 0);
+    this.hide();
+    this.deactivate();
+  };
+
+  Window_Controls.prototype.makeCommandList = function() {
+    this.addCommand('Move', 'moveKey'); // arrow keys
+    this.addCommand('Jump', 'jumpKey'); // x
+    this.addCommand('Dash', 'dashKey'); // c
+    this.addCommand('Accept', 'okKey'); // enter
+    this.addCommand('Cancel', 'cancelKey'); // esc
+
+    this.setConfigValue('moveKey', "Arrow Keys");
+    this.setConfigValue('jumpKey', "X");
+    this.setConfigValue('dashKey', "C");
+    this.setConfigValue('okKey', "ENTER");
+    this.setConfigValue('cancelKey', "ESC");
+  };
+
+  Window_Controls.prototype.statusWidth = function() {
+    return 120;
+  };
+
+  Window_Controls.prototype.statusText = function(index) {
+    var symbol = this.commandSymbol(index);
+    var value = this.getConfigValue(symbol);
+    
+    return value;
+  };
+
+  Window_Options.prototype.isNum = function(symbol) {
+    return !symbol.contains('bool');
+  };
+
+  Window_Controls.prototype.processOk = function() {
+    
+  };
+
+  Window_Controls.prototype.cursorRight = function(wrap) {
+    
+  };
+
+  Window_Controls.prototype.cursorLeft = function(wrap) {
+    
+  };
+
+  Window_Controls.prototype.changeValue = function(symbol, value) {
+    
+  };
 
 })();
