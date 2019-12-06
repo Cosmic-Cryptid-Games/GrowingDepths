@@ -1,0 +1,24 @@
+<block:100,0,1,3,225,center,black>
+</block>
+
+<block:250,0,3,3,225,center,black>
+Executive Producer – Hope Docking
+</block>
+
+<block:200,0,3,3,225,center,black>
+Producer – Christopher Vervoorst
+Lead Design – Mariah Fournier
+</block>
+
+<block:200,0,3,3,210,center,black>
+Writing – Christopher Vervoorst
+Music – Steven Ge
+Art – Avery Blair
+</block>
+
+<block:200,0,3,3,225,center,black>
+Programming
+Michael Hackman
+Mariah Fournier
+Reilly Keele
+</block>

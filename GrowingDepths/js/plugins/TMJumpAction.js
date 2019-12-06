@@ -512,12 +512,18 @@ var baseNumberOfDashes = 1;
 var baseNumberOfJumps = 2;
 var PlayerTakeDamageVariable = 17;
 
+var FinalCutsceneVariable = 19;
+
 var lastCheckpointMapID = 0;
 var lastCheckpointX = 0;
 var lastCheckpointY = 0;
 
+var assistMode = false;
+
 var Imported = Imported || {};
 Imported.TMJumpAction = true;
+
+var dispMushroom = {};
 
 if (!Imported.TMEventBase) {
   Imported.TMEventBase = true;
@@ -571,6 +577,7 @@ function Game_Bullet() {
 
   var deathCaseControlVariable = +(parameters['deathCaseControlVariable'] || 4);
   var enemyAggressionVariable = +(parameters['enemyAggressionVariable'] || 9);
+  var mushCounter = 25;
   var actGravity = +(parameters['gravity'] || 0.004);
   var actFriction = +(parameters['friction'] || 0.001);
   var actStepsForTurn = +(parameters['stepsForTurn'] || 20);
@@ -629,7 +636,6 @@ function Game_Bullet() {
   var padConfigCommand = parameters['padConfigCommand'];
   var actStepAnimeConstantA = +(parameters['stepAnimeConstantA'] || 0.1);
   var actStepAnimeConstantB = +(parameters['stepAnimeConstantB'] || 300);
-  var assistMode = false;
 
   //-----------------------------------------------------------------------------
   // Input
@@ -643,6 +649,9 @@ function Game_Bullet() {
   }
   if (parameters['dashKey']) {
     Input.keyMapper[parameters['dashKey'].charCodeAt()] = 'dash';
+  }
+  if (parameters['deathKey']) {
+    Input.keyMapper[parameters['deathKey'].charCodeAt()] = 'death';
   }
 
   //-----------------------------------------------------------------------------
@@ -894,6 +903,8 @@ function Game_Bullet() {
     this.FadingInClouds = {};
     this.coolDownTimer = 150;
     this.maxFadeInTimer = 15;
+    $gamePlayer.resetSpawn()
+    $gameSwitches.setValue(5, false); //turn off the switch controlling fadeout
   };
 
   //setup a timer that will allow the player to stand on `regionID` for
@@ -906,7 +917,8 @@ function Game_Bullet() {
   	  "maxTimer": cloudTimer,
   	  "Decreasing": "false",
   	  "FadedOutTimer": this.coolDownTimer,
-  	  "FadeInTimer": 0
+  	  "FadeInTimer": 0,
+  	  "SoundTriggered": false
   	}
   }
 
@@ -941,6 +953,38 @@ function Game_Bullet() {
   Game_Map.prototype.playerLandedOnRegion = function(regionID) {
     if (regionID in this.CloudTimers) {
       this.CloudTimers[regionID]["Decreasing"] = "true";
+      if (this.CloudTimers[regionID]["SoundTriggered"] == false) {
+        //play sound
+        cloudLandingSound = {
+          volume:75,
+          pitch:100,
+          pan:0,
+          name:"Landing3"
+        }
+        AudioManager.playSe(cloudLandingSound);
+        this.CloudTimers[regionID]["SoundTriggered"] = true;
+      }
+    }
+    else {
+      //skip playing the sound `$gamePlayer.JustSpawned` times when landing as the player
+      //touches the ground a few times before gaining control
+      if ($gamePlayer.JustSpawned > 0) {
+      	$gamePlayer.landingSoundTriggered = true;
+      	$gamePlayer.JustSpawned--;
+
+      //play the sound
+      } else {
+        if ($gamePlayer.landingSoundTriggered == false) {
+          landingSound = {
+            volume:20,
+            pitch:100,
+            pan:0,
+            name:"Landing2"
+          }
+          AudioManager.playSe(landingSound);
+          $gamePlayer.landingSoundTriggered = true;
+        }
+      }
     }
   }
 
@@ -1062,6 +1106,7 @@ function Game_Bullet() {
       	  //move the value to fading in clouds and set FadeInTimer
       	  var timer = this.InvisibleClouds[regionID];
       	  timer["FadeInTimer"] = 0;
+      	  timer["SoundTriggered"] = false;
       	  this.FadingInClouds[regionID] = timer;
       	  delete this.InvisibleClouds[regionID];
       	}
@@ -1328,7 +1373,7 @@ function Game_Bullet() {
     this._latestY = 0;
     this._previousY = 0;
     this._lastSwim = false;
-    this._collideW = 0.375;
+    this._collideW = 0.425;
     this._collideH = 1.5;
     this._collideIds = [];
     this._landingObject = null;
@@ -1471,9 +1516,9 @@ function Game_Bullet() {
   //gets the player's x and y coordinates
   Game_CharacterBase.prototype.getWallJumpCalculations = function(x,y) {
     if (this._direction == 4) {
-      var x = Math.floor(this._realX - this._collideW - 0.16);
+      var x = Math.floor(this._realX - 0.535);
 	} else {
-      var x = Math.floor(this._realX + this._collideW + 0.16);
+      var x = Math.floor(this._realX + 0.535);
     }
     var y = Math.floor(this._realY);
     return { x: x, y: y };
@@ -2026,7 +2071,7 @@ function Game_Bullet() {
   Game_Character.prototype.nwayShot = function(n, space, angle, speed, count, type, index, skillId) {
     angle = angle - (space * (n - 1) / 2);
     for (var i = 0; i < n; i++) {
-      $gameMap.addBullet(this._realX, this._realY - this._collideH / 2, 200 + i,
+      $gameMap.addBullet(this._realX - this._collideW, this._realY - (this._collideH * 1.5), 200 + i,
                          Math.cos(angle) * speed, Math.sin(angle) * speed, angle, count, type, index,
                          this.battler().isEnemy(), skillId, this);
       angle += space;
@@ -2087,6 +2132,9 @@ function Game_Bullet() {
     this.jumpInputCountdown = 0;
     this.idleTimer = 0;
     this.idleFramesStartAnimation = 400;
+    this.playerBounds = [];
+    this.landingSoundTriggered = true;
+	this.JustSpawned = 0;
   };
 
   // 画面中央の X 座標
@@ -2124,6 +2172,9 @@ function Game_Bullet() {
   		$gameVariables.setValue(PlayerTakeDamageVariable, 1);
   	}
 
+  	//clear death state if it exists
+  	$gameVariables.setValue(deathCaseControlVariable, 0)
+
   	this._adjustAssistMode()
   }
 
@@ -2132,6 +2183,9 @@ function Game_Bullet() {
   	baseNumberOfJumps = 2;
   	baseNumberOfDashes = 1;
   	$gameVariables.setValue(PlayerTakeDamageVariable, 0);
+
+  	//clear death state if it exists
+  	$gameVariables.setValue(deathCaseControlVariable, 0)
 
   	this._adjustAssistMode()
   }
@@ -2224,8 +2278,7 @@ function Game_Bullet() {
   //if the player is in the enemy aggression region, let the enemies know
   //if the player is in the instant death region, kill them
   Game_Player.prototype.checkPlayerRegionOverlap = function(x, y) {
-    var playerRegionID = $gameMap.regionId(x, y);
-    var regionIDAbove = $gameMap.regionId(x, y - 1);
+    var playerRegionID = $gameMap.regionId(x, y)
 
   	//If the player is in the enemy aggression region, set enemyAggressionVariable to 1
   	//otherwise set it to 0
@@ -2236,7 +2289,7 @@ function Game_Bullet() {
     }
 
     //If the player is in the death region or just below spikes, then kill them
-  	if (playerRegionID === actInstantKillRegion || regionIDAbove === actInstantKillRegion) {
+  	if (playerRegionID === actInstantKillRegion) {
 
   		//prevent double death by setting deathCaseControlVariable to 1.  The common event
   		//sets the deathCaseControlVariable back to 0 once it finishes respawning
@@ -2250,8 +2303,23 @@ function Game_Bullet() {
     }
   }
 
+  Game_Player.prototype.updatePlayerBounds = function() {
+    var topLeftBound = [Math.floor(this._realX - this._collideW), Math.floor(this._realY - this._collideH)];
+    var topRightBound = [Math.floor(this._realX + this._collideW), Math.floor(this._realY - this._collideH)];
+    var bottomLeftBound = [Math.floor(this._realX - this._collideW), Math.floor(this._realY)];
+    var bottomRightBound = [Math.floor(this._realX + this._collideW), Math.floor(this._realY)];
+    this.playerBounds = [topLeftBound, topRightBound, bottomLeftBound, bottomRightBound];
+  }
+
+  Game_Player.prototype.resetSpawn = function() {
+  	this.JustSpawned = 2; //player touches ground twice before getting control
+  }
+
   // frame update
   Game_Player.prototype.update = function(sceneActive) {
+
+  	//if the player is in the final cutscene, take away control
+  	if ($gameVariables.value(FinalCutsceneVariable) == 1) return;
 
   	//if the player can take damage
   	if ($gameVariables.value(PlayerTakeDamageVariable) == 0) {
@@ -2264,7 +2332,13 @@ function Game_Bullet() {
     		return;
     	}
     }
-  	this.checkPlayerRegionOverlap($gamePlayer.x, $gamePlayer.y);
+    this.updatePlayerBounds();
+    for (i = 0; i < this.playerBounds.length; i++) {
+      xy = this.playerBounds[i];
+      x = xy[0];
+      y = xy[1];
+      this.checkPlayerRegionOverlap(x, y);
+    }
 
   	//prevent jumping for a certain while
   	//remove 1 tick every update frame
@@ -2274,6 +2348,14 @@ function Game_Bullet() {
 
   	if (this.currentlyCanWallJump()) {
   		this.changeAnimation(MCAnimation.WALLSLIDE);
+  	} else {
+  		if (this._CurrentAnimation == MCAnimation.WALLSLIDE) {
+  			if (this._vy < 0) {
+  				this.changeAnimation(MCAnimation.JUMP);
+  			} else {
+  				this.changeAnimation(MCAnimation.FALLING);
+  			}
+  		}
   	}
 
     var lastScrolledX = this.scrolledX();
@@ -2304,7 +2386,8 @@ function Game_Bullet() {
 
   // input processing
   Game_Player.prototype.updateInput = function() {
-  	this.updateIdleCount();
+    this.deathByInput();
+    this.updateIdleCount();
   	this.handleIdleAnimationUpdates();
     this.carryByInput();
     if (this.isCarrying()) this._shotDelay = 1;
@@ -2319,6 +2402,14 @@ function Game_Bullet() {
       this.changeAnimation(MCAnimation.FALLING);
     }
   };
+
+  Game_Player.prototype.deathByInput = function() {
+    if (Input.isPressed('death')) {
+      $gameVariables.setValue(deathCaseControlVariable, 1);
+      var battler = this.actor();
+      battler.addState(0001);
+    }
+  }
 
   //If the player is dashing, then I don't care if they are falling,
   //otherwise check if the player has downards velocity
@@ -2412,8 +2503,8 @@ function Game_Bullet() {
         case actInstantKillRegion:
           if ($gameVariables.value(deathCaseControlVariable) == 0) {
           	$gameVariables.setValue(deathCaseControlVariable, 1);
-          	var battler = this.actor()
-          	battler.addState(0001)
+          	var battler = this.actor();
+          	battler.addState(0001);
           }
           break;
         default:
@@ -2621,6 +2712,10 @@ function Game_Bullet() {
       } else if (Input.isPressed('down')) {
         if (this.isCollideLadder(true)) this.getOnLadder(true);
       }
+    }
+
+    if (this._landingObject == null) {
+      this.landingSoundTriggered = false;
     }
   };
 
@@ -2866,8 +2961,6 @@ function Game_Bullet() {
       this._dashCountTime = +(data.meta['dash_count'] || 15);
       this._dashDelayTime = +(data.meta['dash_delay'] || 30);
       this._dashMpCost = +(data.meta['dash_mp_cost'] || 0);
-      this._collideW = +(data.meta['w'] || 0.375);
-      this._collideH = +(data.meta['h'] || 0.75);
       this._fallGuard = +(data.meta['fall_guard'] || 0);
       this._guardSpeed = +(data.meta['guard_speed'] || 0);
       this._invincibleTime = +(data.meta['invincible_time'] || 30);
@@ -3347,6 +3440,10 @@ function Game_Bullet() {
     for (key in this.currentMushroomSet) {
       this.mushroomSet[key] = true;
     }
+
+    var mush = Object.keys(this.mushroomSet).length
+    $gameVariables.setValue(mushCounter, mush);
+
     this.currentMushroomSet = {};
   }
 
@@ -4178,7 +4275,7 @@ function Game_Bullet() {
     this.setConfigValue('boolAssist', assistMode);
     this.setConfigValue('numJumps', baseNumberOfJumps);
     this.setConfigValue('numDashes', baseNumberOfDashes);
-    this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+    this.setConfigValue('boolDamage', !$gameVariables.value(PlayerTakeDamageVariable));
   };
 
   Window_AssistOptions.prototype.statusWidth = function() {
@@ -4224,7 +4321,7 @@ function Game_Bullet() {
             $gamePlayer.disableAssistMode();
             this.setConfigValue('numJumps', baseNumberOfJumps);
             this.setConfigValue('numDashes', baseNumberOfDashes);
-            this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+            this.setConfigValue('boolDamage', true);
 
             this.setCommandEnabled('numJumps', !this.isCommandEnabled(this.findSymbol('numJumps')));
             this.setCommandEnabled('numDashes', !this.isCommandEnabled(this.findSymbol('numDashes')));
@@ -4250,14 +4347,14 @@ function Game_Bullet() {
           }
           value = value.clamp(-1, 10);
           this.changeValue(symbol, value);
-      } else {
+        } else {
           this.changeValue(symbol, true);
           if(symbol == 'boolAssist') {
             assistMode = true;
             $gamePlayer.disableAssistMode();
             this.setConfigValue('numJumps', baseNumberOfJumps);
             this.setConfigValue('numDashes', baseNumberOfDashes);
-            this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+            this.setConfigValue('boolDamage', true);
 
             this.setCommandEnabled('numJumps', true);
             this.setCommandEnabled('numDashes', true);
@@ -4288,7 +4385,7 @@ function Game_Bullet() {
             $gamePlayer.disableAssistMode();
             this.setConfigValue('numJumps', baseNumberOfJumps);
             this.setConfigValue('numDashes', baseNumberOfDashes);
-            this.setConfigValue('boolDamage', PlayerTakeDamageVariable);
+            this.setConfigValue('boolDamage', true);
 
             this.setCommandEnabled('numJumps', false);
             this.setCommandEnabled('numDashes', false);
@@ -4377,5 +4474,140 @@ function Game_Bullet() {
     this._optionsWindow.show();
     this._optionsWindow.activate();
   };
+
+  //-----------------------------------------------------------------------------
+  // Scene_DisplayMushrooms
+  //
+
+  dispMushroom.start = function() {
+    SceneManager.push(Scene_DisplayMushrooms);
+  };
+
+  function Scene_DisplayMushrooms() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Scene_DisplayMushrooms.prototype = Object.create(Scene_MenuBase.prototype);
+  Scene_DisplayMushrooms.prototype.constructor = Scene_DisplayMushrooms;
+
+  Scene_DisplayMushrooms.prototype.initialize = function() {
+    Scene_MenuBase.prototype.initialize.call(this);
+  };
+
+  Scene_DisplayMushrooms.prototype.create = function() {
+    Scene_MenuBase.prototype.create.call(this);
+    this.createWindow();    
+  };
+
+  Scene_DisplayMushrooms.prototype.createWindow = function() {
+    this._window = new Window_DisplayMushrooms();
+
+    this.addWindow(this._window);
+  }
+
+  Scene_DisplayMushrooms.prototype.endScene = function() {
+    //  SoundManager.playOk();
+      SceneManager.pop();
+  }
+
+  Scene_DisplayMushrooms.prototype.update = function() {
+    Scene_MenuBase.prototype.update.call(this);
+    // if(Input.isTriggered('cancel')) {
+    //   SoundManager.playOk();
+    //   SceneManager.pop();
+    // }
+  }
+
+  //-----------------------------------------------------------------------------
+  // Window_DisplayMushrooms
+  //
+
+  function Window_DisplayMushrooms() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Window_DisplayMushrooms.prototype = Object.create(Window_Base.prototype);
+  Window_DisplayMushrooms.prototype.constructor = Window_DisplayMushrooms;
+
+  Window_DisplayMushrooms.prototype.initialize = function() {
+    var width = Graphics.boxWidth;
+    var height = Graphics.boxHeight;
+
+    Window_Base.prototype.initialize.call(this, 0, 0, width, height);
+    
+    this.setBackgroundType(2) // transparent background
+    this.width = 500;
+    this.height = 400;
+    this.updatePlacement();
+
+    // this.refresh();
+
+    this.mush = 0;
+    this.timer = 0;
+    this.howLong = 350;
+
+    var bitmap = ImageManager.loadPicture("mushroom")
+    var sprite = new Sprite(bitmap);
+    sprite.x = this.width / 2 - 80;
+    sprite.y = this.height / 2 - 50;
+
+    this.addChild(sprite);
+    this.makeFontBigger();
+
+    // this.drawText("x ", this.width / 2 - 40, this.height / 2 - 40, 100, 'center');
+    // this.drawText($gameVariables.value(mushCounter), this.width / 2 - 7, this.height / 2 - 37, 100, 'center');
+    // this.drawText(this.mush, this.width / 2 - 7, this.height / 2 - 37, 100, 'center');
+    // this.drawTextEx("x " + $gameVariables.value(mushCounter), this.width / 2, this.height / 2 - 43);
+
+    // $gameVariables.setValue(mushCounter, 50);
+    
+    this.refresh();
+  };
+
+  Window_DisplayMushrooms.prototype.updatePlacement = function() {
+    this.x = (Graphics.boxWidth - this.width) / 2;
+    this.y = (Graphics.boxHeight - this.height) / 2;
+  };
+
+  Window_DisplayMushrooms.prototype.update = function() {
+    // Window_Base.prototype.update.call(this);
+    if(this.mush < $gameVariables.value(mushCounter)) {
+      if(this.timer >= 75) {
+        this.mush++;
+      }
+
+      if(this.mush == $gameVariables.value(mushCounter)) {
+        mushroomCollectionSound = {
+          volume:75,
+          pitch:100,
+          pan:0,
+          name:"MushroomCollect"
+        }
+    
+        AudioManager.playSe(mushroomCollectionSound);
+      }
+
+      this.refresh();
+    }
+
+    this.timer++;
+    console.log(this.timer);
+    
+    if(this.timer >= this.howLong) {
+      SceneManager._scene.endScene();
+    }
+  }
+
+  Window_DisplayMushrooms.prototype.refresh = function() {
+    Window_Base.prototype.update.call(this);
+
+    this.contents.clear();
+    // this.drawText("MUSHROOM: ", 0, 0, 100, 'center');
+    // mush = Object.keys($gameSystem.mushroomSet).length;
+    // this.drawTextEx("MUSHROOM: " + $gameVariables.value(mushCounter), this.width / 2, this.height / 2);
+
+    this.drawText("x ", this.width / 2 - 40, this.height / 2 - 40, 100, 'center');
+    this.drawText(this.mush, this.width / 2 - 7, this.height / 2 - 37, 100, 'center');
+  }
 
 })();
