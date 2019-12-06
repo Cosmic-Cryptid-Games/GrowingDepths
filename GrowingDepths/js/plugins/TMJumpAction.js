@@ -2288,7 +2288,7 @@ function Game_Bullet() {
     	$gameVariables.setValue(enemyAggressionVariable, 0);
     }
     
-    //checkpoint region
+    //screen transition region
     if (playerRegionID === 100) {
     	//tell the game interpreter to update the mushroom set as the screen has transitioned
     	$gameVariables.setValue(26, 1);
