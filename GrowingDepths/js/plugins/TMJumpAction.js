@@ -4659,12 +4659,14 @@ function Game_Bullet() {
     this.addCommand('Move', 'moveKey'); // arrow keys
     this.addCommand('Jump', 'jumpKey'); // x
     this.addCommand('Dash', 'dashKey'); // c
+    this.addCommand('Respawn', 'respawnKey'); // c
     this.addCommand('Accept', 'okKey'); // enter
     this.addCommand('Cancel', 'cancelKey'); // esc
 
     this.setConfigValue('moveKey', "Arrow Keys");
     this.setConfigValue('jumpKey', "X");
     this.setConfigValue('dashKey', "C");
+    this.setConfigValue('respawnKey', "R");
     this.setConfigValue('okKey', "ENTER");
     this.setConfigValue('cancelKey', "ESC");
   };
