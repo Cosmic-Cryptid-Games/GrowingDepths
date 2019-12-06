@@ -4575,7 +4575,7 @@ function Game_Bullet() {
 
     var bitmap = ImageManager.loadPicture("mushroom")
     var sprite = new Sprite(bitmap);
-    sprite.x = this.width / 2 - 80;
+    sprite.x = this.width / 2 - 115;
     sprite.y = this.height / 2 - 50;
 
     this.addChild(sprite);
@@ -4633,8 +4633,9 @@ function Game_Bullet() {
     // mush = Object.keys($gameSystem.mushroomSet).length;
     // this.drawTextEx("MUSHROOM: " + $gameVariables.value(mushCounter), this.width / 2, this.height / 2);
 
-    this.drawText("x ", this.width / 2 - 40, this.height / 2 - 40, 100, 'center');
-    this.drawText(this.mush, this.width / 2 - 7, this.height / 2 - 37, 100, 'center');
+    // this.drawText("x ", this.width / 2 - 40, this.height / 2 - 40, 100, 'center');
+    this.drawText(this.mush, this.width / 2 - 75, this.height / 2 - 37, 100, 'center');
+    this.drawText(" / 87", this.width / 2 -5, this.height / 2 - 37, 100, 'center');
   }
 
   //-----------------------------------------------------------------------------
