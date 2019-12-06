@@ -2287,6 +2287,12 @@ function Game_Bullet() {
     } else {
     	$gameVariables.setValue(enemyAggressionVariable, 0);
     }
+    
+    //screen transition region
+    if (playerRegionID === 100) {
+    	//tell the game interpreter to update the mushroom set as the screen has transitioned
+    	$gameVariables.setValue(26, 1);
+    }
 
 
     //If the player is in the death region or just below spikes, then kill them
@@ -3334,6 +3340,14 @@ function Game_Bullet() {
   _Game_Interpreter_update = Game_Interpreter.prototype.update;
   Game_Interpreter.prototype.update = function() {
     _Game_Interpreter_update.call(this);
+    
+    
+    
+    //player has entered a teleport region, save the collected mushrooms
+    if ($gameVariables.value(26) == 1) {
+    	this.addMushrooms();
+    	$gameVariables.setValue(26, 0);
+    }
 
     //if the boss event ID has been set, and the player isn't currently dying, then
     //check if the player is within a certain area around the boss event
@@ -3461,7 +3475,7 @@ function Game_Bullet() {
     for (key in this.currentMushroomSet) {
       this.mushroomSet[key] = true;
     }
-
+    
     var mush = Object.keys(this.mushroomSet).length
     $gameVariables.setValue(mushCounter, mush);
 
