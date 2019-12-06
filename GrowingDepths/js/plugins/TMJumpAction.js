@@ -4347,6 +4347,7 @@ function Game_Bullet() {
           }
           value = value.clamp(-1, 10);
           this.changeValue(symbol, value);
+        } else {
           this.changeValue(symbol, true);
           if(symbol == 'boolAssist') {
             assistMode = true;
