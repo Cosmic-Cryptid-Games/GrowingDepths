@@ -1,4 +1,4 @@
-<block:100,0,1,3,225,center,black>
+﻿<block:100,0,1,3,225,center,black>
 </block>
 
 <block:250,0,3,3,225,center,black>
@@ -17,8 +17,22 @@ Art – Avery Blair
 </block>
 
 <block:200,0,3,3,225,center,black>
-Programming
-Michael Hackman
-Mariah Fournier
-Reilly Keele
+Programming - Michael Hackman
+Programming - Mariah Fournier
+Programming - Reilly Keele
+</block>
+
+<block:200,0,3,3,200,center,black>
+TMJumpAction by Tomoaky
+ExtraMovementFrames by ModernAlgebra
+GALV_RollCredits by Galv
+Non-Combat Menu v1.05a by Mjshi
+
+Sound Effects modified from FreeSound.org
+</block>
+
+<block:200,0,3,3,225,center,black>
+A CMPUT 250 GAME
+University of Alberta
+Fall 2019 - Nathan Sturtevant 
 </block>
