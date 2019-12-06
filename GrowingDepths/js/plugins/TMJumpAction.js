@@ -2288,6 +2288,7 @@ function Game_Bullet() {
     	$gameVariables.setValue(enemyAggressionVariable, 0);
     }
 
+
     //If the player is in the death region or just below spikes, then kill them
   	if (playerRegionID === actInstantKillRegion) {
 
@@ -2295,7 +2296,7 @@ function Game_Bullet() {
   		//sets the deathCaseControlVariable back to 0 once it finishes respawning
   		//the player, meaning that there's no way this "if" statement will be entered more
   		//than once per death
-    	if ($gameVariables.value(deathCaseControlVariable) == 0) {
+    	if ($gameVariables.value(deathCaseControlVariable) == 0 && $gameVariables.value(PlayerTakeDamageVariable) == 0) {
           	$gameVariables.setValue(deathCaseControlVariable, 1);
           	var battler = this.actor()
           	battler.addState(0001)
@@ -2320,7 +2321,7 @@ function Game_Bullet() {
 
   	//if the player is in the final cutscene, take away control
   	if ($gameVariables.value(FinalCutsceneVariable) == 1) return;
-
+	/*
   	//if the player can take damage
   	if ($gameVariables.value(PlayerTakeDamageVariable) == 0) {
 
@@ -2332,6 +2333,23 @@ function Game_Bullet() {
     		return;
     	}
     }
+    */
+    if (
+    	($gameVariables.value(PlayerTakeDamageVariable) == 0 &&
+    	 $gameVariables.value(deathCaseControlVariable) !== 0) ||
+    	 $gameVariables.value(24) == 1) {
+            //change animation state to death and prevent/freeze player movement
+    	    this.changeAnimation(MCAnimation.DEATH);
+    	    return;
+    }
+    	
+    /*
+    if ($gameVariables.value(24) == 1) {
+    	//change animation state to death and prevent/freeze player movement
+    	this.changeAnimation(MCAnimation.DEATH);
+    	return;
+    }
+    */
     this.updatePlayerBounds();
     for (i = 0; i < this.playerBounds.length; i++) {
       xy = this.playerBounds[i];
@@ -2404,11 +2422,14 @@ function Game_Bullet() {
   };
 
   Game_Player.prototype.deathByInput = function() {
+  	$gameVariables.setValue(23, 0);
     if (Input.isPressed('death')) {
       $gameVariables.setValue(deathCaseControlVariable, 1);
+      $gameVariables.setValue(23, 1); // trigger for resetting
       var battler = this.actor();
       battler.addState(0001);
     }
+    
   }
 
   //If the player is dashing, then I don't care if they are falling,
@@ -4114,9 +4135,10 @@ function Game_Bullet() {
   Window_Options.prototype.makeCommandList = function() {
     _Window_Option_makeCommandList.call(this);
 
-    this.addCommand('Assist Mode', 'assist')
+    this.addCommand('Assist Mode', 'assist');
+    this.addCommand('Controls', 'controls');
 
-    if (padConfigCommand) this.addCommand(padConfigCommand, 'padConfig');
+    // if (padConfigCommand) this.addCommand(padConfigCommand, 'padConfig');
 
     // Because dashes are always unnecessary, they are deleted.
     for (var i = 0; i < this._list.length; i++) {
@@ -4132,6 +4154,7 @@ function Game_Bullet() {
     var symbol = this.commandSymbol(index);
     if (symbol === 'padConfig') return '';
     if (symbol === 'assist') return '';
+    if (symbol === 'controls') return ''; 
     return _Window_Options_statusText.call(this, index);
   };
 
@@ -4153,6 +4176,11 @@ function Game_Bullet() {
       this.updateInputData();
       this.deactivate();
       this.callHandler('assist');
+    } else if (symbol === 'controls'){
+      this.playOkSound();
+      this.updateInputData();
+      this.deactivate();
+      this.callHandler('controls');
     } else {
       _Window_Options_processOk.call(this);
     }
@@ -4162,7 +4190,7 @@ function Game_Bullet() {
   Window_Options.prototype.cursorRight = function(wrap) {
     var index = this.index();
     var symbol = this.commandSymbol(index);
-    if (symbol !== 'padConfig' || symbol !== 'assist') {
+    if (symbol !== 'padConfig' || symbol !== 'assist' || symbol !== 'controls') {
       _Window_Options_cursorRight.call(this, wrap);
     }
   };
@@ -4171,7 +4199,7 @@ function Game_Bullet() {
   Window_Options.prototype.cursorLeft = function(wrap) {
     var index = this.index();
     var symbol = this.commandSymbol(index);
-    if (symbol !== 'padConfig' || symbol !== 'assist') {
+    if (symbol !== 'padConfig' || symbol !== 'assist' || symbol !== 'controls') {
       _Window_Options_cursorLeft.call(this, wrap);
     }
   };
@@ -4430,6 +4458,7 @@ function Game_Bullet() {
     _Scene_Options_create.call(this);
     this.createPadOptionsWindow();
     this.createAssistOptionsWindow();
+    this.createControlsWindow();
   };
 
   var _Scene_Options_createOptionsWindow = Scene_Options.prototype.createOptionsWindow;
@@ -4437,6 +4466,7 @@ function Game_Bullet() {
     _Scene_Options_createOptionsWindow.call(this);
     this._optionsWindow.setHandler('padConfig', this.onPadConfig.bind(this));
     this._optionsWindow.setHandler('assist', this.onAssist.bind(this));
+    this._optionsWindow.setHandler('controls', this.onControls.bind(this));
   };
 
   Scene_Options.prototype.createPadOptionsWindow = function() {
@@ -4471,6 +4501,24 @@ function Game_Bullet() {
 
   Scene_Options.prototype.cancelAssist = function() {
     this._assistOptionsWindow.hide();
+    this._optionsWindow.show();
+    this._optionsWindow.activate();
+  };
+
+  Scene_Options.prototype.createControlsWindow = function() {
+    this._controlsWindow = new Window_Controls();
+    this._controlsWindow.setHandler('cancel', this.cancelControls.bind(this));
+    this.addWindow(this._controlsWindow);
+  };
+
+  Scene_Options.prototype.onControls = function() {
+    this._optionsWindow.hide();
+    this._controlsWindow.show();
+    this._controlsWindow.activate();
+  };
+
+  Scene_Options.prototype.cancelControls = function() {
+    this._controlsWindow.hide();
     this._optionsWindow.show();
     this._optionsWindow.activate();
   };
@@ -4548,7 +4596,7 @@ function Game_Bullet() {
 
     var bitmap = ImageManager.loadPicture("mushroom")
     var sprite = new Sprite(bitmap);
-    sprite.x = this.width / 2 - 80;
+    sprite.x = this.width / 2 - 115;
     sprite.y = this.height / 2 - 50;
 
     this.addChild(sprite);
@@ -4606,8 +4654,73 @@ function Game_Bullet() {
     // mush = Object.keys($gameSystem.mushroomSet).length;
     // this.drawTextEx("MUSHROOM: " + $gameVariables.value(mushCounter), this.width / 2, this.height / 2);
 
-    this.drawText("x ", this.width / 2 - 40, this.height / 2 - 40, 100, 'center');
-    this.drawText(this.mush, this.width / 2 - 7, this.height / 2 - 37, 100, 'center');
+    // this.drawText("x ", this.width / 2 - 40, this.height / 2 - 40, 100, 'center');
+    this.drawText(this.mush, this.width / 2 - 75, this.height / 2 - 37, 100, 'center');
+    this.drawText(" / 87", this.width / 2 -5, this.height / 2 - 37, 100, 'center');
   }
+
+  //-----------------------------------------------------------------------------
+  // Window_AssistOptions
+  //
+
+  function Window_Controls() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Window_Controls.prototype = Object.create(Window_Options.prototype);
+  Window_Controls.prototype.constructor = Window_Controls;
+
+  Window_Controls.prototype.initialize = function() {
+    Window_Options.prototype.initialize.call(this, 0, 0);
+    this.hide();
+    this.deactivate();
+  };
+
+  Window_Controls.prototype.makeCommandList = function() {
+    this.addCommand('Move', 'moveKey'); // arrow keys
+    this.addCommand('Jump', 'jumpKey'); // x
+    this.addCommand('Dash', 'dashKey'); // c
+    this.addCommand('Respawn', 'respawnKey'); // c
+    this.addCommand('Accept', 'okKey'); // enter
+    this.addCommand('Cancel', 'cancelKey'); // esc
+
+    this.setConfigValue('moveKey', "Arrow Keys");
+    this.setConfigValue('jumpKey', "X");
+    this.setConfigValue('dashKey', "C");
+    this.setConfigValue('respawnKey', "R");
+    this.setConfigValue('okKey', "ENTER");
+    this.setConfigValue('cancelKey', "ESC");
+  };
+
+  Window_Controls.prototype.statusWidth = function() {
+    return 120;
+  };
+
+  Window_Controls.prototype.statusText = function(index) {
+    var symbol = this.commandSymbol(index);
+    var value = this.getConfigValue(symbol);
+    
+    return value;
+  };
+
+  Window_Options.prototype.isNum = function(symbol) {
+    return !symbol.contains('bool');
+  };
+
+  Window_Controls.prototype.processOk = function() {
+    
+  };
+
+  Window_Controls.prototype.cursorRight = function(wrap) {
+    
+  };
+
+  Window_Controls.prototype.cursorLeft = function(wrap) {
+    
+  };
+
+  Window_Controls.prototype.changeValue = function(symbol, value) {
+    
+  };
 
 })();
