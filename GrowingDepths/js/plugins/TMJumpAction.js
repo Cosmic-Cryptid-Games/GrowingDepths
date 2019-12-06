@@ -2288,6 +2288,7 @@ function Game_Bullet() {
     	$gameVariables.setValue(enemyAggressionVariable, 0);
     }
 
+
     //If the player is in the death region or just below spikes, then kill them
   	if (playerRegionID === actInstantKillRegion) {
 
@@ -2295,7 +2296,7 @@ function Game_Bullet() {
   		//sets the deathCaseControlVariable back to 0 once it finishes respawning
   		//the player, meaning that there's no way this "if" statement will be entered more
   		//than once per death
-    	if ($gameVariables.value(deathCaseControlVariable) == 0) {
+    	if ($gameVariables.value(deathCaseControlVariable) == 0 && $gameVariables.value(PlayerTakeDamageVariable) == 0) {
           	$gameVariables.setValue(deathCaseControlVariable, 1);
           	var battler = this.actor()
           	battler.addState(0001)
@@ -2320,7 +2321,7 @@ function Game_Bullet() {
 
   	//if the player is in the final cutscene, take away control
   	if ($gameVariables.value(FinalCutsceneVariable) == 1) return;
-
+	/*
   	//if the player can take damage
   	if ($gameVariables.value(PlayerTakeDamageVariable) == 0) {
 
@@ -2332,6 +2333,23 @@ function Game_Bullet() {
     		return;
     	}
     }
+    */
+    if (
+    	($gameVariables.value(PlayerTakeDamageVariable) == 0 &&
+    	 $gameVariables.value(deathCaseControlVariable) !== 0) ||
+    	 $gameVariables.value(24) == 1) {
+            //change animation state to death and prevent/freeze player movement
+    	    this.changeAnimation(MCAnimation.DEATH);
+    	    return;
+    }
+    	
+    /*
+    if ($gameVariables.value(24) == 1) {
+    	//change animation state to death and prevent/freeze player movement
+    	this.changeAnimation(MCAnimation.DEATH);
+    	return;
+    }
+    */
     this.updatePlayerBounds();
     for (i = 0; i < this.playerBounds.length; i++) {
       xy = this.playerBounds[i];
@@ -2404,11 +2422,14 @@ function Game_Bullet() {
   };
 
   Game_Player.prototype.deathByInput = function() {
+  	$gameVariables.setValue(23, 0);
     if (Input.isPressed('death')) {
       $gameVariables.setValue(deathCaseControlVariable, 1);
+      $gameVariables.setValue(23, 1); // trigger for resetting
       var battler = this.actor();
       battler.addState(0001);
     }
+    
   }
 
   //If the player is dashing, then I don't care if they are falling,
